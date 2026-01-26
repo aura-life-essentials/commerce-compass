@@ -1,22 +1,28 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Crown, RefreshCw, ExternalLink, Check, Sparkles, Calendar, CreditCard } from 'lucide-react';
+import { ArrowLeft, Crown, RefreshCw, ExternalLink, Check, Sparkles, Calendar, CreditCard, Clock, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import { SUBSCRIPTION_TIERS, getTierById } from '@/lib/subscriptionTiers';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
+import { TrialBadge } from '@/components/ui/TrialBadge';
 
 const SubscriptionManagement = () => {
   const navigate = useNavigate();
   const { user } = useAuthContext();
+  const { trackAction, trackConversion } = useAnalytics();
   const { 
     isSubscribed, 
     tier, 
     subscriptionEnd, 
+    trialActive,
+    trialDaysRemaining,
+    cancelAtPeriodEnd,
     isLoading, 
     subscribe, 
     manageSubscription, 
@@ -28,7 +34,9 @@ const SubscriptionManagement = () => {
 
   const handleUpgrade = async (tierId: string) => {
     try {
+      trackAction('subscription_upgrade_clicked', { tier: tierId });
       await subscribe(tierId as any);
+      trackConversion('subscription_checkout_started', { tier: tierId });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to start checkout');
     }
@@ -36,6 +44,7 @@ const SubscriptionManagement = () => {
 
   const handleManageSubscription = async () => {
     try {
+      trackAction('manage_subscription_clicked');
       await manageSubscription();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to open portal');
@@ -50,7 +59,7 @@ const SubscriptionManagement = () => {
   if (!user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="max-w-md w-full">
+        <Card className="max-w-md w-full glass">
           <CardHeader className="text-center">
             <Crown className="w-12 h-12 mx-auto text-primary mb-4" />
             <CardTitle>Sign In Required</CardTitle>
@@ -84,13 +93,66 @@ const SubscriptionManagement = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
+        {/* Trial Banner */}
+        {trialActive && trialDaysRemaining !== null && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <Card className="bg-gradient-to-r from-primary/10 to-cyan-500/10 border-primary/30">
+              <CardContent className="py-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                      <Clock className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Free Trial Active</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Your card will be charged after the trial ends
+                      </p>
+                    </div>
+                  </div>
+                  <TrialBadge daysRemaining={trialDaysRemaining} />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Cancellation Notice */}
+        {cancelAtPeriodEnd && subscriptionEnd && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <Card className="bg-warning/10 border-warning/30">
+              <CardContent className="py-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-warning/20 flex items-center justify-center">
+                    <Calendar className="w-5 h-5 text-warning" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-warning">Subscription Ending</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Your subscription will end on {format(new Date(subscriptionEnd), 'MMMM d, yyyy')}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
         {/* Current Subscription Status */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <Card className={`relative overflow-hidden ${isSubscribed ? 'border-primary/50' : ''}`}>
+          <Card className={`relative overflow-hidden glass ${isSubscribed ? 'border-primary/50' : ''}`}>
             {isSubscribed && currentTier && (
               <div className={`absolute inset-0 bg-gradient-to-r ${currentTier.color} opacity-5`} />
             )}
@@ -105,9 +167,15 @@ const SubscriptionManagement = () => {
                       {isSubscribed ? (
                         <>
                           {currentTier?.name} Plan
-                          <Badge variant="default" className="bg-primary/20 text-primary border-primary/30">
-                            Active
-                          </Badge>
+                          {trialActive ? (
+                            <Badge className="bg-primary/20 text-primary border-primary/30">
+                              Trial
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-primary/20 text-primary border-primary/30">
+                              Active
+                            </Badge>
+                          )}
                         </>
                       ) : (
                         <>
@@ -133,12 +201,12 @@ const SubscriptionManagement = () => {
               </div>
             </CardHeader>
 
-            {isSubscribed && subscriptionEnd && (
+            {isSubscribed && subscriptionEnd && !trialActive && (
               <CardContent className="pt-0">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="w-4 h-4" />
                   <span>
-                    Renews on {format(new Date(subscriptionEnd), 'MMMM d, yyyy')}
+                    {cancelAtPeriodEnd ? 'Ends' : 'Renews'} on {format(new Date(subscriptionEnd), 'MMMM d, yyyy')}
                   </span>
                 </div>
               </CardContent>
@@ -160,6 +228,17 @@ const SubscriptionManagement = () => {
           </Card>
         </motion.div>
 
+        {/* Security Badge */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="mb-8 flex items-center justify-center gap-2 text-sm text-muted-foreground"
+        >
+          <Shield className="w-4 h-4 text-primary" />
+          <span>Payments secured by Stripe • Cancel anytime</span>
+        </motion.div>
+
         {/* Available Plans */}
         <div className="mb-6">
           <h2 className="text-2xl font-bold mb-2">
@@ -168,7 +247,7 @@ const SubscriptionManagement = () => {
           <p className="text-muted-foreground">
             {isSubscribed 
               ? 'Upgrade to unlock more features or downgrade if needed'
-              : 'Select the plan that best fits your needs'}
+              : 'All plans include a 5-day free trial. Your card will be charged after the trial.'}
           </p>
         </div>
 
@@ -176,7 +255,6 @@ const SubscriptionManagement = () => {
           {SUBSCRIPTION_TIERS.map((tierConfig, index) => {
             const isCurrentPlan = tier === tierConfig.id;
             const isUpgrade = currentTierIndex >= 0 && index > currentTierIndex;
-            const isDowngrade = currentTierIndex >= 0 && index < currentTierIndex;
 
             return (
               <motion.div
@@ -185,7 +263,7 @@ const SubscriptionManagement = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Card className={`relative h-full flex flex-col ${isCurrentPlan ? 'ring-2 ring-primary' : ''} ${tierConfig.popular ? 'border-primary/50' : ''}`}>
+                <Card className={`relative h-full flex flex-col glass ${isCurrentPlan ? 'ring-2 ring-primary' : ''} ${tierConfig.popular ? 'border-primary/50' : ''}`}>
                   {tierConfig.popular && !isCurrentPlan && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                       <Badge className="bg-primary text-primary-foreground">
@@ -213,6 +291,9 @@ const SubscriptionManagement = () => {
                       <span className="text-3xl font-bold">${tierConfig.price}</span>
                       <span className="text-muted-foreground">/{tierConfig.billingCycle}</span>
                     </div>
+                    {!isSubscribed && (
+                      <p className="text-xs text-primary mt-1">5-day free trial included</p>
+                    )}
                   </CardHeader>
 
                   <CardContent className="flex-1">
@@ -237,7 +318,7 @@ const SubscriptionManagement = () => {
                         className="w-full"
                         variant={isUpgrade ? 'default' : 'outline'}
                       >
-                        {isUpgrade ? 'Upgrade' : 'Downgrade'} via Portal
+                        {isUpgrade ? 'Upgrade' : 'Change'} via Portal
                         <ExternalLink className="w-3 h-3 ml-2" />
                       </Button>
                     ) : (
@@ -245,7 +326,7 @@ const SubscriptionManagement = () => {
                         onClick={() => handleUpgrade(tierConfig.id)}
                         className={`w-full ${tierConfig.popular ? 'bg-gradient-to-r ' + tierConfig.color : ''}`}
                       >
-                        Get Started
+                        Start Free Trial
                       </Button>
                     )}
                   </CardContent>
@@ -262,7 +343,7 @@ const SubscriptionManagement = () => {
           transition={{ delay: 0.5 }}
           className="mt-12 text-center"
         >
-          <Card className="bg-muted/30">
+          <Card className="glass">
             <CardContent className="py-8">
               <h3 className="text-lg font-semibold mb-2">Need Help?</h3>
               <p className="text-muted-foreground mb-4">

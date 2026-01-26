@@ -25,9 +25,9 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const { priceId, tierId } = await req.json();
+    const { priceId, tierId, promoCode } = await req.json();
     if (!priceId) throw new Error("Price ID is required");
-    logStep("Received request", { priceId, tierId });
+    logStep("Received request", { priceId, tierId, promoCode });
 
     const authHeader = req.headers.get("Authorization")!;
     const token = authHeader.replace("Bearer ", "");
@@ -49,9 +49,11 @@ serve(async (req) => {
 
     const origin = req.headers.get("origin") || "https://lovable.dev";
     
-    const session = await stripe.checkout.sessions.create({
+    // Build checkout session config with 5-day free trial (card required upfront)
+    const sessionConfig: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
+      payment_method_collection: 'always',
       line_items: [
         {
           price: priceId,
@@ -59,15 +61,67 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${origin}/subscription-success?tier=${tierId}`,
+      subscription_data: {
+        trial_period_days: 5,
+        metadata: {
+          user_id: user.id,
+          tier_id: tierId,
+        },
+      },
+      success_url: `${origin}/subscription-success?tier=${tierId}&trial=true`,
       cancel_url: `${origin}/pricing`,
       metadata: {
         user_id: user.id,
         tier_id: tierId,
       },
-    });
+      allow_promotion_codes: true,
+      billing_address_collection: 'required',
+      tax_id_collection: {
+        enabled: true,
+      },
+      custom_text: {
+        submit: {
+          message: 'Start your 5-day free trial. Your card will be charged after the trial ends.',
+        },
+        terms_of_service_acceptance: {
+          message: 'I agree to the [Terms of Service](https://profitreaper.com/terms)',
+        },
+      },
+      consent_collection: {
+        terms_of_service: 'required',
+      },
+    };
 
-    logStep("Checkout session created", { sessionId: session.id, url: session.url });
+    // Apply promo code if provided
+    if (promoCode) {
+      try {
+        const promotionCodes = await stripe.promotionCodes.list({
+          code: promoCode,
+          active: true,
+          limit: 1,
+        });
+        
+        if (promotionCodes.data.length > 0) {
+          sessionConfig.discounts = [{ promotion_code: promotionCodes.data[0].id }];
+          // Remove allow_promotion_codes when using discounts
+          delete sessionConfig.allow_promotion_codes;
+          logStep("Applied promo code", { promoCode, promotionCodeId: promotionCodes.data[0].id });
+        } else {
+          logStep("Promo code not found or inactive", { promoCode });
+        }
+      } catch (promoError) {
+        logStep("Error looking up promo code", { error: (promoError as Error).message });
+      }
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionConfig);
+
+    logStep("Checkout session created with 5-day trial", { 
+      sessionId: session.id, 
+      url: session.url,
+      trialDays: 5,
+      hasPromo: !!promoCode 
+    });
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
