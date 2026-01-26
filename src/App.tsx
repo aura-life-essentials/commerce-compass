@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Store from "./pages/Store";
 import ProductDetail from "./pages/ProductDetail";
 import Auth from "./pages/Auth";
+import CheckoutSuccess from "./pages/CheckoutSuccess";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             {/* Public store routes */}
             <Route path="/store" element={<Store />} />
             <Route path="/product/:productId" element={<ProductDetail />} />
+            <Route path="/checkout-success" element={<CheckoutSuccess />} />
             
             {/* Auth route */}
             <Route path="/auth" element={<Auth />} />
