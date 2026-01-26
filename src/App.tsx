@@ -13,6 +13,9 @@ import CheckoutSuccess from "./pages/CheckoutSuccess";
 import OrderHistory from "./pages/OrderHistory";
 import Wishlist from "./pages/Wishlist";
 import Metaverse from "./pages/Metaverse";
+import Pricing from "./pages/Pricing";
+import Landing from "./pages/Landing";
+import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +38,9 @@ const App = () => (
               } 
             />
             
+            {/* Public landing page */}
+            <Route path="/welcome" element={<Landing />} />
+            
             {/* Public store routes */}
             <Route path="/store" element={<Store />} />
             <Route path="/product/:productId" element={<ProductDetail />} />
@@ -49,6 +55,10 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            
+            {/* Public pricing page */}
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/subscription-success" element={<SubscriptionSuccess />} />
             
             {/* Auth route */}
             <Route path="/auth" element={<Auth />} />

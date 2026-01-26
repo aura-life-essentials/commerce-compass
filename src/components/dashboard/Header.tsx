@@ -1,7 +1,7 @@
-import { Brain, Bell, Settings, Command, LogOut, Shield, Crown } from "lucide-react";
+import { Brain, Bell, Settings, Command, LogOut, Shield, Crown, CreditCard, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -70,6 +70,18 @@ export const Header = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            <Link to="/pricing">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                <CreditCard className="w-4 h-4 mr-2" />
+                Pricing
+              </Button>
+            </Link>
+            <Link to="/metaverse">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                <Globe className="w-4 h-4 mr-2" />
+                Metaverse
+              </Button>
+            </Link>
             <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
               <Command className="w-4 h-4" />
             </Button>
