@@ -1,0 +1,409 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+const CJ_API_BASE = "https://developers.cjdropshipping.com/api2.0/v1";
+const PROFIT_MARGIN = 0.67; // 67% profit margin
+
+interface CJProduct {
+  pid: string;
+  productNameEn: string;
+  productImage: string;
+  sellPrice: number;
+  categoryName: string;
+  description: string;
+  variants: any[];
+}
+
+interface CJVariant {
+  vid: string;
+  variantNameEn: string;
+  variantSellPrice: number;
+  variantImage: string;
+}
+
+interface ProductWithPricing {
+  cj_product_id: string;
+  title: string;
+  description: string;
+  category: string;
+  images: string[];
+  base_cost: number;
+  shipping_cost: number;
+  total_cost: number;
+  customer_price: number;
+  profit: number;
+  profit_margin: number;
+  variants: VariantWithPricing[];
+}
+
+interface VariantWithPricing {
+  cj_variant_id: string;
+  name: string;
+  base_cost: number;
+  customer_price: number;
+  profit: number;
+}
+
+// Calculate customer price with 67% profit margin
+function calculatePricing(baseCost: number, shippingCost: number = 0) {
+  const totalCost = baseCost + shippingCost;
+  const customerPrice = totalCost * (1 + PROFIT_MARGIN);
+  const profit = customerPrice - totalCost;
+  
+  return {
+    totalCost: Math.round(totalCost * 100) / 100,
+    customerPrice: Math.round(customerPrice * 100) / 100,
+    profit: Math.round(profit * 100) / 100,
+    profitMargin: PROFIT_MARGIN * 100,
+  };
+}
+
+// Fetch products from CJ Dropshipping API
+async function fetchCJProducts(apiKey: string, categoryId?: string, pageNum: number = 1, pageSize: number = 20) {
+  const url = new URL(`${CJ_API_BASE}/product/list`);
+  
+  const body: any = {
+    pageNum,
+    pageSize,
+  };
+  
+  if (categoryId) {
+    body.categoryId = categoryId;
+  }
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers: {
+      "CJ-Access-Token": apiKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("CJ API Error:", errorText);
+    throw new Error(`CJ API Error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data;
+}
+
+// Get product details with variants
+async function getProductDetails(apiKey: string, productId: string) {
+  const response = await fetch(`${CJ_API_BASE}/product/query`, {
+    method: "POST",
+    headers: {
+      "CJ-Access-Token": apiKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ pid: productId }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch product details: ${response.status}`);
+  }
+
+  return await response.json();
+}
+
+// Get shipping cost estimate
+async function getShippingCost(apiKey: string, productId: string, countryCode: string = "US") {
+  try {
+    const response = await fetch(`${CJ_API_BASE}/logistic/freightCalculate`, {
+      method: "POST",
+      headers: {
+        "CJ-Access-Token": apiKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        startCountryCode: "CN",
+        endCountryCode: countryCode,
+        products: [{ pid: productId, quantity: 1 }],
+      }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      // Return the cheapest shipping option
+      if (data.data && data.data.length > 0) {
+        const cheapest = data.data.reduce((min: any, curr: any) => 
+          curr.logisticPrice < min.logisticPrice ? curr : min
+        );
+        return cheapest.logisticPrice || 0;
+      }
+    }
+    return 3.50; // Default shipping estimate
+  } catch (error) {
+    console.error("Error fetching shipping cost:", error);
+    return 3.50; // Default shipping estimate
+  }
+}
+
+// Transform CJ product to our format with pricing
+async function transformProduct(apiKey: string, product: CJProduct): Promise<ProductWithPricing> {
+  const shippingCost = await getShippingCost(apiKey, product.pid);
+  const pricing = calculatePricing(product.sellPrice, shippingCost);
+
+  const variants: VariantWithPricing[] = (product.variants || []).map((variant: CJVariant) => {
+    const variantPricing = calculatePricing(variant.variantSellPrice, shippingCost);
+    return {
+      cj_variant_id: variant.vid,
+      name: variant.variantNameEn,
+      base_cost: variant.variantSellPrice,
+      customer_price: variantPricing.customerPrice,
+      profit: variantPricing.profit,
+    };
+  });
+
+  return {
+    cj_product_id: product.pid,
+    title: product.productNameEn,
+    description: product.description || "",
+    category: product.categoryName || "General",
+    images: [product.productImage],
+    base_cost: product.sellPrice,
+    shipping_cost: shippingCost,
+    total_cost: pricing.totalCost,
+    customer_price: pricing.customerPrice,
+    profit: pricing.profit,
+    profit_margin: pricing.profitMargin,
+    variants,
+  };
+}
+
+serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const CJ_API_KEY = Deno.env.get("CJ_DROPSHIPPING_API_KEY");
+    
+    if (!CJ_API_KEY) {
+      return new Response(
+        JSON.stringify({ error: "CJ Dropshipping API key not configured" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const { action, storeId, categoryId, productId, pageNum, pageSize } = await req.json();
+
+    switch (action) {
+      case "list_products": {
+        // Fetch products from CJ
+        const cjResponse = await fetchCJProducts(CJ_API_KEY, categoryId, pageNum || 1, pageSize || 20);
+        
+        if (!cjResponse.data || !cjResponse.data.list) {
+          return new Response(
+            JSON.stringify({ products: [], total: 0 }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Transform products with pricing
+        const productsWithPricing = await Promise.all(
+          cjResponse.data.list.map((product: CJProduct) => transformProduct(CJ_API_KEY, product))
+        );
+
+        return new Response(
+          JSON.stringify({
+            products: productsWithPricing,
+            total: cjResponse.data.total,
+            pageNum: pageNum || 1,
+            pageSize: pageSize || 20,
+            profitMargin: PROFIT_MARGIN * 100,
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      case "import_product": {
+        if (!storeId || !productId) {
+          return new Response(
+            JSON.stringify({ error: "storeId and productId are required" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Get product details
+        const productDetails = await getProductDetails(CJ_API_KEY, productId);
+        
+        if (!productDetails.data) {
+          return new Response(
+            JSON.stringify({ error: "Product not found" }),
+            { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const transformedProduct = await transformProduct(CJ_API_KEY, productDetails.data);
+
+        // Insert into our products table
+        const { data: insertedProduct, error: insertError } = await supabase
+          .from("products")
+          .insert({
+            store_id: storeId,
+            title: transformedProduct.title,
+            description: transformedProduct.description,
+            category: transformedProduct.category,
+            price: transformedProduct.customer_price,
+            compare_at_price: transformedProduct.customer_price * 1.2, // Show "discount"
+            images: transformedProduct.images,
+            variants: transformedProduct.variants,
+            status: "active",
+            tags: ["cj-dropshipping", "auto-sourced"],
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error("Insert error:", insertError);
+          return new Response(
+            JSON.stringify({ error: "Failed to import product" }),
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Log the agent action
+        await supabase.from("agent_logs").insert({
+          store_id: storeId,
+          agent_name: "Profit Reaper",
+          agent_role: "Product Sourcing",
+          action: `Imported product: ${transformedProduct.title}`,
+          status: "completed",
+          details: {
+            cj_product_id: productId,
+            base_cost: transformedProduct.base_cost,
+            customer_price: transformedProduct.customer_price,
+            profit: transformedProduct.profit,
+            profit_margin: transformedProduct.profit_margin,
+          },
+        });
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            product: insertedProduct,
+            pricing: {
+              baseCost: transformedProduct.base_cost,
+              shippingCost: transformedProduct.shipping_cost,
+              customerPrice: transformedProduct.customer_price,
+              profit: transformedProduct.profit,
+              profitMargin: transformedProduct.profit_margin,
+            },
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      case "sync_all_stores": {
+        // Get all connected stores
+        const { data: stores, error: storesError } = await supabase
+          .from("stores")
+          .select("id, name")
+          .eq("status", "connected");
+
+        if (storesError || !stores) {
+          return new Response(
+            JSON.stringify({ error: "Failed to fetch stores" }),
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Fetch trending products
+        const cjResponse = await fetchCJProducts(CJ_API_KEY, undefined, 1, 10);
+        const products = cjResponse.data?.list || [];
+
+        const results = [];
+        
+        for (const store of stores) {
+          // Import top products to each store
+          for (const product of products.slice(0, 5)) {
+            const transformed = await transformProduct(CJ_API_KEY, product);
+            
+            const { error } = await supabase.from("products").upsert({
+              store_id: store.id,
+              title: transformed.title,
+              description: transformed.description,
+              category: transformed.category,
+              price: transformed.customer_price,
+              images: transformed.images,
+              status: "active",
+              tags: ["cj-dropshipping", "auto-sourced"],
+            }, {
+              onConflict: "store_id,title",
+            });
+
+            if (!error) {
+              results.push({
+                store: store.name,
+                product: transformed.title,
+                price: transformed.customer_price,
+                profit: transformed.profit,
+              });
+            }
+          }
+
+          // Update store sync timestamp
+          await supabase
+            .from("stores")
+            .update({ last_synced_at: new Date().toISOString() })
+            .eq("id", store.id);
+
+          // Log sync activity
+          await supabase.from("agent_logs").insert({
+            store_id: store.id,
+            agent_name: "Omega Sync",
+            agent_role: "Store Synchronization",
+            action: `Synced products from CJ Dropshipping`,
+            status: "completed",
+            details: { productsImported: 5, profitMargin: PROFIT_MARGIN * 100 },
+          });
+        }
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            storesSynced: stores.length,
+            productsImported: results.length,
+            results,
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      case "calculate_price": {
+        const { baseCost, shippingCost } = await req.json();
+        const pricing = calculatePricing(baseCost || 0, shippingCost || 0);
+        
+        return new Response(
+          JSON.stringify(pricing),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      default:
+        return new Response(
+          JSON.stringify({ error: "Invalid action" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+    }
+  } catch (error) {
+    console.error("Edge function error:", error);
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
