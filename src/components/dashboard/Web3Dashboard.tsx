@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Wallet, Coins, TrendingUp, Gem, Boxes, Vote, Globe2, Zap } from 'lucide-react';
+import { Wallet, Coins, TrendingUp, Gem, Boxes, Vote, Globe2, Zap, Store } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,7 @@ import { useNFTMembership } from '@/hooks/useNFTMembership';
 import { useStaking } from '@/hooks/useStaking';
 import { useDAO } from '@/hooks/useDAO';
 import { NFTMembershipPanel } from './web3/NFTMembershipPanel';
+import { NFTMarketplace } from './web3/NFTMarketplace';
 import { StakingPanel } from './web3/StakingPanel';
 import { DAOPanel } from './web3/DAOPanel';
 import { CryptoPayments } from './web3/CryptoPayments';
@@ -19,11 +20,12 @@ export function Web3Dashboard() {
   const { totalStaked, totalPendingRewards, pools } = useStaking();
   const { treasury, totalFundingRaised, userTotalInvested, activeProjects } = useDAO();
 
-  const [activeTab, setActiveTab] = React.useState<'overview' | 'nft' | 'staking' | 'dao' | 'payments'>('overview');
+  const [activeTab, setActiveTab] = React.useState<'overview' | 'nft' | 'marketplace' | 'staking' | 'dao' | 'payments'>('overview');
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Globe2 },
     { id: 'nft', label: 'NFT Pass', icon: Gem },
+    { id: 'marketplace', label: 'Marketplace', icon: Store },
     { id: 'staking', label: 'Staking', icon: TrendingUp },
     { id: 'dao', label: 'DAO', icon: Vote },
     { id: 'payments', label: 'Crypto Pay', icon: Coins }
@@ -225,6 +227,9 @@ export function Web3Dashboard() {
 
       {/* NFT Panel */}
       {activeTab === 'nft' && <NFTMembershipPanel />}
+
+      {/* NFT Marketplace */}
+      {activeTab === 'marketplace' && <NFTMarketplace />}
 
       {/* Staking Panel */}
       {activeTab === 'staking' && <StakingPanel />}
