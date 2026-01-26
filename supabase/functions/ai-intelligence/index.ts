@@ -1,0 +1,81 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { query, type = "research" } = await req.json();
+    const PERPLEXITY_API_KEY = Deno.env.get("PERPLEXITY_API_KEY");
+
+    if (!PERPLEXITY_API_KEY) {
+      throw new Error("Perplexity API key not configured");
+    }
+
+    const systemPrompts: Record<string, string> = {
+      research: "You are a senior business intelligence analyst. Provide comprehensive, actionable market research with data-driven insights. Focus on trends, opportunities, and strategic recommendations.",
+      competitor: "You are a competitive intelligence expert. Analyze competitors, market positioning, and strategic advantages. Provide specific, actionable insights.",
+      trend: "You are a trend forecasting specialist. Identify emerging patterns, predict market movements, and highlight innovation opportunities.",
+      financial: "You are a financial analyst. Provide detailed financial analysis, valuation insights, and investment recommendations with supporting data."
+    };
+
+    const response = await fetch("https://api.perplexity.ai/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${PERPLEXITY_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "sonar",
+        messages: [
+          {
+            role: "system",
+            content: systemPrompts[type] || systemPrompts.research
+          },
+          {
+            role: "user",
+            content: query
+          }
+        ],
+        temperature: 0.2,
+        max_tokens: 2000,
+        return_citations: true,
+        search_recency_filter: "week"
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Perplexity API error: ${error}`);
+    }
+
+    const data = await response.json();
+    
+    return new Response(
+      JSON.stringify({
+        content: data.choices[0]?.message?.content || "",
+        citations: data.citations || [],
+        model: data.model
+      }),
+      { 
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      }
+    );
+  } catch (error: unknown) {
+    console.error("AI Intelligence Error:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return new Response(
+      JSON.stringify({ error: message }),
+      { 
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      }
+    );
+  }
+});
