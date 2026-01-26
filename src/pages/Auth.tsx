@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { z } from 'zod';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Shield, Zap } from 'lucide-react';
+import { Loader2, Shield, Zap, ShoppingBag } from 'lucide-react';
 
 // Validation schemas
 const emailSchema = z.string().trim().email({ message: "Invalid email address" }).max(255);
@@ -291,9 +291,18 @@ export default function Auth() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-slate-500 text-sm mt-6">
-          Protected by enterprise-grade security
-        </p>
+        <div className="text-center mt-6 space-y-3">
+          <Link 
+            to="/store" 
+            className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors font-medium"
+          >
+            <ShoppingBag className="h-4 w-4" />
+            Browse Store Without Logging In
+          </Link>
+          <p className="text-slate-500 text-sm">
+            Protected by enterprise-grade security
+          </p>
+        </div>
       </div>
     </div>
   );
