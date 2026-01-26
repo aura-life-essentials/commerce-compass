@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -86,6 +87,19 @@ Return as JSON with:
   return { script: content };
 }
 
+// Helper function to extract plain text from script (which may be array of objects or string)
+function extractScriptText(script: unknown): string {
+  if (typeof script === "string") {
+    return script;
+  }
+  if (Array.isArray(script)) {
+    return script.map((item: { text?: string; dialogue?: string }) => 
+      item.text || item.dialogue || ""
+    ).join(" ");
+  }
+  return "";
+}
+
 async function generateVoiceover(text: string, voiceId: string = "JBFqnCBsd6RMkjVDRZzb") {
   logStep("Generating voiceover", { voiceId, textLength: text.length });
 
@@ -118,8 +132,8 @@ async function generateVoiceover(text: string, voiceId: string = "JBFqnCBsd6RMkj
 
   const audioBuffer = await response.arrayBuffer();
   
-  // Convert to base64 for storage/transfer
-  const base64Audio = btoa(String.fromCharCode(...new Uint8Array(audioBuffer)));
+  // Convert to base64 for storage/transfer (using Deno's encoding library)
+  const base64Audio = base64Encode(audioBuffer);
   
   return {
     audio_base64: base64Audio,
@@ -197,9 +211,10 @@ serve(async (req) => {
       
       // Generate voiceover for the script
       let voiceover = null;
-      if (script.script) {
+      const scriptForVoiceover = extractScriptText(script.script);
+      if (scriptForVoiceover) {
         try {
-          voiceover = await generateVoiceover(script.script, voice_id);
+          voiceover = await generateVoiceover(scriptForVoiceover, voice_id);
         } catch (e) {
           logStep("Voiceover generation failed", e);
         }
