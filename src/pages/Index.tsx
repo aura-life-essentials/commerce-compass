@@ -9,6 +9,7 @@ import { HeroBanner } from "@/components/dashboard/HeroBanner";
 import { ProfitReaper } from "@/components/dashboard/ProfitReaper";
 import { OmegaSwarm } from "@/components/dashboard/OmegaSwarm";
 import { AutonomousSalesPanel } from "@/components/dashboard/AutonomousSalesPanel";
+import { AutonomousEngine } from "@/components/dashboard/AutonomousEngine";
 import { useStores, useCreateStore } from "@/hooks/useStores";
 import { useAgentLogs, useCreateAgentLog } from "@/hooks/useAgentLogs";
 import { useAggregatedRevenue, useCreateRevenueMetric } from "@/hooks/useRevenueMetrics";
@@ -238,6 +239,11 @@ const Index = () => {
             <div>
               <GrowthFlywheel />
             </div>
+          </div>
+
+          {/* Autonomous AI Engine */}
+          <div className="mb-8">
+            <AutonomousEngine />
           </div>
 
           {/* Autonomous Sales Panel */}
