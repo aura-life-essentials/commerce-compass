@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Building2, Users, ShoppingBag, Vote, Gem, Zap, Globe, MessageSquare } from 'lucide-react';
+import { Building2, Users, ShoppingBag, Vote, Gem, Zap, Globe, MessageSquare, Video } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MetaverseOffice } from './MetaverseOffice';
+import { LiveAvatarCall } from './LiveAvatarCall';
 import { useMetaverse } from '@/hooks/useMetaverse';
+import { Link } from 'react-router-dom';
 
 export function MetaverseHub() {
   const { spaces, isLoading } = useMetaverse();
@@ -40,6 +42,12 @@ export function MetaverseHub() {
           <p className="text-muted-foreground">Your virtual headquarters in the metaverse</p>
         </div>
         <div className="flex items-center gap-3">
+          <Link to="/metaverse">
+            <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+              <Globe className="w-4 h-4 mr-2" />
+              Enter Full Metaverse
+            </Button>
+          </Link>
           <Badge variant="outline" className="border-green-500 text-green-400 px-3 py-1">
             <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse" />
             {totalOnline} Online
@@ -121,6 +129,22 @@ export function MetaverseHub() {
               </div>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Live Avatar Call Section */}
+      <Card className="overflow-hidden border-cyan-500/30">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2">
+            <Video className="w-5 h-5 text-cyan-500" />
+            Live Avatar Connection
+            <Badge className="ml-2 bg-cyan-500/20 text-cyan-400 border-0">
+              Cross-Platform
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <LiveAvatarCall />
         </CardContent>
       </Card>
       
