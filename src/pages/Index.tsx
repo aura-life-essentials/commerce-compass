@@ -5,6 +5,10 @@ import { AgentCard } from "@/components/dashboard/AgentCard";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { GrowthFlywheel } from "@/components/dashboard/GrowthFlywheel";
 import { GovernancePanel } from "@/components/dashboard/GovernancePanel";
+import { HeroBanner } from "@/components/dashboard/HeroBanner";
+import { ProfitReaper } from "@/components/dashboard/ProfitReaper";
+import { OmegaSwarm } from "@/components/dashboard/OmegaSwarm";
+import { AutonomousSalesPanel } from "@/components/dashboard/AutonomousSalesPanel";
 import { useStores, useCreateStore } from "@/hooks/useStores";
 import { useAgentLogs, useCreateAgentLog } from "@/hooks/useAgentLogs";
 import { useAggregatedRevenue, useCreateRevenueMetric } from "@/hooks/useRevenueMetrics";
@@ -19,7 +23,9 @@ import {
   Layers,
   Bot,
   RefreshCw,
-  Database
+  Database,
+  Zap,
+  Target
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -37,6 +43,8 @@ const demoAgents = [
   { agent_name: "Content Weaver", agent_role: "Content Creation", action: "Generated product descriptions" },
   { agent_name: "SEO Sentinel", agent_role: "Search Optimization", action: "Optimized meta tags" },
   { agent_name: "CX Guardian", agent_role: "Customer Experience", action: "Reviewed support tickets" },
+  { agent_name: "Profit Reaper", agent_role: "Profit Optimization", action: "Applied 67% margins to products" },
+  { agent_name: "Omega Syncer", agent_role: "Store Synchronization", action: "Synced CJ Dropshipping catalog" },
 ];
 
 const Index = () => {
@@ -82,10 +90,11 @@ const Index = () => {
   // Calculate metrics from real data
   const totalRevenue = revenueData?.reduce((sum, r) => sum + r.revenue, 0) || 0;
   const totalOrders = revenueData?.reduce((sum, r) => sum + r.orders, 0) || 0;
+  const avgProfit = totalRevenue * 0.67; // 67% profit margin
 
   const seedDemoData = async () => {
     try {
-      toast.loading("Seeding demo data...");
+      toast.loading("Initializing autonomous sales system...");
       
       // Create demo stores
       const createdStores = [];
@@ -109,10 +118,11 @@ const Index = () => {
         for (let i = 30; i >= 0; i--) {
           const date = new Date();
           date.setDate(date.getDate() - i);
+          const dailyRevenue = Math.floor(Math.random() * 5000) + 1000;
           await createRevenueMetric.mutateAsync({
             store_id: store.id,
             date: date.toISOString().split("T")[0],
-            revenue: Math.floor(Math.random() * 5000) + 1000,
+            revenue: dailyRevenue,
             orders_count: Math.floor(Math.random() * 50) + 10,
             organic_traffic: Math.floor(Math.random() * 1000) + 200,
             conversion_rate: Math.random() * 0.05 + 0.02,
@@ -130,6 +140,14 @@ const Index = () => {
       });
       
       await createGovernanceEvent.mutateAsync({
+        event_type: "profit_margin_audit",
+        category: "finance",
+        severity: "info",
+        description: "67% profit margin verified across all products",
+        resolved: true,
+      });
+      
+      await createGovernanceEvent.mutateAsync({
         event_type: "security_audit",
         category: "security",
         severity: "info",
@@ -138,10 +156,10 @@ const Index = () => {
       });
       
       toast.dismiss();
-      toast.success("Demo data seeded successfully!");
+      toast.success("Autonomous sales system initialized!");
     } catch (error) {
       toast.dismiss();
-      toast.error("Failed to seed demo data");
+      toast.error("Failed to initialize system");
       console.error(error);
     }
   };
@@ -150,38 +168,17 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Ambient glow effect */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-[128px]" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[128px]" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-[128px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/3 rounded-full blur-[200px]" />
       </div>
 
       <div className="relative z-10">
         <Header />
 
         <main className="container mx-auto px-6 py-8">
-          {/* Hero Section */}
-          <div className="mb-8 animate-fade-in">
-            <h2 className="text-3xl font-bold tracking-tight mb-2">
-              Good evening, <span className="text-gradient">Commander</span>
-            </h2>
-            <p className="text-muted-foreground">
-              Your commerce empire is performing well. Here's your unified intelligence report.
-            </p>
-          </div>
-
-          {/* Empty State - Seed Demo Data */}
-          {!hasData && !storesLoading && (
-            <div className="glass rounded-xl p-8 mb-8 text-center">
-              <Database className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">No Stores Connected</h3>
-              <p className="text-muted-foreground mb-6">
-                Get started by seeding demo data or connecting your first Shopify store.
-              </p>
-              <Button onClick={seedDemoData} className="gap-2">
-                <RefreshCw className="w-4 h-4" />
-                Seed Demo Data
-              </Button>
-            </div>
-          )}
+          {/* Hero Banner */}
+          <HeroBanner onSeedData={seedDemoData} hasData={hasData} />
 
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -200,6 +197,14 @@ const Index = () => {
                   subtitle={`Across ${stores?.length || 0} stores`}
                 />
                 <MetricCard
+                  title="Estimated Profit"
+                  value={`$${(avgProfit / 1000).toFixed(1)}k`}
+                  change="67% margin"
+                  changeType="positive"
+                  icon={Target}
+                  subtitle="Auto-calculated"
+                />
+                <MetricCard
                   title="Total Orders"
                   value={totalOrders.toString()}
                   change="+24"
@@ -208,35 +213,36 @@ const Index = () => {
                   subtitle="This period"
                 />
                 <MetricCard
-                  title="Active Stores"
-                  value={(stores?.length || 0).toString()}
-                  change={stores?.length ? `+${stores.length}` : "0"}
+                  title="Active Agents"
+                  value={agents.filter(a => a.status === "active").length.toString()}
+                  change="Online"
                   changeType="positive"
-                  icon={Users}
-                  subtitle="Connected"
-                />
-                <MetricCard
-                  title="Conversion Rate"
-                  value="3.2%"
-                  change="+0.4%"
-                  changeType="positive"
-                  icon={TrendingUp}
-                  subtitle="Industry avg: 2.1%"
+                  icon={Zap}
+                  subtitle="Processing 24/7"
                 />
               </>
             )}
           </div>
 
+          {/* Profit Reaper & Omega Swarm Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <ProfitReaper />
+            <OmegaSwarm />
+          </div>
+
+          {/* Revenue Chart & Autonomous Sales */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            {/* Revenue Chart - spans 2 columns */}
             <div className="lg:col-span-2">
               <RevenueChart />
             </div>
-
-            {/* Growth Flywheel */}
             <div>
               <GrowthFlywheel />
             </div>
+          </div>
+
+          {/* Autonomous Sales Panel */}
+          <div className="mb-8">
+            <AutonomousSalesPanel />
           </div>
 
           {/* Stores and Agents Grid */}
@@ -279,7 +285,7 @@ const Index = () => {
               <div className="flex items-center gap-2 mb-6">
                 <Bot className="w-5 h-5 text-primary" />
                 <h3 className="font-semibold text-lg">AI Executive Teams</h3>
-                <span className="ml-auto text-sm text-emerald-400">
+                <span className="ml-auto text-sm text-primary">
                   {agents.filter(a => a.status === "active").length} active
                 </span>
               </div>
@@ -315,10 +321,10 @@ const Index = () => {
               <h3 className="font-semibold text-lg mb-4">Command Center</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { label: "Sync Stores", desc: "Refresh all data", action: () => toast.info("Sync initiated") },
-                  { label: "Deploy Agents", desc: "Activate team", action: () => toast.info("Agents deploying") },
-                  { label: "View Analytics", desc: "Deep insights", action: () => toast.info("Analytics loading") },
-                  { label: "Audit Log", desc: "Review actions", action: () => toast.info("Opening audit log") },
+                  { label: "Sync CJ Products", desc: "Import catalog", action: () => toast.info("Syncing CJ Dropshipping...") },
+                  { label: "Deploy Reaper", desc: "Activate profit engine", action: () => toast.info("Profit Reaper deploying...") },
+                  { label: "Omega Swarm", desc: "Scale agents", action: () => toast.info("Omega Swarm scaling...") },
+                  { label: "Audit Margins", desc: "Verify 67% profit", action: () => toast.info("Auditing profit margins...") },
                 ].map((action) => (
                   <button
                     key={action.label}
@@ -340,7 +346,7 @@ const Index = () => {
         <footer className="border-t border-border mt-12">
           <div className="container mx-auto px-6 py-6">
             <p className="text-center text-sm text-muted-foreground">
-              CEO Brain • Unified Commerce Intelligence • Trust-First, Growth-Driven
+              CEO Brain • Profit Reaper + Omega Swarm • Autonomous Commerce Engine • 67% Profit Margins
             </p>
           </div>
         </footer>
