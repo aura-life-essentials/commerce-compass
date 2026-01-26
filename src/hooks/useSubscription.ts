@@ -7,8 +7,20 @@ interface SubscriptionState {
   isSubscribed: boolean;
   tier: SubscriptionTier | null;
   subscriptionEnd: string | null;
+  trialActive: boolean;
+  trialEnd: string | null;
+  cancelAtPeriodEnd: boolean;
   isLoading: boolean;
   error: string | null;
+}
+
+interface PromoValidation {
+  valid: boolean;
+  code?: string;
+  discount?: string;
+  percent_off?: number;
+  amount_off?: number;
+  error?: string;
 }
 
 export function useSubscription() {
@@ -17,6 +29,9 @@ export function useSubscription() {
     isSubscribed: false,
     tier: null,
     subscriptionEnd: null,
+    trialActive: false,
+    trialEnd: null,
+    cancelAtPeriodEnd: false,
     isLoading: true,
     error: null,
   });
@@ -42,6 +57,9 @@ export function useSubscription() {
           isSubscribed: true,
           tier: tierConfig?.id || null,
           subscriptionEnd: data.subscription_end,
+          trialActive: data.trial_active || false,
+          trialEnd: data.trial_end || null,
+          cancelAtPeriodEnd: data.cancel_at_period_end || false,
           isLoading: false,
           error: null,
         });
@@ -50,6 +68,9 @@ export function useSubscription() {
           isSubscribed: false,
           tier: null,
           subscriptionEnd: null,
+          trialActive: false,
+          trialEnd: null,
+          cancelAtPeriodEnd: false,
           isLoading: false,
           error: null,
         });
@@ -72,7 +93,23 @@ export function useSubscription() {
     return () => clearInterval(interval);
   }, [checkSubscription]);
 
-  const subscribe = async (tierId: SubscriptionTier) => {
+  const validatePromoCode = async (code: string): Promise<PromoValidation> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('validate-promo-code', {
+        body: { code },
+      });
+
+      if (error) throw error;
+      return data as PromoValidation;
+    } catch (err) {
+      return {
+        valid: false,
+        error: err instanceof Error ? err.message : 'Failed to validate promo code',
+      };
+    }
+  };
+
+  const subscribe = async (tierId: SubscriptionTier, promoCode?: string) => {
     if (!session?.access_token) {
       throw new Error('Please sign in to subscribe');
     }
@@ -87,6 +124,7 @@ export function useSubscription() {
       body: {
         priceId: tier.priceId,
         tierId: tier.id,
+        promoCode,
       },
     });
 
@@ -113,9 +151,16 @@ export function useSubscription() {
     }
   };
 
+  // Calculate trial days remaining
+  const trialDaysRemaining = state.trialEnd 
+    ? Math.max(0, Math.ceil((new Date(state.trialEnd).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : null;
+
   return {
     ...state,
+    trialDaysRemaining,
     subscribe,
+    validatePromoCode,
     manageSubscription,
     refreshSubscription: checkSubscription,
   };

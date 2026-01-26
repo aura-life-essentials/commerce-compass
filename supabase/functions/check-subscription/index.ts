@@ -48,7 +48,11 @@ serve(async (req) => {
     
     if (customers.data.length === 0) {
       logStep("No customer found, returning unsubscribed state");
-      return new Response(JSON.stringify({ subscribed: false }), {
+      return new Response(JSON.stringify({ 
+        subscribed: false,
+        trial_active: false,
+        trial_end: null,
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
@@ -57,29 +61,56 @@ serve(async (req) => {
     const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });
 
+    // Check for active OR trialing subscriptions
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
-      status: "active",
       limit: 1,
     });
-    const hasActiveSub = subscriptions.data.length > 0;
+
+    const activeSubscription = subscriptions.data.find(
+      (sub: Stripe.Subscription) => sub.status === 'active' || sub.status === 'trialing'
+    );
+
     let productId = null;
     let subscriptionEnd = null;
+    let trialActive = false;
+    let trialEnd = null;
+    let cancelAtPeriodEnd = false;
 
-    if (hasActiveSub) {
-      const subscription = subscriptions.data[0];
+    if (activeSubscription) {
+      const subscription = activeSubscription;
       subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
-      logStep("Active subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd });
-      productId = subscription.items.data[0].price.product;
+      productId = subscription.items.data[0].price.product as string;
+      cancelAtPeriodEnd = subscription.cancel_at_period_end;
+      
+      // Check trial status
+      if (subscription.status === 'trialing' && subscription.trial_end) {
+        trialActive = true;
+        trialEnd = new Date(subscription.trial_end * 1000).toISOString();
+        logStep("Active trial found", { 
+          subscriptionId: subscription.id, 
+          trialEnd,
+          daysRemaining: Math.ceil((subscription.trial_end * 1000 - Date.now()) / (1000 * 60 * 60 * 24))
+        });
+      } else {
+        logStep("Active subscription found", { 
+          subscriptionId: subscription.id, 
+          endDate: subscriptionEnd 
+        });
+      }
+      
       logStep("Determined subscription tier", { productId });
     } else {
       logStep("No active subscription found");
     }
 
     return new Response(JSON.stringify({
-      subscribed: hasActiveSub,
+      subscribed: !!activeSubscription,
       product_id: productId,
-      subscription_end: subscriptionEnd
+      subscription_end: subscriptionEnd,
+      trial_active: trialActive,
+      trial_end: trialEnd,
+      cancel_at_period_end: cancelAtPeriodEnd,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
