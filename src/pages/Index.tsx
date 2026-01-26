@@ -14,6 +14,8 @@ import { CEODashboard } from "@/components/dashboard/CEODashboard";
 import { CRMDashboard } from "@/components/dashboard/CRMDashboard";
 import { AgentMonitor } from "@/components/dashboard/AgentMonitor";
 import { MarketingEngine } from "@/components/dashboard/MarketingEngine";
+import { Web3Dashboard } from "@/components/dashboard/Web3Dashboard";
+import { MetaverseHub } from "@/components/metaverse/MetaverseHub";
 import { useStores, useCreateStore } from "@/hooks/useStores";
 import { useAgentLogs, useCreateAgentLog } from "@/hooks/useAgentLogs";
 import { useAggregatedRevenue, useCreateRevenueMetric } from "@/hooks/useRevenueMetrics";
@@ -273,6 +275,16 @@ const Index = () => {
           {/* Global Marketing Engine */}
           <div className="mb-8">
             <MarketingEngine />
+          </div>
+
+          {/* Web3 Command Center */}
+          <div className="mb-8">
+            <Web3Dashboard />
+          </div>
+
+          {/* Metaverse Business Hub */}
+          <div className="mb-8">
+            <MetaverseHub />
           </div>
 
           {/* Stores and Agents Grid */}

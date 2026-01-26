@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
 import OrderHistory from "./pages/OrderHistory";
 import Wishlist from "./pages/Wishlist";
+import Metaverse from "./pages/Metaverse";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,14 @@ const App = () => (
             <Route path="/orders" element={<OrderHistory />} />
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/checkout-success" element={<CheckoutSuccess />} />
+            <Route 
+              path="/metaverse" 
+              element={
+                <ProtectedRoute>
+                  <Metaverse />
+                </ProtectedRoute>
+              } 
+            />
             
             {/* Auth route */}
             <Route path="/auth" element={<Auth />} />
