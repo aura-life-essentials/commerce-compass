@@ -26,3 +26,27 @@ verify_jwt = false
 
 [functions.create-checkout]
 verify_jwt = false
+
+[functions.create-subscription-checkout]
+verify_jwt = false
+
+[functions.check-subscription]
+verify_jwt = false
+
+[functions.customer-portal]
+verify_jwt = false
+
+[functions.validate-promo-code]
+verify_jwt = false
+
+[functions.track-analytics]
+verify_jwt = false
+
+[functions.send-welcome-email]
+verify_jwt = false
+
+[functions.send-trial-reminder]
+verify_jwt = false
+
+[functions.send-subscription-email]
+verify_jwt = false
