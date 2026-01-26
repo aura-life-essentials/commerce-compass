@@ -11,7 +11,8 @@ import { useDAO } from '@/hooks/useDAO';
 import { useWeb3 } from '@/hooks/useWeb3';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { Header } from '@/components/dashboard/Header';
-import { 
+import { InvestorAIBot } from '@/components/casino/InvestorAIBot';
+import {
   Sparkles, 
   Trophy, 
   Users, 
@@ -520,6 +521,9 @@ export default function CasinoLaunch() {
           </div>
         </footer>
       </div>
+      
+      {/* AI Investor Support Bot */}
+      <InvestorAIBot />
     </div>
   );
 }
