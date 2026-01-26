@@ -56,6 +56,89 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_conversations: {
+        Row: {
+          agent_name: string
+          agent_role: string
+          channel: string | null
+          contact_email: string | null
+          contact_id: string | null
+          contact_name: string | null
+          contact_type: string | null
+          conversation_type: string | null
+          created_at: string
+          deal_id: string | null
+          ended_at: string | null
+          id: string
+          intent: string | null
+          is_active: boolean | null
+          messages: Json | null
+          metadata: Json | null
+          outcome: string | null
+          platform: string | null
+          revenue_generated: number | null
+          sentiment: string | null
+          started_at: string | null
+          subject: string | null
+        }
+        Insert: {
+          agent_name: string
+          agent_role: string
+          channel?: string | null
+          contact_email?: string | null
+          contact_id?: string | null
+          contact_name?: string | null
+          contact_type?: string | null
+          conversation_type?: string | null
+          created_at?: string
+          deal_id?: string | null
+          ended_at?: string | null
+          id?: string
+          intent?: string | null
+          is_active?: boolean | null
+          messages?: Json | null
+          metadata?: Json | null
+          outcome?: string | null
+          platform?: string | null
+          revenue_generated?: number | null
+          sentiment?: string | null
+          started_at?: string | null
+          subject?: string | null
+        }
+        Update: {
+          agent_name?: string
+          agent_role?: string
+          channel?: string | null
+          contact_email?: string | null
+          contact_id?: string | null
+          contact_name?: string | null
+          contact_type?: string | null
+          conversation_type?: string | null
+          created_at?: string
+          deal_id?: string | null
+          ended_at?: string | null
+          id?: string
+          intent?: string | null
+          is_active?: boolean | null
+          messages?: Json | null
+          metadata?: Json | null
+          outcome?: string | null
+          platform?: string | null
+          revenue_generated?: number | null
+          sentiment?: string | null
+          started_at?: string | null
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_conversations_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "wholesale_deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_logs: {
         Row: {
           action: string
@@ -152,6 +235,120 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      business_contacts: {
+        Row: {
+          address: Json | null
+          assigned_agent: string | null
+          company_name: string
+          company_size: string | null
+          contact_name: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          id: string
+          industry: string | null
+          last_contacted_at: string | null
+          lead_score: number | null
+          metadata: Json | null
+          notes: string | null
+          phone: string | null
+          region: string | null
+          source: string | null
+          status: string | null
+          tags: string[] | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: Json | null
+          assigned_agent?: string | null
+          company_name: string
+          company_size?: string | null
+          contact_name?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          industry?: string | null
+          last_contacted_at?: string | null
+          lead_score?: number | null
+          metadata?: Json | null
+          notes?: string | null
+          phone?: string | null
+          region?: string | null
+          source?: string | null
+          status?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: Json | null
+          assigned_agent?: string | null
+          company_name?: string
+          company_size?: string | null
+          contact_name?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          industry?: string | null
+          last_contacted_at?: string | null
+          lead_score?: number | null
+          metadata?: Json | null
+          notes?: string | null
+          phone?: string | null
+          region?: string | null
+          source?: string | null
+          status?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      customer_segments: {
+        Row: {
+          automation_rules: Json | null
+          avg_order_value: number | null
+          created_at: string
+          criteria: Json
+          customer_count: number | null
+          description: string | null
+          id: string
+          is_dynamic: boolean | null
+          segment_name: string
+          total_revenue: number | null
+          updated_at: string
+        }
+        Insert: {
+          automation_rules?: Json | null
+          avg_order_value?: number | null
+          created_at?: string
+          criteria?: Json
+          customer_count?: number | null
+          description?: string | null
+          id?: string
+          is_dynamic?: boolean | null
+          segment_name: string
+          total_revenue?: number | null
+          updated_at?: string
+        }
+        Update: {
+          automation_rules?: Json | null
+          avg_order_value?: number | null
+          created_at?: string
+          criteria?: Json
+          customer_count?: number | null
+          description?: string | null
+          id?: string
+          is_dynamic?: boolean | null
+          segment_name?: string
+          total_revenue?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       global_markets: {
         Row: {
@@ -335,6 +532,167 @@ export type Database = {
           read?: boolean | null
           title?: string
           type?: string
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          billing_address: Json | null
+          created_at: string
+          currency: string | null
+          customer_email: string
+          customer_name: string | null
+          customer_phone: string | null
+          discount_amount: number | null
+          fulfillment_status: string | null
+          id: string
+          items: Json
+          metadata: Json | null
+          notes: string | null
+          shipping_address: Json | null
+          shipping_cost: number | null
+          status: string | null
+          store_id: string | null
+          stripe_customer_id: string | null
+          stripe_payment_id: string | null
+          subtotal: number
+          tax_amount: number | null
+          total_amount: number
+          tracking_number: string | null
+          tracking_url: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          billing_address?: Json | null
+          created_at?: string
+          currency?: string | null
+          customer_email: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          discount_amount?: number | null
+          fulfillment_status?: string | null
+          id?: string
+          items?: Json
+          metadata?: Json | null
+          notes?: string | null
+          shipping_address?: Json | null
+          shipping_cost?: number | null
+          status?: string | null
+          store_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_payment_id?: string | null
+          subtotal?: number
+          tax_amount?: number | null
+          total_amount?: number
+          tracking_number?: string | null
+          tracking_url?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          billing_address?: Json | null
+          created_at?: string
+          currency?: string | null
+          customer_email?: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          discount_amount?: number | null
+          fulfillment_status?: string | null
+          id?: string
+          items?: Json
+          metadata?: Json | null
+          notes?: string | null
+          shipping_address?: Json | null
+          shipping_cost?: number | null
+          status?: string | null
+          store_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_payment_id?: string | null
+          subtotal?: number
+          tax_amount?: number | null
+          total_amount?: number
+          tracking_number?: string | null
+          tracking_url?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organic_campaigns: {
+        Row: {
+          assigned_agent: string | null
+          campaign_name: string
+          campaign_type: string
+          content_strategy: Json | null
+          created_at: string
+          ended_at: string | null
+          generated_content: Json | null
+          id: string
+          leads_generated: number | null
+          metadata: Json | null
+          posts_published: number | null
+          posts_scheduled: number | null
+          revenue_attributed: number | null
+          started_at: string | null
+          status: string | null
+          target_markets: string[] | null
+          target_platforms: string[] | null
+          total_engagement: number | null
+          total_reach: number | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_agent?: string | null
+          campaign_name: string
+          campaign_type: string
+          content_strategy?: Json | null
+          created_at?: string
+          ended_at?: string | null
+          generated_content?: Json | null
+          id?: string
+          leads_generated?: number | null
+          metadata?: Json | null
+          posts_published?: number | null
+          posts_scheduled?: number | null
+          revenue_attributed?: number | null
+          started_at?: string | null
+          status?: string | null
+          target_markets?: string[] | null
+          target_platforms?: string[] | null
+          total_engagement?: number | null
+          total_reach?: number | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_agent?: string | null
+          campaign_name?: string
+          campaign_type?: string
+          content_strategy?: Json | null
+          created_at?: string
+          ended_at?: string | null
+          generated_content?: Json | null
+          id?: string
+          leads_generated?: number | null
+          metadata?: Json | null
+          posts_published?: number | null
+          posts_scheduled?: number | null
+          revenue_attributed?: number | null
+          started_at?: string | null
+          status?: string | null
+          target_markets?: string[] | null
+          target_platforms?: string[] | null
+          total_engagement?: number | null
+          total_reach?: number | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -743,6 +1101,124 @@ export type Database = {
           views?: number | null
         }
         Relationships: []
+      }
+      wholesale_deals: {
+        Row: {
+          actual_close_date: string | null
+          assigned_agent: string | null
+          business_contact_id: string | null
+          contract_url: string | null
+          created_at: string
+          currency: string | null
+          deal_name: string
+          deal_value: number
+          expected_close_date: string | null
+          id: string
+          margin_percentage: number | null
+          negotiation_history: Json | null
+          notes: string | null
+          probability: number | null
+          products: Json | null
+          quantity_total: number | null
+          stage: string | null
+          status: string | null
+          terms: Json | null
+          updated_at: string
+        }
+        Insert: {
+          actual_close_date?: string | null
+          assigned_agent?: string | null
+          business_contact_id?: string | null
+          contract_url?: string | null
+          created_at?: string
+          currency?: string | null
+          deal_name: string
+          deal_value?: number
+          expected_close_date?: string | null
+          id?: string
+          margin_percentage?: number | null
+          negotiation_history?: Json | null
+          notes?: string | null
+          probability?: number | null
+          products?: Json | null
+          quantity_total?: number | null
+          stage?: string | null
+          status?: string | null
+          terms?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          actual_close_date?: string | null
+          assigned_agent?: string | null
+          business_contact_id?: string | null
+          contract_url?: string | null
+          created_at?: string
+          currency?: string | null
+          deal_name?: string
+          deal_value?: number
+          expected_close_date?: string | null
+          id?: string
+          margin_percentage?: number | null
+          negotiation_history?: Json | null
+          notes?: string | null
+          probability?: number | null
+          products?: Json | null
+          quantity_total?: number | null
+          stage?: string | null
+          status?: string | null
+          terms?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wholesale_deals_business_contact_id_fkey"
+            columns: ["business_contact_id"]
+            isOneToOne: false
+            referencedRelation: "business_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wishlists: {
+        Row: {
+          created_at: string
+          id: string
+          notify_on_sale: boolean | null
+          product_id: string | null
+          product_image: string | null
+          product_price: number | null
+          product_title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notify_on_sale?: boolean | null
+          product_id?: string | null
+          product_image?: string | null
+          product_price?: number | null
+          product_title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notify_on_sale?: boolean | null
+          product_id?: string | null
+          product_image?: string | null
+          product_price?: number | null
+          product_title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlists_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

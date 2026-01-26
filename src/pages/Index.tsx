@@ -11,6 +11,9 @@ import { OmegaSwarm } from "@/components/dashboard/OmegaSwarm";
 import { AutonomousSalesPanel } from "@/components/dashboard/AutonomousSalesPanel";
 import { AutonomousEngine } from "@/components/dashboard/AutonomousEngine";
 import { CEODashboard } from "@/components/dashboard/CEODashboard";
+import { CRMDashboard } from "@/components/dashboard/CRMDashboard";
+import { AgentMonitor } from "@/components/dashboard/AgentMonitor";
+import { MarketingEngine } from "@/components/dashboard/MarketingEngine";
 import { useStores, useCreateStore } from "@/hooks/useStores";
 import { useAgentLogs, useCreateAgentLog } from "@/hooks/useAgentLogs";
 import { useAggregatedRevenue, useCreateRevenueMetric } from "@/hooks/useRevenueMetrics";
@@ -255,6 +258,21 @@ const Index = () => {
           {/* Autonomous Sales Panel */}
           <div className="mb-8">
             <AutonomousSalesPanel />
+          </div>
+
+          {/* Enterprise CRM */}
+          <div className="mb-8">
+            <CRMDashboard />
+          </div>
+
+          {/* Real-time Agent Monitor */}
+          <div className="mb-8">
+            <AgentMonitor />
+          </div>
+
+          {/* Global Marketing Engine */}
+          <div className="mb-8">
+            <MarketingEngine />
           </div>
 
           {/* Stores and Agents Grid */}
