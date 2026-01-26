@@ -1,19 +1,30 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 
 export interface Product {
   id: string;
   title: string;
-  description: string;
-  price: number;
+  description: string | null;
+  price: number | null;
   compare_at_price: number | null;
-  category: string;
+  category: string | null;
   images: string[];
-  inventory_quantity: number;
-  status: string;
+  inventory_quantity: number | null;
+  status: string | null;
   store_id: string;
   created_at: string;
+  tags: string[] | null;
 }
+
+// Helper to safely parse JSON images array
+const parseImages = (images: Json | null): string[] => {
+  if (!images) return [];
+  if (Array.isArray(images)) {
+    return images.filter((img): img is string => typeof img === 'string');
+  }
+  return [];
+};
 
 export const useProducts = (storeId?: string) => {
   return useQuery({
@@ -30,7 +41,11 @@ export const useProducts = (storeId?: string) => {
       
       const { data, error } = await query;
       if (error) throw error;
-      return data as Product[];
+      
+      return (data || []).map(item => ({
+        ...item,
+        images: parseImages(item.images),
+      })) as Product[];
     },
   });
 };
@@ -47,7 +62,11 @@ export const useTopProducts = (limit = 10) => {
         .limit(limit);
       
       if (error) throw error;
-      return data as Product[];
+      
+      return (data || []).map(item => ({
+        ...item,
+        images: parseImages(item.images),
+      })) as Product[];
     },
   });
 };

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { getProductImage } from "@/lib/productImages";
 
 interface ProductCardProps {
   product: {
@@ -29,9 +30,10 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
     ? Math.round((1 - product.price / product.compare_at_price) * 100) 
     : 0;
 
-  const imageUrl = Array.isArray(product.images) && product.images.length > 0
+  const firstImage = Array.isArray(product.images) && product.images.length > 0
     ? product.images[0]
-    : "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400";
+    : null;
+  const imageUrl = getProductImage(firstImage, product.title);
 
   const isTrending = product.tags?.includes('trending');
   const isViral = product.tags?.includes('tiktok-viral');
