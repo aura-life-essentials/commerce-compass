@@ -9,7 +9,8 @@ const corsHeaders = {
 const CJ_API_BASE = "https://developers.cjdropshipping.com/api2.0/v1";
 const PROFIT_MARGIN = 0.67; // 67% profit margin
 
-interface CJProduct {
+// CJ API returns different structures for different endpoints
+interface CJProductV1 {
   pid: string;
   productNameEn: string;
   productImage: string;
@@ -19,11 +20,57 @@ interface CJProduct {
   variants: any[];
 }
 
+interface CJProductV2 {
+  id: string;
+  sku: string;
+  nameEn: string;
+  bigImage: string;
+  sellPrice: string;
+  categoryName?: string;
+  description?: string;
+}
+
 interface CJVariant {
   vid: string;
   variantNameEn: string;
   variantSellPrice: number;
   variantImage: string;
+}
+
+// Normalize different CJ API response structures
+function normalizeCJProduct(raw: any): { pid: string; productNameEn: string; productImage: string; sellPrice: number; categoryName: string; description: string; variants: any[] } {
+  // Handle listV2 response structure
+  if (raw.id && raw.nameEn) {
+    // Parse sell price - can be "0.80" or "2.13 -- 7.21" (price range)
+    let price = 0;
+    if (typeof raw.sellPrice === 'string') {
+      const priceStr = raw.sellPrice.split('--')[0].trim();
+      price = parseFloat(priceStr) || 0;
+    } else {
+      price = raw.sellPrice || 0;
+    }
+    
+    return {
+      pid: raw.id,
+      productNameEn: raw.nameEn,
+      productImage: raw.bigImage || '',
+      sellPrice: price,
+      categoryName: raw.categoryName || 'General',
+      description: raw.description || '',
+      variants: [],
+    };
+  }
+  
+  // Handle v1 list response structure
+  return {
+    pid: raw.pid,
+    productNameEn: raw.productNameEn,
+    productImage: raw.productImage,
+    sellPrice: parseFloat(raw.sellPrice) || 0,
+    categoryName: raw.categoryName || 'General',
+    description: raw.description || '',
+    variants: raw.variants || [],
+  };
 }
 
 interface ProductWithPricing {
@@ -186,7 +233,8 @@ async function getShippingCost(accessToken: string, productId: string, countryCo
 }
 
 // Transform CJ product to our format with pricing
-async function transformProduct(accessToken: string, product: CJProduct): Promise<ProductWithPricing> {
+async function transformProduct(accessToken: string, rawProduct: any): Promise<ProductWithPricing> {
+  const product = normalizeCJProduct(rawProduct);
   const shippingCost = await getShippingCost(accessToken, product.pid);
   const pricing = calculatePricing(product.sellPrice, shippingCost);
 
@@ -255,9 +303,9 @@ serve(async (req) => {
           );
         }
 
-        // Transform products with pricing
+        // Transform products with pricing (normalize the CJ API response)
         const productsWithPricing = await Promise.all(
-          cjResponse.data.list.map((product: CJProduct) => transformProduct(accessToken, product))
+          cjResponse.data.list.map((product: any) => transformProduct(accessToken, product))
         );
 
         return new Response(
