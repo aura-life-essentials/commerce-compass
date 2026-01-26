@@ -63,44 +63,84 @@ function calculatePricing(baseCost: number, shippingCost: number = 0) {
   };
 }
 
-// Fetch products from CJ Dropshipping API
-async function fetchCJProducts(apiKey: string, categoryId?: string, pageNum: number = 1, pageSize: number = 20) {
-  const url = new URL(`${CJ_API_BASE}/product/list`);
+// Get access token from CJ API (required before making other calls)
+async function getAccessToken(apiKey: string): Promise<string> {
+  console.log("[CJ] Exchanging API key for access token...");
   
-  const body: any = {
-    pageNum,
-    pageSize,
-  };
-  
-  if (categoryId) {
-    body.categoryId = categoryId;
-  }
-
-  const response = await fetch(url.toString(), {
+  const response = await fetch(`${CJ_API_BASE}/authentication/getAccessToken`, {
     method: "POST",
     headers: {
-      "CJ-Access-Token": apiKey,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ apiKey }),
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error("CJ API Error:", errorText);
+    console.error("[CJ] Token exchange failed:", errorText);
+    throw new Error(`CJ Token Exchange Error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  console.log("[CJ] Token response:", JSON.stringify(data));
+  
+  if (!data.data?.accessToken) {
+    throw new Error(`CJ Token Error: ${data.message || "No access token returned"}`);
+  }
+  
+  return data.data.accessToken;
+}
+
+// Fetch products from CJ Dropshipping API using listV2 (better search)
+async function fetchCJProducts(accessToken: string, categoryId?: string, pageNum: number = 1, pageSize: number = 20, keyword?: string) {
+  // Try listV2 first (better for keyword search), fallback to list
+  const useV2 = Boolean(keyword);
+  const endpoint = useV2 ? `${CJ_API_BASE}/product/listV2` : `${CJ_API_BASE}/product/list`;
+  
+  const url = new URL(endpoint);
+  url.searchParams.set("page", pageNum.toString());
+  url.searchParams.set("size", pageSize.toString());
+  
+  if (categoryId) {
+    url.searchParams.set("categoryId", categoryId);
+  }
+  if (keyword) {
+    url.searchParams.set("keyWord", keyword);
+  }
+
+  console.log("[CJ] Fetching products from:", url.toString());
+  const response = await fetch(url.toString(), {
+    method: "GET",
+    headers: {
+      "CJ-Access-Token": accessToken,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("[CJ] Product list error:", errorText);
     throw new Error(`CJ API Error: ${response.status}`);
   }
 
   const data = await response.json();
+  console.log("[CJ] API Response:", JSON.stringify(data).slice(0, 500));
+  
+  // Handle different response structures
+  if (useV2 && data.data?.content?.[0]?.productList) {
+    return { data: { list: data.data.content[0].productList, total: data.data.total || 0 } };
+  }
+  
+  console.log("[CJ] Fetched", data.data?.list?.length || 0, "products");
   return data;
 }
 
 // Get product details with variants
-async function getProductDetails(apiKey: string, productId: string) {
+async function getProductDetails(accessToken: string, productId: string) {
   const response = await fetch(`${CJ_API_BASE}/product/query`, {
     method: "POST",
     headers: {
-      "CJ-Access-Token": apiKey,
+      "CJ-Access-Token": accessToken,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ pid: productId }),
@@ -114,12 +154,12 @@ async function getProductDetails(apiKey: string, productId: string) {
 }
 
 // Get shipping cost estimate
-async function getShippingCost(apiKey: string, productId: string, countryCode: string = "US") {
+async function getShippingCost(accessToken: string, productId: string, countryCode: string = "US") {
   try {
     const response = await fetch(`${CJ_API_BASE}/logistic/freightCalculate`, {
       method: "POST",
       headers: {
-        "CJ-Access-Token": apiKey,
+        "CJ-Access-Token": accessToken,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -131,7 +171,6 @@ async function getShippingCost(apiKey: string, productId: string, countryCode: s
 
     if (response.ok) {
       const data = await response.json();
-      // Return the cheapest shipping option
       if (data.data && data.data.length > 0) {
         const cheapest = data.data.reduce((min: any, curr: any) => 
           curr.logisticPrice < min.logisticPrice ? curr : min
@@ -139,16 +178,16 @@ async function getShippingCost(apiKey: string, productId: string, countryCode: s
         return cheapest.logisticPrice || 0;
       }
     }
-    return 3.50; // Default shipping estimate
+    return 3.50;
   } catch (error) {
     console.error("Error fetching shipping cost:", error);
-    return 3.50; // Default shipping estimate
+    return 3.50;
   }
 }
 
 // Transform CJ product to our format with pricing
-async function transformProduct(apiKey: string, product: CJProduct): Promise<ProductWithPricing> {
-  const shippingCost = await getShippingCost(apiKey, product.pid);
+async function transformProduct(accessToken: string, product: CJProduct): Promise<ProductWithPricing> {
+  const shippingCost = await getShippingCost(accessToken, product.pid);
   const pricing = calculatePricing(product.sellPrice, shippingCost);
 
   const variants: VariantWithPricing[] = (product.variants || []).map((variant: CJVariant) => {
@@ -198,12 +237,16 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { action, storeId, categoryId, productId, pageNum, pageSize } = await req.json();
+    const { action, storeId, categoryId, productId, pageNum, pageSize, keyword } = await req.json();
+
+    // Get access token first (required for all CJ API calls)
+    const accessToken = await getAccessToken(CJ_API_KEY);
+    console.log("[CJ] Got access token successfully");
 
     switch (action) {
       case "list_products": {
         // Fetch products from CJ
-        const cjResponse = await fetchCJProducts(CJ_API_KEY, categoryId, pageNum || 1, pageSize || 20);
+        const cjResponse = await fetchCJProducts(accessToken, categoryId, pageNum || 1, pageSize || 20, keyword);
         
         if (!cjResponse.data || !cjResponse.data.list) {
           return new Response(
@@ -214,7 +257,7 @@ serve(async (req) => {
 
         // Transform products with pricing
         const productsWithPricing = await Promise.all(
-          cjResponse.data.list.map((product: CJProduct) => transformProduct(CJ_API_KEY, product))
+          cjResponse.data.list.map((product: CJProduct) => transformProduct(accessToken, product))
         );
 
         return new Response(
@@ -238,7 +281,7 @@ serve(async (req) => {
         }
 
         // Get product details
-        const productDetails = await getProductDetails(CJ_API_KEY, productId);
+        const productDetails = await getProductDetails(accessToken, productId);
         
         if (!productDetails.data) {
           return new Response(
@@ -247,7 +290,7 @@ serve(async (req) => {
           );
         }
 
-        const transformedProduct = await transformProduct(CJ_API_KEY, productDetails.data);
+        const transformedProduct = await transformProduct(accessToken, productDetails.data);
 
         // Insert into our products table
         const { data: insertedProduct, error: insertError } = await supabase
@@ -322,7 +365,7 @@ serve(async (req) => {
         }
 
         // Fetch trending products
-        const cjResponse = await fetchCJProducts(CJ_API_KEY, undefined, 1, 10);
+        const cjResponse = await fetchCJProducts(accessToken, undefined, 1, 10);
         const products = cjResponse.data?.list || [];
 
         const results = [];
@@ -330,7 +373,7 @@ serve(async (req) => {
         for (const store of stores) {
           // Import top products to each store
           for (const product of products.slice(0, 5)) {
-            const transformed = await transformProduct(CJ_API_KEY, product);
+            const transformed = await transformProduct(accessToken, product);
             
             const { error } = await supabase.from("products").upsert({
               store_id: store.id,
