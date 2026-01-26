@@ -10,7 +10,7 @@ import { ProfitReaper } from "@/components/dashboard/ProfitReaper";
 import { OmegaSwarm } from "@/components/dashboard/OmegaSwarm";
 import { AutonomousSalesPanel } from "@/components/dashboard/AutonomousSalesPanel";
 import { AutonomousEngine } from "@/components/dashboard/AutonomousEngine";
-// CEODashboard temporarily disabled for debugging
+import { CEODashboard } from "@/components/dashboard/CEODashboard";
 import { useStores, useCreateStore } from "@/hooks/useStores";
 import { useAgentLogs, useCreateAgentLog } from "@/hooks/useAgentLogs";
 import { useAggregatedRevenue, useCreateRevenueMetric } from "@/hooks/useRevenueMetrics";
@@ -240,6 +240,11 @@ const Index = () => {
             <div>
               <GrowthFlywheel />
             </div>
+          </div>
+
+          {/* CEO Dashboard with Voice Control */}
+          <div className="mb-8">
+            <CEODashboard />
           </div>
 
           {/* Autonomous AI Engine */}
