@@ -5,30 +5,147 @@ import { AgentCard } from "@/components/dashboard/AgentCard";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { GrowthFlywheel } from "@/components/dashboard/GrowthFlywheel";
 import { GovernancePanel } from "@/components/dashboard/GovernancePanel";
+import { useStores, useCreateStore } from "@/hooks/useStores";
+import { useAgentLogs, useCreateAgentLog } from "@/hooks/useAgentLogs";
+import { useAggregatedRevenue, useCreateRevenueMetric } from "@/hooks/useRevenueMetrics";
+import { useCreateGovernanceEvent } from "@/hooks/useGovernance";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { 
   DollarSign, 
   ShoppingBag, 
   Users, 
   TrendingUp,
   Layers,
-  Bot
+  Bot,
+  RefreshCw,
+  Database
 } from "lucide-react";
+import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
 
-const stores = [
-  { name: "Luxe Fashion", domain: "luxe.myshopify.com", revenue: "$24.5k", products: 156, status: "active" as const, growth: "+12%" },
-  { name: "Tech Gadgets", domain: "techgadgets.store", revenue: "$18.2k", products: 89, status: "active" as const, growth: "+8%" },
-  { name: "Home Essentials", domain: "homeess.co", revenue: "$31.7k", products: 234, status: "active" as const, growth: "+15%" },
-  { name: "Wellness Hub", domain: "wellness.shop", revenue: "$9.8k", products: 67, status: "idle" as const, growth: "+3%" },
+// Default demo data for seeding
+const demoStores = [
+  { name: "Luxe Fashion", domain: "luxe.myshopify.com", currency: "USD", locale: "en-US", status: "connected" as const },
+  { name: "Tech Gadgets", domain: "techgadgets.store", currency: "USD", locale: "en-US", status: "connected" as const },
+  { name: "Home Essentials", domain: "homeess.co", currency: "USD", locale: "en-US", status: "connected" as const },
+  { name: "Wellness Hub", domain: "wellness.shop", currency: "USD", locale: "en-US", status: "connected" as const },
 ];
 
-const agents = [
-  { name: "Strategy Alpha", role: "Market Analysis", status: "active" as const, tasksCompleted: 47, lastActive: "2m ago" },
-  { name: "Content Weaver", role: "Content Creation", status: "processing" as const, tasksCompleted: 124, lastActive: "now" },
-  { name: "SEO Sentinel", role: "Search Optimization", status: "active" as const, tasksCompleted: 89, lastActive: "5m ago" },
-  { name: "CX Guardian", role: "Customer Experience", status: "idle" as const, tasksCompleted: 203, lastActive: "1h ago" },
+const demoAgents = [
+  { agent_name: "Strategy Alpha", agent_role: "Market Analysis", action: "Analyzed competitor pricing" },
+  { agent_name: "Content Weaver", agent_role: "Content Creation", action: "Generated product descriptions" },
+  { agent_name: "SEO Sentinel", agent_role: "Search Optimization", action: "Optimized meta tags" },
+  { agent_name: "CX Guardian", agent_role: "Customer Experience", action: "Reviewed support tickets" },
 ];
 
 const Index = () => {
+  const { data: stores, isLoading: storesLoading } = useStores();
+  const { data: revenueData, isLoading: revenueLoading } = useAggregatedRevenue();
+  const { data: agentLogs, isLoading: agentsLoading } = useAgentLogs(undefined, 100);
+  
+  const createStore = useCreateStore();
+  const createAgentLog = useCreateAgentLog();
+  const createRevenueMetric = useCreateRevenueMetric();
+  const createGovernanceEvent = useCreateGovernanceEvent();
+
+  const hasData = stores && stores.length > 0;
+
+  // Aggregate agent stats from logs
+  const agentStats = agentLogs?.reduce((acc, log) => {
+    const key = log.agent_name;
+    if (!acc[key]) {
+      acc[key] = {
+        name: log.agent_name,
+        role: log.agent_role,
+        tasksCompleted: 0,
+        lastActive: log.created_at,
+        status: "idle" as "active" | "idle" | "processing",
+      };
+    }
+    if (log.status === "completed") acc[key].tasksCompleted++;
+    if (log.status === "processing") acc[key].status = "processing";
+    if (new Date(log.created_at) > new Date(acc[key].lastActive)) {
+      acc[key].lastActive = log.created_at;
+    }
+    return acc;
+  }, {} as Record<string, { name: string; role: string; tasksCompleted: number; lastActive: string; status: "active" | "idle" | "processing" }>) || {};
+
+  const agents = Object.values(agentStats).length > 0 
+    ? Object.values(agentStats).map(a => ({
+        ...a,
+        status: (Date.now() - new Date(a.lastActive).getTime() < 300000 ? "active" : "idle") as "active" | "idle" | "processing",
+        lastActive: formatDistanceToNow(new Date(a.lastActive), { addSuffix: false }),
+      }))
+    : [];
+
+  // Calculate metrics from real data
+  const totalRevenue = revenueData?.reduce((sum, r) => sum + r.revenue, 0) || 0;
+  const totalOrders = revenueData?.reduce((sum, r) => sum + r.orders, 0) || 0;
+
+  const seedDemoData = async () => {
+    try {
+      toast.loading("Seeding demo data...");
+      
+      // Create demo stores
+      const createdStores = [];
+      for (const store of demoStores) {
+        const result = await createStore.mutateAsync(store);
+        createdStores.push(result);
+      }
+      
+      // Create agent logs for each store
+      for (const store of createdStores) {
+        for (const agent of demoAgents) {
+          await createAgentLog.mutateAsync({
+            store_id: store.id,
+            ...agent,
+            status: "completed",
+            duration_ms: Math.floor(Math.random() * 5000) + 1000,
+          });
+        }
+        
+        // Create revenue metrics for last 30 days
+        for (let i = 30; i >= 0; i--) {
+          const date = new Date();
+          date.setDate(date.getDate() - i);
+          await createRevenueMetric.mutateAsync({
+            store_id: store.id,
+            date: date.toISOString().split("T")[0],
+            revenue: Math.floor(Math.random() * 5000) + 1000,
+            orders_count: Math.floor(Math.random() * 50) + 10,
+            organic_traffic: Math.floor(Math.random() * 1000) + 200,
+            conversion_rate: Math.random() * 0.05 + 0.02,
+          });
+        }
+      }
+      
+      // Create governance events
+      await createGovernanceEvent.mutateAsync({
+        event_type: "compliance_check",
+        category: "compliance",
+        severity: "info",
+        description: "GDPR compliance verified for all stores",
+        resolved: true,
+      });
+      
+      await createGovernanceEvent.mutateAsync({
+        event_type: "security_audit",
+        category: "security",
+        severity: "info",
+        description: "Store isolation verified - no cross-contamination",
+        resolved: true,
+      });
+      
+      toast.dismiss();
+      toast.success("Demo data seeded successfully!");
+    } catch (error) {
+      toast.dismiss();
+      toast.error("Failed to seed demo data");
+      console.error(error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Ambient glow effect */}
@@ -51,40 +168,63 @@ const Index = () => {
             </p>
           </div>
 
+          {/* Empty State - Seed Demo Data */}
+          {!hasData && !storesLoading && (
+            <div className="glass rounded-xl p-8 mb-8 text-center">
+              <Database className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">No Stores Connected</h3>
+              <p className="text-muted-foreground mb-6">
+                Get started by seeding demo data or connecting your first Shopify store.
+              </p>
+              <Button onClick={seedDemoData} className="gap-2">
+                <RefreshCw className="w-4 h-4" />
+                Seed Demo Data
+              </Button>
+            </div>
+          )}
+
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <MetricCard
-              title="Total Revenue"
-              value="$84.2k"
-              change="+12.5%"
-              changeType="positive"
-              icon={DollarSign}
-              subtitle="Across 4 stores"
-            />
-            <MetricCard
-              title="Active Products"
-              value="546"
-              change="+24"
-              changeType="positive"
-              icon={ShoppingBag}
-              subtitle="In catalog"
-            />
-            <MetricCard
-              title="Customer Base"
-              value="12.4k"
-              change="+340"
-              changeType="positive"
-              icon={Users}
-              subtitle="Total customers"
-            />
-            <MetricCard
-              title="Conversion Rate"
-              value="3.2%"
-              change="+0.4%"
-              changeType="positive"
-              icon={TrendingUp}
-              subtitle="Industry avg: 2.1%"
-            />
+            {storesLoading ? (
+              Array(4).fill(0).map((_, i) => (
+                <Skeleton key={i} className="h-32 rounded-xl" />
+              ))
+            ) : (
+              <>
+                <MetricCard
+                  title="Total Revenue"
+                  value={`$${(totalRevenue / 1000).toFixed(1)}k`}
+                  change="+12.5%"
+                  changeType="positive"
+                  icon={DollarSign}
+                  subtitle={`Across ${stores?.length || 0} stores`}
+                />
+                <MetricCard
+                  title="Total Orders"
+                  value={totalOrders.toString()}
+                  change="+24"
+                  changeType="positive"
+                  icon={ShoppingBag}
+                  subtitle="This period"
+                />
+                <MetricCard
+                  title="Active Stores"
+                  value={(stores?.length || 0).toString()}
+                  change={stores?.length ? `+${stores.length}` : "0"}
+                  changeType="positive"
+                  icon={Users}
+                  subtitle="Connected"
+                />
+                <MetricCard
+                  title="Conversion Rate"
+                  value="3.2%"
+                  change="+0.4%"
+                  changeType="positive"
+                  icon={TrendingUp}
+                  subtitle="Industry avg: 2.1%"
+                />
+              </>
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -106,12 +246,31 @@ const Index = () => {
               <div className="flex items-center gap-2 mb-6">
                 <Layers className="w-5 h-5 text-primary" />
                 <h3 className="font-semibold text-lg">Connected Stores</h3>
-                <span className="ml-auto text-sm text-muted-foreground">{stores.length} active</span>
+                <span className="ml-auto text-sm text-muted-foreground">
+                  {stores?.length || 0} active
+                </span>
               </div>
               <div className="space-y-4">
-                {stores.map((store) => (
-                  <StoreCard key={store.domain} {...store} />
-                ))}
+                {storesLoading ? (
+                  Array(3).fill(0).map((_, i) => (
+                    <Skeleton key={i} className="h-24 rounded-xl" />
+                  ))
+                ) : stores?.length ? (
+                  stores.map((store) => (
+                    <StoreCard
+                      key={store.id}
+                      id={store.id}
+                      name={store.name}
+                      domain={store.domain}
+                      status={store.status as "connected" | "disconnected" | "syncing"}
+                      lastSynced={store.last_synced_at}
+                    />
+                  ))
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">
+                    No stores connected yet
+                  </p>
+                )}
               </div>
             </div>
 
@@ -120,12 +279,24 @@ const Index = () => {
               <div className="flex items-center gap-2 mb-6">
                 <Bot className="w-5 h-5 text-primary" />
                 <h3 className="font-semibold text-lg">AI Executive Teams</h3>
-                <span className="ml-auto text-sm text-emerald-400">4 active</span>
+                <span className="ml-auto text-sm text-emerald-400">
+                  {agents.filter(a => a.status === "active").length} active
+                </span>
               </div>
               <div className="space-y-3">
-                {agents.map((agent) => (
-                  <AgentCard key={agent.name} {...agent} />
-                ))}
+                {agentsLoading ? (
+                  Array(4).fill(0).map((_, i) => (
+                    <Skeleton key={i} className="h-16 rounded-lg" />
+                  ))
+                ) : agents.length ? (
+                  agents.map((agent) => (
+                    <AgentCard key={agent.name} {...agent} />
+                  ))
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">
+                    No agent activity yet
+                  </p>
+                )}
               </div>
               <div className="mt-4 pt-4 border-t border-border">
                 <p className="text-xs text-muted-foreground text-center">
@@ -144,13 +315,14 @@ const Index = () => {
               <h3 className="font-semibold text-lg mb-4">Command Center</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { label: "Sync Stores", desc: "Refresh all data" },
-                  { label: "Deploy Agents", desc: "Activate team" },
-                  { label: "View Analytics", desc: "Deep insights" },
-                  { label: "Audit Log", desc: "Review actions" },
+                  { label: "Sync Stores", desc: "Refresh all data", action: () => toast.info("Sync initiated") },
+                  { label: "Deploy Agents", desc: "Activate team", action: () => toast.info("Agents deploying") },
+                  { label: "View Analytics", desc: "Deep insights", action: () => toast.info("Analytics loading") },
+                  { label: "Audit Log", desc: "Review actions", action: () => toast.info("Opening audit log") },
                 ].map((action) => (
                   <button
                     key={action.label}
+                    onClick={action.action}
                     className="p-4 rounded-lg bg-secondary/50 hover:bg-secondary border border-transparent hover:border-primary/20 transition-all text-left group"
                   >
                     <p className="font-medium text-sm group-hover:text-primary transition-colors">
