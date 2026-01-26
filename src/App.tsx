@@ -17,6 +17,7 @@ import Pricing from "./pages/Pricing";
 import Landing from "./pages/Landing";
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import CasinoLaunch from "./pages/CasinoLaunch";
+import IndustryRoadmaps from "./pages/IndustryRoadmaps";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -63,6 +64,9 @@ const App = () => (
             
             {/* Casino Launch page */}
             <Route path="/casino" element={<CasinoLaunch />} />
+            
+            {/* Industry Roadmaps page */}
+            <Route path="/industry-roadmaps" element={<IndustryRoadmaps />} />
             
             {/* Auth route */}
             <Route path="/auth" element={<Auth />} />
