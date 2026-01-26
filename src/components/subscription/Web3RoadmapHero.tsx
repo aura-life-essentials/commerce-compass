@@ -6,9 +6,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { 
   Check, 
   Sparkles, 
-  Crown, 
-  Zap, 
-  Rocket, 
   Diamond,
   ArrowRight,
   Star,
@@ -18,168 +15,47 @@ import {
   Globe,
   Layers,
   Target,
-  Award
+  Award,
+  Loader2
 } from 'lucide-react';
-import { useSubscription } from '@/hooks/useSubscription';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-
-const INDUSTRY_TIERS = [
-  {
-    id: 'foundation',
-    name: 'Foundation',
-    tagline: 'Learn Web3 Basics',
-    price: 97,
-    billing: '/month',
-    color: 'from-slate-500 to-slate-600',
-    icon: Zap,
-    description: 'Perfect for businesses exploring Web3 possibilities',
-    features: [
-      'Web3 fundamentals education',
-      'Industry-specific roadmap consultation',
-      'Community Discord access',
-      'Weekly group strategy calls',
-      'Basic AI research assistant',
-      'Email support (48hr response)',
-    ],
-    deliverables: [
-      'Web3 readiness assessment',
-      'Custom opportunity report',
-    ],
-    guarantee: '14-day money back',
-  },
-  {
-    id: 'builder',
-    name: 'Builder',
-    tagline: 'Build Your Web3 Presence',
-    price: 297,
-    billing: '/month',
-    color: 'from-blue-500 to-cyan-500',
-    icon: Rocket,
-    description: 'Launch your Web3 presence with expert guidance',
-    features: [
-      'Everything in Foundation',
-      'Custom Web3 website design',
-      'Wallet integration setup',
-      'NFT gallery implementation',
-      'Priority support (24hr response)',
-      'Bi-weekly 1-on-1 strategy calls',
-      'Smart contract templates',
-    ],
-    deliverables: [
-      'Full Web3 website',
-      'Integration documentation',
-      '3-month implementation plan',
-    ],
-    guarantee: '30-day results or refund',
-  },
-  {
-    id: 'accelerator',
-    name: 'Accelerator',
-    tagline: 'Launch NFTs & DAOs',
-    price: 997,
-    billing: '/month',
-    color: 'from-purple-500 to-pink-500',
-    icon: Sparkles,
-    popular: true,
-    description: 'Full NFT collection and DAO governance setup',
-    features: [
-      'Everything in Builder',
-      'Custom NFT collection design & launch',
-      'Smart contract development & audit',
-      'DAO governance structure',
-      'Token creation & distribution',
-      '24/7 AI agent support',
-      'Dedicated account manager',
-      'Weekly strategy sessions',
-    ],
-    deliverables: [
-      '10,000 NFT collection ready',
-      'DAO smart contracts deployed',
-      'Token economics design',
-      'Community building playbook',
-    ],
-    guarantee: 'Revenue increase or money back',
-  },
-  {
-    id: 'enterprise',
-    name: 'Enterprise',
-    tagline: 'Complete Web3 Suite',
-    price: 2997,
-    billing: '/month',
-    color: 'from-amber-500 to-orange-500',
-    icon: Crown,
-    description: 'Enterprise-grade Web3 infrastructure',
-    features: [
-      'Everything in Accelerator',
-      'Multi-chain deployment',
-      'Crypto payment gateway',
-      'Custom AI agents for automation',
-      'White-label solutions',
-      'Compliance & legal guidance',
-      'On-demand development team',
-      'C-level strategy sessions',
-    ],
-    deliverables: [
-      'Full Web3 ecosystem',
-      'Custom blockchain integrations',
-      'Revenue automation systems',
-      'Quarterly business reviews',
-    ],
-    guarantee: '50% revenue increase guarantee',
-  },
-  {
-    id: 'partner',
-    name: 'Industry Partner',
-    tagline: 'Guaranteed Success',
-    price: 9997,
-    billing: '/month',
-    color: 'from-yellow-400 via-amber-500 to-red-500',
-    icon: Diamond,
-    elite: true,
-    description: 'Full service build + roadmap + auto-execution',
-    features: [
-      'Everything in Enterprise',
-      'Complete done-for-you buildout',
-      'AI-powered auto-execution',
-      'Guaranteed revenue targets',
-      'Equity partnership options',
-      'Quarterly in-person strategy',
-      'Direct founder access',
-      'Priority feature development',
-      'Global market expansion',
-    ],
-    deliverables: [
-      'Full ecosystem built & managed',
-      'AI army executing 24/7',
-      'Guaranteed ROI targets',
-      'DAO board seat',
-      'Revenue share partnership',
-    ],
-    guarantee: 'Guaranteed 10x ROI or we work free',
-  },
-];
+import { supabase } from '@/integrations/supabase/client';
+import { INDUSTRY_TIERS } from '@/lib/industryTiers';
 
 export function Web3RoadmapHero() {
   const { user } = useAuthContext();
   const navigate = useNavigate();
-  const [selectedTier, setSelectedTier] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingTier, setLoadingTier] = useState<string | null>(null);
 
-  const handleSelectTier = async (tierId: string) => {
+  const handleSelectTier = async (tierId: string, priceId: string) => {
     if (!user) {
-      toast.error('Please sign in to continue');
+      toast.error('Please sign in to subscribe');
       navigate('/auth');
       return;
     }
     
-    setSelectedTier(tierId);
-    setIsLoading(true);
+    setLoadingTier(tierId);
     
-    // Navigate to pricing page with selected tier
-    navigate(`/pricing?tier=${tierId}`);
-    setIsLoading(false);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-subscription-checkout', {
+        body: { priceId, tierId }
+      });
+
+      if (error) throw error;
+      
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast.error('Failed to start checkout. Please try again.');
+    } finally {
+      setLoadingTier(null);
+    }
   };
 
   return (
@@ -244,6 +120,9 @@ export function Web3RoadmapHero() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
           {INDUSTRY_TIERS.map((tier, index) => {
             const Icon = tier.icon;
+            const isLoading = loadingTier === tier.id;
+            const isPopular = 'popular' in tier && tier.popular;
+            const isElite = 'elite' in tier && tier.elite;
             
             return (
               <motion.div
@@ -254,7 +133,7 @@ export function Web3RoadmapHero() {
                 transition={{ delay: index * 0.1 }}
                 className="relative"
               >
-                {tier.popular && (
+                {isPopular && (
                   <div className="absolute -top-4 left-0 right-0 flex justify-center z-10">
                     <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-1">
                       <Star className="w-3 h-3 mr-1" />
@@ -263,7 +142,7 @@ export function Web3RoadmapHero() {
                   </div>
                 )}
                 
-                {tier.elite && (
+                {isElite && (
                   <div className="absolute -top-4 left-0 right-0 flex justify-center z-10">
                     <Badge className="bg-gradient-to-r from-yellow-400 to-amber-500 text-black px-4 py-1">
                       <Diamond className="w-3 h-3 mr-1" />
@@ -274,14 +153,14 @@ export function Web3RoadmapHero() {
 
                 <Card 
                   className={`h-full bg-card/50 backdrop-blur-sm border transition-all duration-300 hover:scale-[1.02] ${
-                    tier.popular 
+                    isPopular 
                       ? 'border-purple-500/50 shadow-lg shadow-purple-500/20' 
-                      : tier.elite
+                      : isElite
                       ? 'border-amber-500/50 shadow-lg shadow-amber-500/20'
                       : 'border-border hover:border-primary/50'
                   }`}
                 >
-                  <CardContent className={`p-6 ${tier.popular || tier.elite ? 'pt-8' : ''}`}>
+                  <CardContent className={`p-6 ${isPopular || isElite ? 'pt-8' : ''}`}>
                     {/* Icon */}
                     <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${tier.color} flex items-center justify-center mb-4`}>
                       <Icon className="w-7 h-7 text-white" />
@@ -301,18 +180,28 @@ export function Web3RoadmapHero() {
 
                     {/* CTA Button */}
                     <Button
-                      onClick={() => handleSelectTier(tier.id)}
+                      onClick={() => handleSelectTier(tier.id, tier.priceId)}
+                      disabled={isLoading}
                       className={`w-full mb-6 ${
-                        tier.elite
+                        isElite
                           ? 'bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black'
-                          : tier.popular
+                          : isPopular
                           ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'
                           : ''
                       }`}
-                      variant={tier.popular || tier.elite ? 'default' : 'outline'}
+                      variant={isPopular || isElite ? 'default' : 'outline'}
                     >
-                      Get Started
-                      <ArrowRight className="w-4 h-4 ml-2" />
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          Subscribe Now
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </>
+                      )}
                     </Button>
 
                     {/* Features */}
