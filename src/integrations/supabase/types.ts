@@ -700,6 +700,65 @@ export type Database = {
         }
         Relationships: []
       }
+      industry_roadmaps: {
+        Row: {
+          assigned_agents: string[] | null
+          client_user_id: string | null
+          company_name: string | null
+          created_at: string
+          current_stage: string | null
+          id: string
+          industry: string
+          milestones: Json | null
+          projected_revenue_increase: number | null
+          roadmap_data: Json | null
+          status: string | null
+          subscription_id: string | null
+          updated_at: string
+          web3_readiness_score: number | null
+        }
+        Insert: {
+          assigned_agents?: string[] | null
+          client_user_id?: string | null
+          company_name?: string | null
+          created_at?: string
+          current_stage?: string | null
+          id?: string
+          industry: string
+          milestones?: Json | null
+          projected_revenue_increase?: number | null
+          roadmap_data?: Json | null
+          status?: string | null
+          subscription_id?: string | null
+          updated_at?: string
+          web3_readiness_score?: number | null
+        }
+        Update: {
+          assigned_agents?: string[] | null
+          client_user_id?: string | null
+          company_name?: string | null
+          created_at?: string
+          current_stage?: string | null
+          id?: string
+          industry?: string
+          milestones?: Json | null
+          projected_revenue_increase?: number | null
+          roadmap_data?: Json | null
+          status?: string | null
+          subscription_id?: string | null
+          updated_at?: string
+          web3_readiness_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "industry_roadmaps_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketing_campaigns: {
         Row: {
           ai_generated_content: Json | null
@@ -960,6 +1019,69 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      nft_subscription_passes: {
+        Row: {
+          auto_renew: boolean | null
+          coinbase_url: string | null
+          contract_address: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          image_url: string | null
+          is_listed: boolean | null
+          list_price_eth: number | null
+          marketplace: string | null
+          metadata_uri: string | null
+          minted_at: string
+          opensea_url: string | null
+          owner_user_id: string | null
+          owner_wallet: string
+          rarible_url: string | null
+          tier: string
+          token_id: string
+        }
+        Insert: {
+          auto_renew?: boolean | null
+          coinbase_url?: string | null
+          contract_address: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_listed?: boolean | null
+          list_price_eth?: number | null
+          marketplace?: string | null
+          metadata_uri?: string | null
+          minted_at?: string
+          opensea_url?: string | null
+          owner_user_id?: string | null
+          owner_wallet: string
+          rarible_url?: string | null
+          tier: string
+          token_id: string
+        }
+        Update: {
+          auto_renew?: boolean | null
+          coinbase_url?: string | null
+          contract_address?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_listed?: boolean | null
+          list_price_eth?: number | null
+          marketplace?: string | null
+          metadata_uri?: string | null
+          minted_at?: string
+          opensea_url?: string | null
+          owner_user_id?: string | null
+          owner_wallet?: string
+          rarible_url?: string | null
+          tier?: string
+          token_id?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -1344,6 +1466,59 @@ export type Database = {
           },
         ]
       }
+      service_requests: {
+        Row: {
+          ai_response: Json | null
+          assigned_agent: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          priority: string | null
+          request_details: Json | null
+          request_type: string
+          status: string | null
+          subscription_id: string | null
+          user_id: string | null
+          wallet_address: string | null
+        }
+        Insert: {
+          ai_response?: Json | null
+          assigned_agent?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          priority?: string | null
+          request_details?: Json | null
+          request_type: string
+          status?: string | null
+          subscription_id?: string | null
+          user_id?: string | null
+          wallet_address?: string | null
+        }
+        Update: {
+          ai_response?: Json | null
+          assigned_agent?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          priority?: string | null
+          request_details?: Json | null
+          request_type?: string
+          status?: string | null
+          subscription_id?: string | null
+          user_id?: string | null
+          wallet_address?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_requests_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staking_pools: {
         Row: {
           apy_percent: number
@@ -1477,6 +1652,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subscriptions: {
+        Row: {
+          billing_cycle: string | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          nft_contract_address: string | null
+          nft_token_id: string | null
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          tier: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          billing_cycle?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          nft_contract_address?: string | null
+          nft_token_id?: string | null
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tier: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          billing_cycle?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          nft_contract_address?: string | null
+          nft_token_id?: string | null
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tier?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       sync_jobs: {
         Row: {
