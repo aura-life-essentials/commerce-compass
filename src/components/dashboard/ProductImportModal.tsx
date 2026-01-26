@@ -63,7 +63,7 @@ interface ProductImportModalProps {
 }
 
 const CATEGORIES = [
-  { id: "", name: "All Categories" },
+  { id: "all", name: "All Categories" },
   { id: "1", name: "Fashion & Apparel" },
   { id: "2", name: "Electronics" },
   { id: "3", name: "Home & Garden" },
@@ -77,7 +77,7 @@ export const ProductImportModal = ({ open, onOpenChange }: ProductImportModalPro
   const [products, setProducts] = useState<CJProduct[]>([]);
   const [stores, setStores] = useState<Store[]>([]);
   const [selectedStore, setSelectedStore] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [importingProducts, setImportingProducts] = useState<Set<string>>(new Set());
@@ -121,7 +121,7 @@ export const ProductImportModal = ({ open, onOpenChange }: ProductImportModalPro
       const { data, error } = await supabase.functions.invoke("cj-dropshipping", {
         body: {
           action: "list_products",
-          categoryId: selectedCategory || undefined,
+          categoryId: selectedCategory === "all" ? undefined : selectedCategory,
           pageNum: currentPage,
           pageSize,
         },
