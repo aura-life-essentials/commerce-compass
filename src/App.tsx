@@ -16,6 +16,7 @@ import Metaverse from "./pages/Metaverse";
 import Pricing from "./pages/Pricing";
 import Landing from "./pages/Landing";
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
+import CasinoLaunch from "./pages/CasinoLaunch";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -59,6 +60,9 @@ const App = () => (
             {/* Public pricing page */}
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/subscription-success" element={<SubscriptionSuccess />} />
+            
+            {/* Casino Launch page */}
+            <Route path="/casino" element={<CasinoLaunch />} />
             
             {/* Auth route */}
             <Route path="/auth" element={<Auth />} />
