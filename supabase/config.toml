@@ -2,3 +2,21 @@ project_id = "rzjkcdtzlhkivnxsrwvc"
 
 [functions.cj-dropshipping]
 verify_jwt = false
+
+[functions.autonomous-brain]
+verify_jwt = false
+
+[functions.viral-scraper]
+verify_jwt = false
+
+[functions.content-generator]
+verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.traffic-webhook]
+verify_jwt = false
+
+[functions.global-expander]
+verify_jwt = false

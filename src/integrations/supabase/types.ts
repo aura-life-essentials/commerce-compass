@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_brains: {
+        Row: {
+          agent_name: string
+          agent_type: string
+          created_at: string
+          current_state: Json | null
+          decision_history: Json | null
+          id: string
+          is_active: boolean | null
+          last_decision_at: string | null
+          learning_data: Json | null
+          performance_score: number | null
+          updated_at: string
+        }
+        Insert: {
+          agent_name: string
+          agent_type: string
+          created_at?: string
+          current_state?: Json | null
+          decision_history?: Json | null
+          id?: string
+          is_active?: boolean | null
+          last_decision_at?: string | null
+          learning_data?: Json | null
+          performance_score?: number | null
+          updated_at?: string
+        }
+        Update: {
+          agent_name?: string
+          agent_type?: string
+          created_at?: string
+          current_state?: Json | null
+          decision_history?: Json | null
+          id?: string
+          is_active?: boolean | null
+          last_decision_at?: string | null
+          learning_data?: Json | null
+          performance_score?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       agent_logs: {
         Row: {
           action: string
@@ -61,6 +103,104 @@ export type Database = {
           },
         ]
       }
+      ai_decisions: {
+        Row: {
+          agent_brain_id: string | null
+          confidence_score: number | null
+          created_at: string
+          decision_type: string
+          executed: boolean | null
+          execution_result: Json | null
+          id: string
+          input_data: Json | null
+          output_action: Json | null
+          reasoning: string | null
+          revenue_impact: number | null
+        }
+        Insert: {
+          agent_brain_id?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          decision_type: string
+          executed?: boolean | null
+          execution_result?: Json | null
+          id?: string
+          input_data?: Json | null
+          output_action?: Json | null
+          reasoning?: string | null
+          revenue_impact?: number | null
+        }
+        Update: {
+          agent_brain_id?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          decision_type?: string
+          executed?: boolean | null
+          execution_result?: Json | null
+          id?: string
+          input_data?: Json | null
+          output_action?: Json | null
+          reasoning?: string | null
+          revenue_impact?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_decisions_agent_brain_id_fkey"
+            columns: ["agent_brain_id"]
+            isOneToOne: false
+            referencedRelation: "agent_brains"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      global_markets: {
+        Row: {
+          country_code: string
+          country_name: string
+          created_at: string
+          currency: string
+          current_revenue: number | null
+          id: string
+          is_active: boolean | null
+          language: string
+          last_analyzed_at: string | null
+          market_score: number | null
+          potential_revenue: number | null
+          region: string
+          stores_count: number | null
+        }
+        Insert: {
+          country_code: string
+          country_name: string
+          created_at?: string
+          currency: string
+          current_revenue?: number | null
+          id?: string
+          is_active?: boolean | null
+          language: string
+          last_analyzed_at?: string | null
+          market_score?: number | null
+          potential_revenue?: number | null
+          region: string
+          stores_count?: number | null
+        }
+        Update: {
+          country_code?: string
+          country_name?: string
+          created_at?: string
+          currency?: string
+          current_revenue?: number | null
+          id?: string
+          is_active?: boolean | null
+          language?: string
+          last_analyzed_at?: string | null
+          market_score?: number | null
+          potential_revenue?: number | null
+          region?: string
+          stores_count?: number | null
+        }
+        Relationships: []
+      }
       governance_events: {
         Row: {
           category: string
@@ -96,6 +236,74 @@ export type Database = {
           severity?: string | null
         }
         Relationships: []
+      }
+      marketing_campaigns: {
+        Row: {
+          ai_generated_content: Json | null
+          budget: number | null
+          campaign_name: string
+          channel: string
+          created_at: string
+          id: string
+          performance_metrics: Json | null
+          revenue_generated: number | null
+          roi_percentage: number | null
+          spent: number | null
+          status: string | null
+          store_id: string | null
+          target_countries: string[] | null
+          thumbnail_url: string | null
+          updated_at: string
+          video_script: string | null
+          voiceover_url: string | null
+        }
+        Insert: {
+          ai_generated_content?: Json | null
+          budget?: number | null
+          campaign_name: string
+          channel: string
+          created_at?: string
+          id?: string
+          performance_metrics?: Json | null
+          revenue_generated?: number | null
+          roi_percentage?: number | null
+          spent?: number | null
+          status?: string | null
+          store_id?: string | null
+          target_countries?: string[] | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          video_script?: string | null
+          voiceover_url?: string | null
+        }
+        Update: {
+          ai_generated_content?: Json | null
+          budget?: number | null
+          campaign_name?: string
+          channel?: string
+          created_at?: string
+          id?: string
+          performance_metrics?: Json | null
+          revenue_generated?: number | null
+          roi_percentage?: number | null
+          spent?: number | null
+          status?: string | null
+          store_id?: string | null
+          target_countries?: string[] | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          video_script?: string | null
+          voiceover_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_campaigns_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -284,6 +492,59 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string | null
+          customer_country: string | null
+          customer_email: string | null
+          id: string
+          metadata: Json | null
+          product_ids: string[] | null
+          status: string | null
+          store_id: string | null
+          stripe_customer_id: string | null
+          stripe_payment_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string | null
+          customer_country?: string | null
+          customer_email?: string | null
+          id?: string
+          metadata?: Json | null
+          product_ids?: string[] | null
+          status?: string | null
+          store_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_payment_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string | null
+          customer_country?: string | null
+          customer_email?: string | null
+          id?: string
+          metadata?: Json | null
+          product_ids?: string[] | null
+          status?: string | null
+          store_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_payment_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stripe_transactions_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sync_jobs: {
         Row: {
           completed_at: string | null
@@ -333,6 +594,104 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      traffic_webhooks: {
+        Row: {
+          country: string | null
+          created_at: string
+          device: string | null
+          id: string
+          processed: boolean | null
+          revenue: number | null
+          source: string
+          store_id: string | null
+          utm_data: Json | null
+          webhook_type: string
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          device?: string | null
+          id?: string
+          processed?: boolean | null
+          revenue?: number | null
+          source: string
+          store_id?: string | null
+          utm_data?: Json | null
+          webhook_type: string
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          device?: string | null
+          id?: string
+          processed?: boolean | null
+          revenue?: number | null
+          source?: string
+          store_id?: string | null
+          utm_data?: Json | null
+          webhook_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "traffic_webhooks_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      viral_content: {
+        Row: {
+          analyzed_at: string | null
+          audio_trends: Json | null
+          comments: number | null
+          content_type: string
+          created_at: string
+          engagement_score: number | null
+          extracted_hooks: Json | null
+          hashtags: string[] | null
+          id: string
+          likes: number | null
+          platform: string
+          shares: number | null
+          source_url: string
+          views: number | null
+        }
+        Insert: {
+          analyzed_at?: string | null
+          audio_trends?: Json | null
+          comments?: number | null
+          content_type: string
+          created_at?: string
+          engagement_score?: number | null
+          extracted_hooks?: Json | null
+          hashtags?: string[] | null
+          id?: string
+          likes?: number | null
+          platform: string
+          shares?: number | null
+          source_url: string
+          views?: number | null
+        }
+        Update: {
+          analyzed_at?: string | null
+          audio_trends?: Json | null
+          comments?: number | null
+          content_type?: string
+          created_at?: string
+          engagement_score?: number | null
+          extracted_hooks?: Json | null
+          hashtags?: string[] | null
+          id?: string
+          likes?: number | null
+          platform?: string
+          shares?: number | null
+          source_url?: string
+          views?: number | null
+        }
+        Relationships: []
       }
     }
     Views: {
