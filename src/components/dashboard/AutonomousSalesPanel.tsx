@@ -9,12 +9,15 @@ import {
   Power,
   Loader2,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Plus,
+  ShoppingCart
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { ProductImportModal } from "./ProductImportModal";
 
 interface SalesChannel {
   id: string;
@@ -27,6 +30,7 @@ interface SalesChannel {
 export const AutonomousSalesPanel = () => {
   const [isAutoPilot, setIsAutoPilot] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   const salesChannels: SalesChannel[] = [
     { id: "1", name: "Luxe Fashion", status: "connected", revenue: 12450, products: 234 },
@@ -118,20 +122,31 @@ export const AutonomousSalesPanel = () => {
       <div className="space-y-3 mb-6">
         <div className="flex items-center justify-between">
           <h4 className="text-sm font-medium">Sales Channels</h4>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleSyncAll}
-            disabled={isSyncing}
-            className="gap-2"
-          >
-            {isSyncing ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Settings className="w-4 h-4" />
-            )}
-            Sync All
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setIsImportModalOpen(true)}
+              className="gap-2 border-primary/50 text-primary hover:bg-primary/10"
+            >
+              <Plus className="w-4 h-4" />
+              Import Products
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleSyncAll}
+              disabled={isSyncing}
+              className="gap-2"
+            >
+              {isSyncing ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Settings className="w-4 h-4" />
+              )}
+              Sync All
+            </Button>
+          </div>
         </div>
         
         {salesChannels.map((channel) => (
@@ -186,6 +201,12 @@ export const AutonomousSalesPanel = () => {
           All products automatically sourced from CJ Dropshipping with 67% profit margin applied to customer pricing.
         </p>
       </div>
+
+      {/* Product Import Modal */}
+      <ProductImportModal 
+        open={isImportModalOpen} 
+        onOpenChange={setIsImportModalOpen} 
+      />
     </div>
   );
 };

@@ -97,6 +97,39 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          agent_name: string | null
+          created_at: string
+          id: string
+          message: string
+          metadata: Json | null
+          read: boolean | null
+          title: string
+          type: string
+        }
+        Insert: {
+          agent_name?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          metadata?: Json | null
+          read?: boolean | null
+          title: string
+          type: string
+        }
+        Update: {
+          agent_name?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          metadata?: Json | null
+          read?: boolean | null
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category: string | null
