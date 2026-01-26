@@ -10,6 +10,8 @@ import Store from "./pages/Store";
 import ProductDetail from "./pages/ProductDetail";
 import Auth from "./pages/Auth";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
+import OrderHistory from "./pages/OrderHistory";
+import Wishlist from "./pages/Wishlist";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +37,8 @@ const App = () => (
             {/* Public store routes */}
             <Route path="/store" element={<Store />} />
             <Route path="/product/:productId" element={<ProductDetail />} />
+            <Route path="/orders" element={<OrderHistory />} />
+            <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/checkout-success" element={<CheckoutSuccess />} />
             
             {/* Auth route */}
