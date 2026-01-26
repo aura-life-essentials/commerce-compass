@@ -1,15 +1,42 @@
 import { Shield, CheckCircle, AlertTriangle, Lock, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useGovernanceEvents } from "@/hooks/useGovernance";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const checks = [
+const defaultChecks = [
   { label: "No Deceptive Advertising", status: "pass", icon: CheckCircle },
   { label: "GDPR Compliance", status: "pass", icon: CheckCircle },
   { label: "Store Isolation Verified", status: "pass", icon: Lock },
   { label: "PII Protection Active", status: "pass", icon: Eye },
-  { label: "Rate Limits Healthy", status: "warning", icon: AlertTriangle },
 ];
 
 export const GovernancePanel = () => {
+  const { data: events, isLoading } = useGovernanceEvents(10);
+
+  // Derive checks from governance events
+  const checks = events?.length 
+    ? events.slice(0, 5).map(event => ({
+        label: event.description.slice(0, 30) + (event.description.length > 30 ? "..." : ""),
+        status: event.resolved ? "pass" : event.severity === "warning" ? "warning" : event.severity === "error" ? "fail" : "pass",
+        icon: event.resolved ? CheckCircle : event.severity === "warning" ? AlertTriangle : CheckCircle,
+      }))
+    : defaultChecks;
+
+  const allPassed = checks.every(c => c.status === "pass");
+
+  if (isLoading) {
+    return (
+      <div className="glass rounded-xl p-6">
+        <Skeleton className="h-6 w-48 mb-6" />
+        <div className="space-y-3">
+          {Array(5).fill(0).map((_, i) => (
+            <Skeleton key={i} className="h-12 rounded-lg" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="glass rounded-xl p-6">
       <div className="flex items-center gap-2 mb-6">
@@ -18,9 +45,9 @@ export const GovernancePanel = () => {
       </div>
 
       <div className="space-y-3">
-        {checks.map((check) => (
+        {checks.map((check, idx) => (
           <div
-            key={check.label}
+            key={idx}
             className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
           >
             <check.icon
@@ -46,9 +73,17 @@ export const GovernancePanel = () => {
         ))}
       </div>
 
-      <div className="mt-6 p-4 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
-        <p className="text-sm text-emerald-400 font-medium">
-          All ethical constraints enforced
+      <div className={cn(
+        "mt-6 p-4 rounded-lg border",
+        allPassed 
+          ? "bg-emerald-500/5 border-emerald-500/20" 
+          : "bg-amber-500/5 border-amber-500/20"
+      )}>
+        <p className={cn(
+          "text-sm font-medium",
+          allPassed ? "text-emerald-400" : "text-amber-400"
+        )}>
+          {allPassed ? "All ethical constraints enforced" : "Some items need review"}
         </p>
         <p className="text-xs text-muted-foreground mt-1">
           Every action is explainable, reversible, and logged.
