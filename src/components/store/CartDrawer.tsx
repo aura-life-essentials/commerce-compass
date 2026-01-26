@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ShoppingCart, Minus, Plus, Trash2, Gift, Zap, CreditCard } from "lucide-react";
+import { X, ShoppingCart, Minus, Plus, Trash2, Gift, Zap, CreditCard, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -12,36 +13,56 @@ interface CartDrawerProps {
   onClose: () => void;
   cart: CartItem[];
   cartTotal: number;
+  onUpdateQuantity?: (productId: string, quantity: number) => void;
+  onRemoveItem?: (productId: string) => void;
 }
 
-export const CartDrawer = ({ open, onClose, cart, cartTotal }: CartDrawerProps) => {
+export const CartDrawer = ({ 
+  open, 
+  onClose, 
+  cart, 
+  cartTotal,
+  onUpdateQuantity,
+  onRemoveItem,
+}: CartDrawerProps) => {
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const shipping = cartTotal > 25 ? 0 : 4.99;
   const orderTotal = cartTotal + shipping;
   const savings = cartTotal * 0.15; // Simulated savings
 
   const handleCheckout = async () => {
+    if (cart.length === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
+
+    setIsCheckingOut(true);
+    
     try {
-      toast.loading("Creating checkout session...");
-      
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { 
           items: cart.map(item => ({
             productId: item.id,
             quantity: item.quantity,
+            title: item.title,
+            price: item.price,
           })),
         },
       });
 
-      toast.dismiss();
-      
       if (error) throw error;
+      
       if (data?.url) {
         window.open(data.url, '_blank');
         toast.success("Checkout opened in new tab!");
+      } else {
+        throw new Error("No checkout URL returned");
       }
     } catch (error: any) {
-      toast.dismiss();
-      toast.error(error.message || "Failed to create checkout");
+      console.error("[CART] Checkout error:", error);
+      toast.error(error.message || "Failed to create checkout. Please try again.");
+    } finally {
+      setIsCheckingOut(false);
     }
   };
 
@@ -81,7 +102,7 @@ export const CartDrawer = ({ open, onClose, cart, cartTotal }: CartDrawerProps) 
             </div>
 
             {/* Free Shipping Progress */}
-            {cartTotal < 25 && (
+            {cartTotal < 25 && cartTotal > 0 && (
               <div className="p-4 bg-primary/10 border-b border-primary/20">
                 <div className="flex items-center gap-2 text-sm text-primary mb-2">
                   <Gift className="w-4 h-4" />
@@ -90,7 +111,7 @@ export const CartDrawer = ({ open, onClose, cart, cartTotal }: CartDrawerProps) 
                 <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
-                    animate={{ width: `${(cartTotal / 25) * 100}%` }}
+                    animate={{ width: `${Math.min((cartTotal / 25) * 100, 100)}%` }}
                     className="h-full bg-gradient-to-r from-primary to-cyan-500"
                   />
                 </div>
@@ -134,15 +155,30 @@ export const CartDrawer = ({ open, onClose, cart, cartTotal }: CartDrawerProps) 
                       
                       <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center gap-2">
-                          <Button size="icon" variant="outline" className="w-7 h-7 rounded-full border-slate-600">
+                          <Button 
+                            size="icon" 
+                            variant="outline" 
+                            className="w-7 h-7 rounded-full border-slate-600"
+                            onClick={() => onUpdateQuantity?.(item.id, item.quantity - 1)}
+                          >
                             <Minus className="w-3 h-3" />
                           </Button>
                           <span className="text-white font-medium w-6 text-center">{item.quantity}</span>
-                          <Button size="icon" variant="outline" className="w-7 h-7 rounded-full border-slate-600">
+                          <Button 
+                            size="icon" 
+                            variant="outline" 
+                            className="w-7 h-7 rounded-full border-slate-600"
+                            onClick={() => onUpdateQuantity?.(item.id, item.quantity + 1)}
+                          >
                             <Plus className="w-3 h-3" />
                           </Button>
                         </div>
-                        <Button size="icon" variant="ghost" className="w-7 h-7 text-red-400 hover:text-red-300 hover:bg-red-500/10">
+                        <Button 
+                          size="icon" 
+                          variant="ghost" 
+                          className="w-7 h-7 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          onClick={() => onRemoveItem?.(item.id)}
+                        >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -193,10 +229,20 @@ export const CartDrawer = ({ open, onClose, cart, cartTotal }: CartDrawerProps) 
                 {/* Checkout Button */}
                 <Button
                   onClick={handleCheckout}
-                  className="w-full bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/80 hover:to-cyan-500/80 text-white font-semibold py-6 text-lg"
+                  disabled={isCheckingOut}
+                  className="w-full bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/80 hover:to-cyan-500/80 text-white font-semibold py-6 text-lg disabled:opacity-50"
                 >
-                  <CreditCard className="w-5 h-5 mr-2" />
-                  Secure Checkout
+                  {isCheckingOut ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Creating Checkout...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="w-5 h-5 mr-2" />
+                      Secure Checkout
+                    </>
+                  )}
                 </Button>
 
                 <div className="flex items-center justify-center gap-4 text-xs text-slate-500">

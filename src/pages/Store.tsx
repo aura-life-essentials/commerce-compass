@@ -26,7 +26,7 @@ const Store = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [upsellProduct, setUpsellProduct] = useState<any>(null);
-  const { cart, addToCart, cartTotal, cartCount } = useCart();
+  const { cart, addToCart, updateQuantity, removeFromCart, cartTotal, cartCount } = useCart();
 
   const categories = products 
     ? [...new Set(products.map(p => p.category).filter(Boolean))]
@@ -261,6 +261,8 @@ const Store = () => {
         onClose={() => setCartOpen(false)} 
         cart={cart}
         cartTotal={cartTotal}
+        onUpdateQuantity={updateQuantity}
+        onRemoveItem={removeFromCart}
       />
 
       {/* Upsell Modal */}

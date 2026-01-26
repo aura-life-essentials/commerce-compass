@@ -7,8 +7,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Stripe product/price mappings
-const PRODUCT_PRICES: Record<string, string> = {
+// Map product IDs to Stripe price IDs
+const PRODUCT_PRICE_MAP: Record<string, string> = {
+  // Existing mapped products
   "wireless-earbuds-pro": "price_1StjbfFjshJghowTMCSHB90t",
   "portable-neck-fan-360": "price_1Stjc8FjshJghowTRJA47tX1",
   "led-galaxy-projector": "price_1StjcDFjshJghowTuoy0LUGk",
@@ -16,28 +17,85 @@ const PRODUCT_PRICES: Record<string, string> = {
   "mini-projector-hd": "price_1StjcGFjshJghowTFMPHk6rD",
 };
 
+interface CartItem {
+  productId: string;
+  quantity: number;
+  title?: string;
+  price?: number;
+}
+
+interface CheckoutRequest {
+  items?: CartItem[];
+  productId?: string;
+  quantity?: number;
+  customerEmail?: string;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { productId, quantity = 1, customerEmail } = await req.json();
-    console.log("[CREATE-CHECKOUT] Request received:", { productId, quantity, customerEmail });
+    const body: CheckoutRequest = await req.json();
+    console.log("[CREATE-CHECKOUT] Request received:", JSON.stringify(body));
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-    // Get price ID from product mapping or use provided price ID
-    const priceId = PRODUCT_PRICES[productId] || productId;
-    console.log("[CREATE-CHECKOUT] Using price ID:", priceId);
+    // Handle both single product and cart checkout
+    let lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
 
-    // Check for existing customer
+    if (body.items && body.items.length > 0) {
+      // Multi-item cart checkout
+      console.log("[CREATE-CHECKOUT] Processing cart with", body.items.length, "items");
+      
+      for (const item of body.items) {
+        const priceId = PRODUCT_PRICE_MAP[item.productId];
+        
+        if (priceId) {
+          // Use existing Stripe price
+          lineItems.push({
+            price: priceId,
+            quantity: item.quantity,
+          });
+        } else if (item.price && item.title) {
+          // Create price_data for products not in Stripe
+          lineItems.push({
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: item.title,
+              },
+              unit_amount: Math.round(item.price * 100), // Convert to cents
+            },
+            quantity: item.quantity,
+          });
+        } else {
+          console.warn(`[CREATE-CHECKOUT] Skipping item - no price mapping and no price data:`, item.productId);
+        }
+      }
+    } else if (body.productId) {
+      // Single product checkout (backward compatibility)
+      const priceId = PRODUCT_PRICE_MAP[body.productId] || body.productId;
+      lineItems.push({
+        price: priceId,
+        quantity: body.quantity || 1,
+      });
+    }
+
+    if (lineItems.length === 0) {
+      throw new Error("No valid items to checkout");
+    }
+
+    console.log("[CREATE-CHECKOUT] Line items:", JSON.stringify(lineItems));
+
+    // Check for existing Stripe customer
     let customerId: string | undefined;
-    if (customerEmail) {
-      const customers = await stripe.customers.list({ email: customerEmail, limit: 1 });
+    if (body.customerEmail) {
+      const customers = await stripe.customers.list({ email: body.customerEmail, limit: 1 });
       if (customers.data.length > 0) {
         customerId = customers.data[0].id;
         console.log("[CREATE-CHECKOUT] Found existing customer:", customerId);
@@ -48,19 +106,17 @@ serve(async (req) => {
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      customer_email: customerId ? undefined : customerEmail,
-      line_items: [
-        {
-          price: priceId,
-          quantity: quantity,
-        },
-      ],
+      customer_email: customerId ? undefined : body.customerEmail,
+      line_items: lineItems,
       mode: "payment",
-      success_url: `${origin}/?payment=success`,
-      cancel_url: `${origin}/?payment=canceled`,
+      success_url: `${origin}/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/store?checkout=canceled`,
+      shipping_address_collection: {
+        allowed_countries: ['US', 'CA', 'GB', 'AU', 'DE', 'FR', 'JP'],
+      },
       metadata: {
-        source: "ceo-brain-dashboard",
-        productId: productId,
+        source: "trendvault-store",
+        itemCount: String(lineItems.length),
       },
     });
 
@@ -75,9 +131,13 @@ serve(async (req) => {
     await supabase.from("agent_logs").insert({
       agent_name: "Stripe Checkout",
       agent_role: "Payment Processing",
-      action: `Created checkout session for ${productId}`,
+      action: `Created checkout session with ${lineItems.length} items`,
       status: "completed",
-      details: { sessionId: session.id, priceId, quantity },
+      details: { 
+        sessionId: session.id, 
+        itemCount: lineItems.length,
+        totalItems: body.items?.reduce((sum, item) => sum + item.quantity, 0) || body.quantity || 1,
+      },
     });
 
     return new Response(JSON.stringify({ url: session.url, sessionId: session.id }), {
