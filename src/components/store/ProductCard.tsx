@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ShoppingCart, Heart, Eye, Star, Zap, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,12 +41,13 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
   const isLowStock = (product.inventory_quantity || 0) < 50;
 
   return (
-    <motion.div
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-      whileHover={{ y: -8 }}
-      transition={{ duration: 0.3 }}
-    >
+    <Link to={`/product/${product.id}`}>
+      <motion.div
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        whileHover={{ y: -8 }}
+        transition={{ duration: 0.3 }}
+      >
       <Card className="group relative overflow-hidden bg-gradient-to-br from-slate-900 to-slate-950 border-slate-800 hover:border-primary/30 transition-all duration-500">
         {/* Glow Effect on Hover */}
         <motion.div
@@ -110,6 +112,7 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
               size="icon"
               variant="secondary"
               className="w-9 h-9 rounded-full bg-slate-800/80 text-white backdrop-blur-sm hover:bg-primary/20"
+              onClick={(e) => e.stopPropagation()}
             >
               <Eye className="w-4 h-4" />
             </Button>
@@ -172,7 +175,11 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             animate={{ opacity: isHovered ? 1 : 0.8, y: isHovered ? 0 : 5 }}
           >
             <Button
-              onClick={onAddToCart}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onAddToCart();
+              }}
               className="w-full bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/80 hover:to-cyan-500/80 text-white font-medium"
             >
               <ShoppingCart className="w-4 h-4 mr-2" />
@@ -182,5 +189,6 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
         </div>
       </Card>
     </motion.div>
+  </Link>
   );
 };
