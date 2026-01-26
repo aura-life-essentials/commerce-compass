@@ -10,6 +10,7 @@ import { ProfitReaper } from "@/components/dashboard/ProfitReaper";
 import { OmegaSwarm } from "@/components/dashboard/OmegaSwarm";
 import { AutonomousSalesPanel } from "@/components/dashboard/AutonomousSalesPanel";
 import { AutonomousEngine } from "@/components/dashboard/AutonomousEngine";
+// CEODashboard temporarily disabled for debugging
 import { useStores, useCreateStore } from "@/hooks/useStores";
 import { useAgentLogs, useCreateAgentLog } from "@/hooks/useAgentLogs";
 import { useAggregatedRevenue, useCreateRevenueMetric } from "@/hooks/useRevenueMetrics";
