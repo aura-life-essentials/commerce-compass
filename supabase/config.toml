@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.global-expander]
 verify_jwt = false
+
+[functions.ceo-brain]
+verify_jwt = false
