@@ -18,6 +18,7 @@ import Landing from "./pages/Landing";
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import CasinoLaunch from "./pages/CasinoLaunch";
 import IndustryRoadmaps from "./pages/IndustryRoadmaps";
+import SubscriptionManagement from "./pages/SubscriptionManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -67,6 +68,9 @@ const App = () => (
             
             {/* Industry Roadmaps page */}
             <Route path="/industry-roadmaps" element={<IndustryRoadmaps />} />
+            
+            {/* Subscription Management */}
+            <Route path="/subscription" element={<SubscriptionManagement />} />
             
             {/* Auth route */}
             <Route path="/auth" element={<Auth />} />
