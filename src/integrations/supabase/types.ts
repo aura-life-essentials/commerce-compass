@@ -308,6 +308,78 @@ export type Database = {
         }
         Relationships: []
       }
+      crypto_transactions: {
+        Row: {
+          amount: number
+          block_number: number | null
+          chain: string | null
+          confirmed_at: string | null
+          created_at: string
+          from_wallet: string
+          gas_fee: number | null
+          id: string
+          related_order_id: string | null
+          related_project_id: string | null
+          status: string | null
+          to_wallet: string | null
+          token: string
+          tx_hash: string | null
+          tx_type: string
+          usd_value: number | null
+        }
+        Insert: {
+          amount: number
+          block_number?: number | null
+          chain?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          from_wallet: string
+          gas_fee?: number | null
+          id?: string
+          related_order_id?: string | null
+          related_project_id?: string | null
+          status?: string | null
+          to_wallet?: string | null
+          token?: string
+          tx_hash?: string | null
+          tx_type: string
+          usd_value?: number | null
+        }
+        Update: {
+          amount?: number
+          block_number?: number | null
+          chain?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          from_wallet?: string
+          gas_fee?: number | null
+          id?: string
+          related_order_id?: string | null
+          related_project_id?: string | null
+          status?: string | null
+          to_wallet?: string | null
+          token?: string
+          tx_hash?: string | null
+          tx_type?: string
+          usd_value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crypto_transactions_related_order_id_fkey"
+            columns: ["related_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crypto_transactions_related_project_id_fkey"
+            columns: ["related_project_id"]
+            isOneToOne: false
+            referencedRelation: "dao_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_segments: {
         Row: {
           automation_rules: Json | null
@@ -349,6 +421,200 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      dao_projects: {
+        Row: {
+          banner_image: string | null
+          created_at: string
+          creator_user_id: string | null
+          creator_wallet: string
+          current_funding_eth: number
+          description: string | null
+          equity_pool_percent: number
+          funding_deadline: string | null
+          funding_goal_eth: number
+          id: string
+          launched_at: string | null
+          max_contribution_eth: number | null
+          min_contribution_eth: number | null
+          project_name: string
+          project_type: string
+          proposal_id: string | null
+          roadmap: Json | null
+          status: string | null
+          team: Json | null
+          total_backers: number | null
+        }
+        Insert: {
+          banner_image?: string | null
+          created_at?: string
+          creator_user_id?: string | null
+          creator_wallet: string
+          current_funding_eth?: number
+          description?: string | null
+          equity_pool_percent?: number
+          funding_deadline?: string | null
+          funding_goal_eth: number
+          id?: string
+          launched_at?: string | null
+          max_contribution_eth?: number | null
+          min_contribution_eth?: number | null
+          project_name: string
+          project_type: string
+          proposal_id?: string | null
+          roadmap?: Json | null
+          status?: string | null
+          team?: Json | null
+          total_backers?: number | null
+        }
+        Update: {
+          banner_image?: string | null
+          created_at?: string
+          creator_user_id?: string | null
+          creator_wallet?: string
+          current_funding_eth?: number
+          description?: string | null
+          equity_pool_percent?: number
+          funding_deadline?: string | null
+          funding_goal_eth?: number
+          id?: string
+          launched_at?: string | null
+          max_contribution_eth?: number | null
+          min_contribution_eth?: number | null
+          project_name?: string
+          project_type?: string
+          proposal_id?: string | null
+          roadmap?: Json | null
+          status?: string | null
+          team?: Json | null
+          total_backers?: number | null
+        }
+        Relationships: []
+      }
+      dao_proposals: {
+        Row: {
+          created_at: string
+          description: string
+          executed_at: string | null
+          execution_data: Json | null
+          id: string
+          proposal_type: string
+          proposer_user_id: string | null
+          proposer_wallet: string
+          quorum_required: number | null
+          status: string | null
+          title: string
+          votes_against: number | null
+          votes_for: number | null
+          voting_ends_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          executed_at?: string | null
+          execution_data?: Json | null
+          id?: string
+          proposal_type: string
+          proposer_user_id?: string | null
+          proposer_wallet: string
+          quorum_required?: number | null
+          status?: string | null
+          title: string
+          votes_against?: number | null
+          votes_for?: number | null
+          voting_ends_at: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          executed_at?: string | null
+          execution_data?: Json | null
+          id?: string
+          proposal_type?: string
+          proposer_user_id?: string | null
+          proposer_wallet?: string
+          quorum_required?: number | null
+          status?: string | null
+          title?: string
+          votes_against?: number | null
+          votes_for?: number | null
+          voting_ends_at?: string
+        }
+        Relationships: []
+      }
+      dao_treasury: {
+        Row: {
+          eth_balance: number
+          id: string
+          revenue_share_percent: number | null
+          token_balance: number
+          total_value_usd: number
+          treasury_name: string
+          updated_at: string
+          usdc_balance: number
+        }
+        Insert: {
+          eth_balance?: number
+          id?: string
+          revenue_share_percent?: number | null
+          token_balance?: number
+          total_value_usd?: number
+          treasury_name?: string
+          updated_at?: string
+          usdc_balance?: number
+        }
+        Update: {
+          eth_balance?: number
+          id?: string
+          revenue_share_percent?: number | null
+          token_balance?: number
+          total_value_usd?: number
+          treasury_name?: string
+          updated_at?: string
+          usdc_balance?: number
+        }
+        Relationships: []
+      }
+      dao_votes: {
+        Row: {
+          id: string
+          proposal_id: string | null
+          tx_hash: string | null
+          vote_direction: string
+          vote_power: number
+          voted_at: string
+          voter_user_id: string | null
+          voter_wallet: string
+        }
+        Insert: {
+          id?: string
+          proposal_id?: string | null
+          tx_hash?: string | null
+          vote_direction: string
+          vote_power: number
+          voted_at?: string
+          voter_user_id?: string | null
+          voter_wallet: string
+        }
+        Update: {
+          id?: string
+          proposal_id?: string | null
+          tx_hash?: string | null
+          vote_direction?: string
+          vote_power?: number
+          voted_at?: string
+          voter_user_id?: string | null
+          voter_wallet?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dao_votes_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "dao_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       global_markets: {
         Row: {
@@ -498,6 +764,199 @@ export type Database = {
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      metaverse_spaces: {
+        Row: {
+          access_level: string | null
+          created_at: string
+          current_visitors: number | null
+          decoration_data: Json | null
+          id: string
+          is_live: boolean | null
+          max_capacity: number | null
+          owner_user_id: string | null
+          owner_wallet: string | null
+          position_data: Json | null
+          required_nft_tier: string | null
+          space_name: string
+          space_type: string
+        }
+        Insert: {
+          access_level?: string | null
+          created_at?: string
+          current_visitors?: number | null
+          decoration_data?: Json | null
+          id?: string
+          is_live?: boolean | null
+          max_capacity?: number | null
+          owner_user_id?: string | null
+          owner_wallet?: string | null
+          position_data?: Json | null
+          required_nft_tier?: string | null
+          space_name: string
+          space_type?: string
+        }
+        Update: {
+          access_level?: string | null
+          created_at?: string
+          current_visitors?: number | null
+          decoration_data?: Json | null
+          id?: string
+          is_live?: boolean | null
+          max_capacity?: number | null
+          owner_user_id?: string | null
+          owner_wallet?: string | null
+          position_data?: Json | null
+          required_nft_tier?: string | null
+          space_name?: string
+          space_type?: string
+        }
+        Relationships: []
+      }
+      metaverse_visitors: {
+        Row: {
+          avatar_url: string | null
+          display_name: string | null
+          id: string
+          is_speaking: boolean | null
+          joined_at: string
+          last_active_at: string
+          position: Json | null
+          space_id: string | null
+          visitor_user_id: string | null
+          visitor_wallet: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          display_name?: string | null
+          id?: string
+          is_speaking?: boolean | null
+          joined_at?: string
+          last_active_at?: string
+          position?: Json | null
+          space_id?: string | null
+          visitor_user_id?: string | null
+          visitor_wallet?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          display_name?: string | null
+          id?: string
+          is_speaking?: boolean | null
+          joined_at?: string
+          last_active_at?: string
+          position?: Json | null
+          space_id?: string | null
+          visitor_user_id?: string | null
+          visitor_wallet?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "metaverse_visitors_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "metaverse_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nft_memberships: {
+        Row: {
+          benefits: Json | null
+          contract_address: string
+          id: string
+          image_url: string | null
+          is_listed: boolean | null
+          list_price_eth: number | null
+          metadata_uri: string | null
+          minted_at: string
+          owner_user_id: string | null
+          owner_wallet: string
+          price_eth: number | null
+          royalty_percent: number | null
+          tier: string
+          token_id: string
+          total_royalties_earned: number | null
+        }
+        Insert: {
+          benefits?: Json | null
+          contract_address: string
+          id?: string
+          image_url?: string | null
+          is_listed?: boolean | null
+          list_price_eth?: number | null
+          metadata_uri?: string | null
+          minted_at?: string
+          owner_user_id?: string | null
+          owner_wallet: string
+          price_eth?: number | null
+          royalty_percent?: number | null
+          tier?: string
+          token_id: string
+          total_royalties_earned?: number | null
+        }
+        Update: {
+          benefits?: Json | null
+          contract_address?: string
+          id?: string
+          image_url?: string | null
+          is_listed?: boolean | null
+          list_price_eth?: number | null
+          metadata_uri?: string | null
+          minted_at?: string
+          owner_user_id?: string | null
+          owner_wallet?: string
+          price_eth?: number | null
+          royalty_percent?: number | null
+          tier?: string
+          token_id?: string
+          total_royalties_earned?: number | null
+        }
+        Relationships: []
+      }
+      nft_royalty_payments: {
+        Row: {
+          created_at: string
+          from_wallet: string
+          id: string
+          marketplace: string | null
+          nft_id: string | null
+          royalty_amount_eth: number
+          sale_price_eth: number
+          to_wallet: string
+          tx_hash: string | null
+        }
+        Insert: {
+          created_at?: string
+          from_wallet: string
+          id?: string
+          marketplace?: string | null
+          nft_id?: string | null
+          royalty_amount_eth: number
+          sale_price_eth: number
+          to_wallet: string
+          tx_hash?: string | null
+        }
+        Update: {
+          created_at?: string
+          from_wallet?: string
+          id?: string
+          marketplace?: string | null
+          nft_id?: string | null
+          royalty_amount_eth?: number
+          sale_price_eth?: number
+          to_wallet?: string
+          tx_hash?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nft_royalty_payments_nft_id_fkey"
+            columns: ["nft_id"]
+            isOneToOne: false
+            referencedRelation: "nft_memberships"
             referencedColumns: ["id"]
           },
         ]
@@ -791,6 +1250,53 @@ export type Database = {
         }
         Relationships: []
       }
+      project_contributions: {
+        Row: {
+          contributed_at: string
+          contribution_eth: number
+          contributor_user_id: string | null
+          contributor_wallet: string
+          equity_percent: number
+          id: string
+          is_active: boolean | null
+          project_id: string | null
+          rewards_claimed: number | null
+          tx_hash: string | null
+        }
+        Insert: {
+          contributed_at?: string
+          contribution_eth: number
+          contributor_user_id?: string | null
+          contributor_wallet: string
+          equity_percent: number
+          id?: string
+          is_active?: boolean | null
+          project_id?: string | null
+          rewards_claimed?: number | null
+          tx_hash?: string | null
+        }
+        Update: {
+          contributed_at?: string
+          contribution_eth?: number
+          contributor_user_id?: string | null
+          contributor_wallet?: string
+          equity_percent?: number
+          id?: string
+          is_active?: boolean | null
+          project_id?: string | null
+          rewards_claimed?: number | null
+          tx_hash?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_contributions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "dao_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       revenue_metrics: {
         Row: {
           avg_order_value: number | null
@@ -837,6 +1343,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      staking_pools: {
+        Row: {
+          apy_percent: number
+          created_at: string
+          id: string
+          is_active: boolean | null
+          lock_period_days: number | null
+          min_stake: number | null
+          pool_name: string
+          pool_type: string
+          total_rewards_distributed: number
+          total_staked: number
+        }
+        Insert: {
+          apy_percent?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          lock_period_days?: number | null
+          min_stake?: number | null
+          pool_name: string
+          pool_type?: string
+          total_rewards_distributed?: number
+          total_staked?: number
+        }
+        Update: {
+          apy_percent?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          lock_period_days?: number | null
+          min_stake?: number | null
+          pool_name?: string
+          pool_type?: string
+          total_rewards_distributed?: number
+          total_staked?: number
+        }
+        Relationships: []
       }
       stores: {
         Row: {
@@ -983,6 +1528,42 @@ export type Database = {
           },
         ]
       }
+      token_holdings: {
+        Row: {
+          governance_power: number
+          id: string
+          pending_rewards: number
+          staked_balance: number
+          token_balance: number
+          total_earned: number
+          updated_at: string
+          user_id: string | null
+          wallet_address: string
+        }
+        Insert: {
+          governance_power?: number
+          id?: string
+          pending_rewards?: number
+          staked_balance?: number
+          token_balance?: number
+          total_earned?: number
+          updated_at?: string
+          user_id?: string | null
+          wallet_address: string
+        }
+        Update: {
+          governance_power?: number
+          id?: string
+          pending_rewards?: number
+          staked_balance?: number
+          token_balance?: number
+          total_earned?: number
+          updated_at?: string
+          user_id?: string | null
+          wallet_address?: string
+        }
+        Relationships: []
+      }
       traffic_webhooks: {
         Row: {
           country: string | null
@@ -1051,6 +1632,56 @@ export type Database = {
         }
         Relationships: []
       }
+      user_stakes: {
+        Row: {
+          accumulated_rewards: number | null
+          id: string
+          is_active: boolean | null
+          last_claim_at: string | null
+          nft_boost_percent: number | null
+          pool_id: string | null
+          staked_amount: number
+          staked_at: string
+          unlock_at: string | null
+          user_id: string | null
+          wallet_address: string
+        }
+        Insert: {
+          accumulated_rewards?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_claim_at?: string | null
+          nft_boost_percent?: number | null
+          pool_id?: string | null
+          staked_amount: number
+          staked_at?: string
+          unlock_at?: string | null
+          user_id?: string | null
+          wallet_address: string
+        }
+        Update: {
+          accumulated_rewards?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_claim_at?: string | null
+          nft_boost_percent?: number | null
+          pool_id?: string | null
+          staked_amount?: number
+          staked_at?: string
+          unlock_at?: string | null
+          user_id?: string | null
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_stakes_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "staking_pools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       viral_content: {
         Row: {
           analyzed_at: string | null
@@ -1099,6 +1730,93 @@ export type Database = {
           shares?: number | null
           source_url?: string
           views?: number | null
+        }
+        Relationships: []
+      }
+      wallet_connections: {
+        Row: {
+          chain: string
+          connected_at: string
+          ens_name: string | null
+          id: string
+          is_primary: boolean | null
+          last_active_at: string | null
+          metadata: Json | null
+          user_id: string | null
+          wallet_address: string
+        }
+        Insert: {
+          chain?: string
+          connected_at?: string
+          ens_name?: string | null
+          id?: string
+          is_primary?: boolean | null
+          last_active_at?: string | null
+          metadata?: Json | null
+          user_id?: string | null
+          wallet_address: string
+        }
+        Update: {
+          chain?: string
+          connected_at?: string
+          ens_name?: string | null
+          id?: string
+          is_primary?: boolean | null
+          last_active_at?: string | null
+          metadata?: Json | null
+          user_id?: string | null
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      web3_revenue: {
+        Row: {
+          crypto_sales_eth: number | null
+          crypto_sales_usd: number | null
+          dao_fees_eth: number | null
+          dao_fees_usd: number | null
+          date: string
+          id: string
+          nft_royalties_eth: number | null
+          nft_royalties_usd: number | null
+          project_revenue_eth: number | null
+          project_revenue_usd: number | null
+          staking_fees_eth: number | null
+          staking_fees_usd: number | null
+          total_eth: number | null
+          total_usd: number | null
+        }
+        Insert: {
+          crypto_sales_eth?: number | null
+          crypto_sales_usd?: number | null
+          dao_fees_eth?: number | null
+          dao_fees_usd?: number | null
+          date: string
+          id?: string
+          nft_royalties_eth?: number | null
+          nft_royalties_usd?: number | null
+          project_revenue_eth?: number | null
+          project_revenue_usd?: number | null
+          staking_fees_eth?: number | null
+          staking_fees_usd?: number | null
+          total_eth?: number | null
+          total_usd?: number | null
+        }
+        Update: {
+          crypto_sales_eth?: number | null
+          crypto_sales_usd?: number | null
+          dao_fees_eth?: number | null
+          dao_fees_usd?: number | null
+          date?: string
+          id?: string
+          nft_royalties_eth?: number | null
+          nft_royalties_usd?: number | null
+          project_revenue_eth?: number | null
+          project_revenue_usd?: number | null
+          staking_fees_eth?: number | null
+          staking_fees_usd?: number | null
+          total_eth?: number | null
+          total_usd?: number | null
         }
         Relationships: []
       }
