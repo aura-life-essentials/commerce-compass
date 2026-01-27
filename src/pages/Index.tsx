@@ -51,7 +51,7 @@ const demoAgents = [
   { agent_name: "SEO Sentinel", agent_role: "Search Optimization", action: "Optimized meta tags" },
   { agent_name: "CX Guardian", agent_role: "Customer Experience", action: "Reviewed support tickets" },
   { agent_name: "Profit Reaper", agent_role: "Profit Optimization", action: "Applied 67% margins to products" },
-  { agent_name: "Omega Syncer", agent_role: "Store Synchronization", action: "Synced CJ Dropshipping catalog" },
+  { agent_name: "Omega Syncer", agent_role: "Store Synchronization", action: "Synced Aura Dropshipping catalog" },
 ];
 
 const Index = () => {
@@ -363,7 +363,7 @@ const Index = () => {
               <h3 className="font-semibold text-lg mb-4">Command Center</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { label: "Sync CJ Products", desc: "Import catalog", action: () => toast.info("Syncing CJ Dropshipping...") },
+                  { label: "Sync Aura Products", desc: "Import catalog", action: () => toast.info("Syncing Aura Dropshipping...") },
                   { label: "Deploy Reaper", desc: "Activate profit engine", action: () => toast.info("Profit Reaper deploying...") },
                   { label: "Omega Swarm", desc: "Scale agents", action: () => toast.info("Omega Swarm scaling...") },
                   { label: "Audit Margins", desc: "Verify 67% profit", action: () => toast.info("Auditing profit margins...") },

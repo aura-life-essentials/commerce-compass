@@ -138,7 +138,7 @@ async function getAccessToken(apiKey: string): Promise<string> {
   return data.data.accessToken;
 }
 
-// Fetch products from CJ Dropshipping API using listV2 (better search)
+// Fetch products from Aura Dropshipping API using listV2 (better search)
 async function fetchCJProducts(accessToken: string, categoryId?: string, pageNum: number = 1, pageSize: number = 20, keyword?: string) {
   // Try listV2 first (better for keyword search), fallback to list
   const useV2 = Boolean(keyword);
@@ -276,7 +276,7 @@ serve(async (req) => {
     
     if (!CJ_API_KEY) {
       return new Response(
-        JSON.stringify({ error: "CJ Dropshipping API key not configured" }),
+        JSON.stringify({ error: "Aura Dropshipping API key not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -353,7 +353,7 @@ serve(async (req) => {
             images: transformedProduct.images,
             variants: transformedProduct.variants,
             status: "active",
-            tags: ["cj-dropshipping", "auto-sourced"],
+            tags: ["aura-dropshipping", "auto-sourced"],
           })
           .select()
           .single();
@@ -431,7 +431,7 @@ serve(async (req) => {
               price: transformed.customer_price,
               images: transformed.images,
               status: "active",
-              tags: ["cj-dropshipping", "auto-sourced"],
+              tags: ["aura-dropshipping", "auto-sourced"],
             }, {
               onConflict: "store_id,title",
             });
@@ -457,7 +457,7 @@ serve(async (req) => {
             store_id: store.id,
             agent_name: "Omega Sync",
             agent_role: "Store Synchronization",
-            action: `Synced products from CJ Dropshipping`,
+            action: `Synced products from Aura Dropshipping`,
             status: "completed",
             details: { productsImported: 5, profitMargin: PROFIT_MARGIN * 100 },
           });

@@ -41,7 +41,7 @@ export const AutonomousSalesPanel = () => {
 
   const handleSyncAll = async () => {
     setIsSyncing(true);
-    toast.loading("Syncing all stores with CJ Dropshipping...");
+    toast.loading("Syncing all stores with Aura Dropshipping...");
     
     // Simulate sync
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -64,7 +64,7 @@ export const AutonomousSalesPanel = () => {
           </div>
           <div>
             <h3 className="font-semibold text-lg">Autonomous Sales Engine</h3>
-            <p className="text-sm text-muted-foreground">CJ Dropshipping Integration</p>
+            <p className="text-sm text-muted-foreground">Aura Dropshipping Integration</p>
           </div>
         </div>
         
@@ -198,7 +198,7 @@ export const AutonomousSalesPanel = () => {
       <div className="p-4 rounded-lg bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20">
         <p className="text-sm font-medium mb-1">🔥 Profit Reaper Active</p>
         <p className="text-xs text-muted-foreground">
-          All products automatically sourced from CJ Dropshipping with 67% profit margin applied to customer pricing.
+          All products automatically sourced from Aura Dropshipping with 67% profit margin applied to customer pricing.
         </p>
       </div>
 

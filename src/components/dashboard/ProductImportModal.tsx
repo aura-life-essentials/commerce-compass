@@ -129,7 +129,7 @@ export const ProductImportModal = ({ open, onOpenChange }: ProductImportModalPro
 
       if (error) {
         console.error("Error fetching products:", error);
-        toast.error("Failed to fetch products from CJ Dropshipping");
+        toast.error("Failed to fetch products from Aura Dropshipping");
         // Use mock data for demo
         setProducts(getMockProducts());
         setTotalProducts(100);
@@ -329,7 +329,7 @@ export const ProductImportModal = ({ open, onOpenChange }: ProductImportModalPro
                 <ShoppingCart className="w-6 h-6 text-orange-400" />
               </div>
               <div>
-                <DialogTitle className="text-xl">CJ Dropshipping Catalog</DialogTitle>
+                <DialogTitle className="text-xl">Aura Dropshipping Catalog</DialogTitle>
                 <DialogDescription>
                   Browse and import products with 67% profit margin
                 </DialogDescription>

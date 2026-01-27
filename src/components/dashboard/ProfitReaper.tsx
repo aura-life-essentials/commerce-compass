@@ -175,7 +175,7 @@ export const ProfitReaper = () => {
             <span className="text-orange-400">1.67</span>
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            Auto-applied to all CJ Dropshipping products across connected stores
+            Auto-applied to all Aura Dropshipping products across connected stores
           </p>
         </div>
 
