@@ -19,6 +19,9 @@ import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import CasinoLaunch from "./pages/CasinoLaunch";
 import IndustryRoadmaps from "./pages/IndustryRoadmaps";
 import SubscriptionManagement from "./pages/SubscriptionManagement";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import RefundPolicy from "./pages/RefundPolicy";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -71,6 +74,11 @@ const App = () => (
             
             {/* Subscription Management */}
             <Route path="/subscription" element={<SubscriptionManagement />} />
+            
+            {/* Legal pages - Required for app store compliance */}
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/refunds" element={<RefundPolicy />} />
             
             {/* Auth route */}
             <Route path="/auth" element={<Auth />} />

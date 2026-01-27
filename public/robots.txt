@@ -1,3 +1,17 @@
+# TrendVault Robots.txt
+User-agent: *
+Allow: /
+Disallow: /auth
+Disallow: /checkout-success
+Disallow: /subscription-success
+
+# Sitemap
+Sitemap: https://trendvault.store/sitemap.xml
+
+# Crawl-delay for courtesy
+Crawl-delay: 1
+
+# Allow major search engines
 User-agent: Googlebot
 Allow: /
 
@@ -8,7 +22,4 @@ User-agent: Twitterbot
 Allow: /
 
 User-agent: facebookexternalhit
-Allow: /
-
-User-agent: *
 Allow: /
