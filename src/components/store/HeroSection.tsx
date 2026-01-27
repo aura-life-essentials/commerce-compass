@@ -107,7 +107,18 @@ export const HeroSection = () => {
               transition={{ delay: 0.5 }}
               className="flex flex-wrap gap-4"
             >
-              <Button size="lg" className="bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/80 hover:to-cyan-500/80 text-white font-semibold px-8 h-14 text-lg group">
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/80 hover:to-cyan-500/80 text-white font-semibold px-8 h-14 text-lg group"
+                onClick={() => {
+                  const productsSection = document.getElementById('products-section');
+                  if (productsSection) {
+                    productsSection.scrollIntoView({ behavior: 'smooth' });
+                  } else {
+                    window.scrollTo({ top: 600, behavior: 'smooth' });
+                  }
+                }}
+              >
                 Shop Now
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>

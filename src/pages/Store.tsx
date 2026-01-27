@@ -132,7 +132,7 @@ const Store = () => {
         <BundleSection products={products || []} onAddToCart={handleAddToCart} />
 
         {/* Product Grid */}
-        <section className="container mx-auto px-4 py-12">
+        <section id="products-section" className="container mx-auto px-4 py-12">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-3xl font-bold text-white mb-2">
