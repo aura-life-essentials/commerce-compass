@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  ShoppingCart, Heart, Share2, Star, Zap, TrendingUp,
+  ShoppingCart, Heart, Star, Zap, TrendingUp,
   ChevronLeft, ChevronRight, Package, Truck, Shield, 
   RotateCcw, Check, Minus, Plus, X, ZoomIn
 } from "lucide-react";
@@ -15,6 +15,8 @@ import { getProductImage } from "@/lib/productImages";
 import { ImageGallery } from "@/components/store/ImageGallery";
 import { RelatedProducts } from "@/components/store/RelatedProducts";
 import { CartDrawer } from "@/components/store/CartDrawer";
+import { SocialShareButtons } from "@/components/store/SocialShareButtons";
+import { useSEOHead } from "@/hooks/useSEOHead";
 
 const ProductDetail = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -32,6 +34,29 @@ const ProductDetail = () => {
   const relatedProducts = products?.filter(
     p => p.id !== productId && p.category === product?.category
   ).slice(0, 4) || [];
+
+  const productImages = product && Array.isArray(product.images) && product.images.length > 0
+    ? product.images.map(img => getProductImage(img, product.title))
+    : product ? [getProductImage(null, product.title)] : [];
+
+  const productUrl = `https://trendvault.store/product/${productId}`;
+
+  // Stable review count
+  const stableReviewCount = useMemo(() => {
+    if (!productId) return 100;
+    const hash = productId.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+    return 50 + (hash % 200);
+  }, [productId]);
+
+  // SEO — must be called before any returns
+  useSEOHead({
+    title: product?.title || "Product",
+    description: product?.description || "Shop trending products at TrendVault.",
+    image: productImages[0] || "/og-image.jpg",
+    type: "product",
+    price: product?.price || 0,
+    productName: product?.title,
+  });
 
   if (isLoading) {
     return (
@@ -56,10 +81,6 @@ const ProductDetail = () => {
     ? Math.round((1 - (product.price || 0) / product.compare_at_price) * 100) 
     : 0;
 
-  const productImages = Array.isArray(product.images) && product.images.length > 0
-    ? product.images.map(img => getProductImage(img, product.title))
-    : [getProductImage(null, product.title)];
-
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
       addToCart(product);
@@ -69,9 +90,8 @@ const ProductDetail = () => {
 
   const isTrending = product.tags?.includes('trending');
   const isViral = product.tags?.includes('tiktok-viral');
-  const isLowStock = (product.inventory_quantity || 0) < 50;
+  const isLowStock = (product.inventory_quantity || 0) < 50 && (product.inventory_quantity || 0) > 0;
 
-  // Generate fake reviews for demo
   const reviews = [
     { name: "Sarah M.", rating: 5, text: "Absolutely love this product! Exceeded my expectations in every way.", date: "2 days ago", verified: true },
     { name: "James K.", rating: 5, text: "Best purchase I've made this year. The quality is outstanding.", date: "1 week ago", verified: true },
@@ -188,10 +208,7 @@ const ProductDetail = () => {
                 ))}
               </div>
               <span className="text-sm text-slate-400">
-                4.9 ({Math.floor(Math.random() * 500) + 200} reviews)
-              </span>
-              <span className="text-sm text-emerald-400">
-                • {Math.floor(Math.random() * 1000) + 500} sold
+                4.9 ({stableReviewCount} reviews)
               </span>
             </div>
 
@@ -274,13 +291,12 @@ const ProductDetail = () => {
               >
                 <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
               </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-14 w-14"
-              >
-                <Share2 className="w-5 h-5" />
-              </Button>
+              <SocialShareButtons
+                url={productUrl}
+                title={product.title}
+                description={product.description || undefined}
+                image={productImages[0]}
+              />
             </div>
 
             {/* Trust Badges */}

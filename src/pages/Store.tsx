@@ -4,6 +4,7 @@ import {
   ShoppingCart, Sparkles, Zap, Gift, 
   Timer, TrendingUp, Heart, Package, ChevronRight
 } from "lucide-react";
+import { useSEOHead } from "@/hooks/useSEOHead";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useProducts } from "@/hooks/useProducts";
@@ -18,10 +19,16 @@ import { UpsellModal } from "@/components/store/UpsellModal";
 import { LoyaltyBanner } from "@/components/store/LoyaltyBanner";
 import { SocialProofToast } from "@/components/store/SocialProofToast";
 import { StoreFooter } from "@/components/store/StoreFooter";
+import { EmailCapturePopup } from "@/components/store/EmailCapturePopup";
 import { useCart } from "@/hooks/useCart";
 import { Link } from "react-router-dom";
 
 const Store = () => {
+  useSEOHead({
+    title: "Shop Viral Products & Trending Deals",
+    description: "Discover curated TikTok-viral products with up to 70% off. Fast shipping, easy returns, and flash sales daily.",
+  });
+
   const { data: products, isLoading } = useProducts();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
@@ -218,6 +225,9 @@ const Store = () => {
 
       {/* Social Proof Toast */}
       <SocialProofToast products={products || []} />
+
+      {/* Email Capture Popup */}
+      <EmailCapturePopup />
     </div>
   );
 };
