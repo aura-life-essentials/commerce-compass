@@ -208,10 +208,7 @@ const ProductDetail = () => {
                 ))}
               </div>
               <span className="text-sm text-slate-400">
-                4.9 ({Math.floor(Math.random() * 500) + 200} reviews)
-              </span>
-              <span className="text-sm text-emerald-400">
-                • {Math.floor(Math.random() * 1000) + 500} sold
+                4.9 ({stableReviewCount} reviews)
               </span>
             </div>
 
