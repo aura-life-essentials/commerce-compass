@@ -13,7 +13,7 @@ const bundles = [
   {
     id: "starter-pack",
     name: "Starter Essentials",
-    description: "Perfect for beginners - everything you need to get started",
+    description: "Perfect for beginners — everything you need to get started",
     discount: 35,
     icon: "🌟",
     color: "from-blue-500 to-cyan-500",
@@ -59,7 +59,7 @@ const bundles = [
 
 export const BundleSection = ({ products, onAddToCart }: BundleSectionProps) => {
   return (
-    <section className="container mx-auto px-4 py-16">
+    <section id="bundles-section" className="container mx-auto px-4 py-16">
       <div className="text-center mb-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -90,8 +90,7 @@ export const BundleSection = ({ products, onAddToCart }: BundleSectionProps) => 
           transition={{ delay: 0.2 }}
           className="text-lg text-slate-400 max-w-2xl mx-auto"
         >
-          Save up to 45% when you buy our handpicked product bundles. 
-          Designed for maximum value and perfect combinations.
+          Save up to 45% when you buy our handpicked product bundles.
         </motion.p>
       </div>
 
@@ -105,7 +104,6 @@ export const BundleSection = ({ products, onAddToCart }: BundleSectionProps) => 
             transition={{ delay: index * 0.1 }}
           >
             <Card className={`relative overflow-hidden bg-gradient-to-br ${bundle.bgColor} border ${bundle.borderColor} hover:scale-[1.02] transition-all duration-300 h-full`}>
-              {/* Popular Badge */}
               {bundle.popular && (
                 <div className="absolute top-0 right-0">
                   <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-bold px-4 py-1.5 rounded-bl-xl">
@@ -116,7 +114,6 @@ export const BundleSection = ({ products, onAddToCart }: BundleSectionProps) => 
               )}
 
               <div className="p-6 space-y-6">
-                {/* Header */}
                 <div className="flex items-start gap-4">
                   <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${bundle.color} flex items-center justify-center text-3xl shadow-lg`}>
                     {bundle.icon}
@@ -127,7 +124,6 @@ export const BundleSection = ({ products, onAddToCart }: BundleSectionProps) => 
                   </div>
                 </div>
 
-                {/* Items List */}
                 <div className="space-y-2">
                   {bundle.items.map((item, i) => (
                     <div key={i} className="flex items-center gap-2 text-slate-300">
@@ -137,7 +133,6 @@ export const BundleSection = ({ products, onAddToCart }: BundleSectionProps) => 
                   ))}
                 </div>
 
-                {/* Pricing */}
                 <div className="p-4 rounded-xl bg-slate-900/60 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-slate-400">Original Price:</span>
@@ -153,11 +148,9 @@ export const BundleSection = ({ products, onAddToCart }: BundleSectionProps) => 
                   </div>
                 </div>
 
-                {/* CTA Button */}
                 <Button
                   className={`w-full bg-gradient-to-r ${bundle.color} hover:opacity-90 text-white font-semibold py-6 text-lg`}
                   onClick={() => {
-                    // Add all bundle items to cart
                     bundle.items.forEach((_, i) => {
                       if (products[i]) onAddToCart(products[i]);
                     });
