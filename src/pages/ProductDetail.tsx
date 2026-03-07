@@ -77,22 +77,6 @@ const ProductDetail = () => {
     );
   }
 
-  const productImages = Array.isArray(product.images) && product.images.length > 0
-    ? product.images.map(img => getProductImage(img, product.title))
-    : [getProductImage(null, product.title)];
-
-  const productUrl = `https://trendvault.store/product/${product.id}`;
-
-  // SEO for this product
-  useSEOHead({
-    title: product.title,
-    description: product.description || `Shop ${product.title} at TrendVault. Fast shipping & easy returns.`,
-    image: productImages[0],
-    type: "product",
-    price: product.price || 0,
-    productName: product.title,
-  });
-
   const discount = product.compare_at_price 
     ? Math.round((1 - (product.price || 0) / product.compare_at_price) * 100) 
     : 0;
@@ -107,12 +91,6 @@ const ProductDetail = () => {
   const isTrending = product.tags?.includes('trending');
   const isViral = product.tags?.includes('tiktok-viral');
   const isLowStock = (product.inventory_quantity || 0) < 50 && (product.inventory_quantity || 0) > 0;
-
-  // Stable rating based on product id
-  const stableReviewCount = useMemo(() => {
-    const hash = product.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-    return 50 + (hash % 200);
-  }, [product.id]);
 
   const reviews = [
     { name: "Sarah M.", rating: 5, text: "Absolutely love this product! Exceeded my expectations in every way.", date: "2 days ago", verified: true },
