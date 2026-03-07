@@ -291,13 +291,12 @@ const ProductDetail = () => {
               >
                 <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
               </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-14 w-14"
-              >
-                <Share2 className="w-5 h-5" />
-              </Button>
+              <SocialShareButtons
+                url={productUrl}
+                title={product.title}
+                description={product.description || undefined}
+                image={productImages[0]}
+              />
             </div>
 
             {/* Trust Badges */}
