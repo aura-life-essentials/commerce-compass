@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
-import { Crown, Star, Gift, Sparkles, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Crown, Star, Gift, Truck } from "lucide-react";
 
 export const LoyaltyBanner = () => {
   return (
@@ -12,35 +11,25 @@ export const LoyaltyBanner = () => {
       <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-center gap-4 text-sm">
           <div className="flex items-center gap-2">
-            <motion.div
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
+            <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
               <Crown className="w-4 h-4 text-yellow-400" />
             </motion.div>
-            <span className="text-yellow-300 font-medium">VIP REWARDS</span>
+            <span className="text-yellow-300 font-medium">FREE SHIPPING ON $25+</span>
           </div>
           
           <span className="hidden sm:inline text-slate-400">|</span>
           
           <span className="hidden sm:inline text-slate-300">
             <Star className="w-3 h-3 text-yellow-400 inline mr-1" />
-            Earn 5% back on every purchase
+            30-Day Easy Returns
           </span>
           
-          <span className="text-slate-400">|</span>
+          <span className="hidden md:inline text-slate-400">|</span>
           
-          <span className="text-slate-300">
-            <Gift className="w-3 h-3 text-pink-400 inline mr-1" />
-            Free birthday gift
+          <span className="hidden md:inline text-slate-300">
+            <Truck className="w-3 h-3 text-cyan-400 inline mr-1" />
+            Fast & Tracked Delivery
           </span>
-          
-          <Button
-            variant="link"
-            className="text-primary hover:text-primary/80 p-0 h-auto font-medium"
-          >
-            Join Free <ChevronRight className="w-3 h-3 ml-1" />
-          </Button>
         </div>
       </div>
     </motion.div>

@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  ShoppingCart, Star, Sparkles, Zap, Gift, Crown, 
-  Timer, TrendingUp, Heart, Eye, Package, 
-  ChevronRight, Play, Volume2
+  ShoppingCart, Sparkles, Zap, Gift, 
+  Timer, TrendingUp, Heart, Package, ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +17,7 @@ import { CartDrawer } from "@/components/store/CartDrawer";
 import { UpsellModal } from "@/components/store/UpsellModal";
 import { LoyaltyBanner } from "@/components/store/LoyaltyBanner";
 import { SocialProofToast } from "@/components/store/SocialProofToast";
+import { StoreFooter } from "@/components/store/StoreFooter";
 import { useCart } from "@/hooks/useCart";
 import { Link } from "react-router-dom";
 
@@ -38,15 +38,17 @@ const Store = () => {
 
   const handleAddToCart = (product: any) => {
     addToCart(product);
-    // Show upsell for high-value items
     if (product.price > 30) {
       const relatedProduct = products?.find(
         p => p.id !== product.id && p.category === product.category
       );
-      if (relatedProduct) {
-        setUpsellProduct(relatedProduct);
-      }
+      if (relatedProduct) setUpsellProduct(relatedProduct);
     }
+  };
+
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
@@ -55,7 +57,6 @@ const Store = () => {
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px] animate-pulse-slow" />
         <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-[150px] animate-pulse-slow" style={{ animationDelay: "1.5s" }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-500/3 rounded-full blur-[200px]" />
       </div>
 
       {/* Header */}
@@ -69,23 +70,23 @@ const Store = () => {
           </Link>
           
           <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-            <button className="hover:text-primary transition-colors">New Arrivals</button>
-            <button className="hover:text-primary transition-colors">Best Sellers</button>
-            <button className="hover:text-primary transition-colors flex items-center gap-1">
+            <button onClick={() => scrollToSection('products-section')} className="hover:text-primary transition-colors">All Products</button>
+            <button onClick={() => scrollToSection('flash-sale-section')} className="hover:text-primary transition-colors flex items-center gap-1">
               <Timer className="w-4 h-4 text-red-400" />
               Flash Sales
             </button>
-            <button className="hover:text-primary transition-colors flex items-center gap-1">
+            <button onClick={() => scrollToSection('bundles-section')} className="hover:text-primary transition-colors flex items-center gap-1">
               <Gift className="w-4 h-4 text-purple-400" />
               Bundles
             </button>
           </nav>
 
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="relative">
-              <Heart className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center">3</span>
-            </Button>
+            <Link to="/wishlist">
+              <Button variant="ghost" size="icon" className="relative">
+                <Heart className="w-5 h-5" />
+              </Button>
+            </Link>
             <Button 
               variant="ghost" 
               size="icon" 
@@ -112,23 +113,10 @@ const Store = () => {
 
       {/* Main Content */}
       <main className="relative z-10">
-        {/* Hero Section */}
         <HeroSection />
-
-        {/* Trust Badges */}
         <TrustBadges />
-
-        {/* Flash Sale Section */}
         <FlashSaleSection products={products?.slice(0, 4) || []} onAddToCart={handleAddToCart} />
-
-        {/* Category Navigation */}
-        <CategoryNav 
-          categories={categories} 
-          selected={selectedCategory} 
-          onSelect={setSelectedCategory} 
-        />
-
-        {/* Featured Bundles */}
+        <CategoryNav categories={categories} selected={selectedCategory} onSelect={setSelectedCategory} />
         <BundleSection products={products || []} onAddToCart={handleAddToCart} />
 
         {/* Product Grid */}
@@ -145,7 +133,7 @@ const Store = () => {
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="text-primary border-primary/30">
                 <TrendingUp className="w-3 h-3 mr-1" />
-                {products?.length || 0} Products
+                {filteredProducts?.length || 0} Products
               </Badge>
             </div>
           </div>
@@ -160,10 +148,7 @@ const Store = () => {
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <ProductCard 
-                    product={product} 
-                    onAddToCart={() => handleAddToCart(product)} 
-                  />
+                  <ProductCard product={product} onAddToCart={() => handleAddToCart(product)} />
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -180,15 +165,14 @@ const Store = () => {
             
             <div className="relative z-10 max-w-2xl mx-auto text-center">
               <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white mb-4">
-                <Crown className="w-3 h-3 mr-1" />
-                VIP EXCLUSIVE
+                <Sparkles className="w-3 h-3 mr-1" />
+                EXCLUSIVE DEALS
               </Badge>
               <h3 className="text-4xl font-bold text-white mb-4">
-                Join the Inner Circle
+                Get Early Access to Sales
               </h3>
               <p className="text-lg text-slate-300 mb-8">
-                Get early access to flash sales, exclusive discounts, and secret drops. 
-                VIP members save an average of 40% on every order.
+                Be the first to know about flash sales, new arrivals, and exclusive discounts.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <input 
@@ -198,7 +182,7 @@ const Store = () => {
                 />
                 <Button size="lg" className="bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/80 hover:to-cyan-500/80 text-white font-semibold px-8">
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Join VIP Free
+                  Subscribe
                 </Button>
               </div>
               <p className="text-xs text-slate-500 mt-4">
@@ -210,50 +194,7 @@ const Store = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border py-12 mt-8">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <h4 className="font-semibold text-white mb-4">Shop</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary">New Arrivals</a></li>
-                <li><a href="#" className="hover:text-primary">Best Sellers</a></li>
-                <li><a href="#" className="hover:text-primary">Flash Sales</a></li>
-                <li><a href="#" className="hover:text-primary">Bundles</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-white mb-4">Support</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary">FAQ</a></li>
-                <li><a href="#" className="hover:text-primary">Shipping</a></li>
-                <li><a href="#" className="hover:text-primary">Returns</a></li>
-                <li><a href="#" className="hover:text-primary">Contact</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-white mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary">About Us</a></li>
-                <li><a href="#" className="hover:text-primary">Careers</a></li>
-                <li><a href="#" className="hover:text-primary">Press</a></li>
-                <li><a href="#" className="hover:text-primary">Affiliates</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-white mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link to="/privacy" className="hover:text-primary">Privacy Policy</Link></li>
-                <li><Link to="/terms" className="hover:text-primary">Terms of Service</Link></li>
-                <li><Link to="/refunds" className="hover:text-primary">Refund Policy</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="pt-8 border-t border-border text-center text-sm text-muted-foreground">
-            <p>© 2026 TrendVault. Powered by Autonomous Commerce Engine.</p>
-          </div>
-        </div>
-      </footer>
+      <StoreFooter />
 
       {/* Cart Drawer */}
       <CartDrawer 

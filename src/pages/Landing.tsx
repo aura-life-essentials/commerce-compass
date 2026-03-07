@@ -123,8 +123,13 @@ export default function Landing() {
                 >
                   View Pricing <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
-                <Button size="lg" variant="outline" className="text-lg px-8">
-                  <Play className="w-5 h-5 mr-2" /> Watch Demo
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="text-lg px-8"
+                  onClick={() => navigate('/store')}
+                >
+                  <Play className="w-5 h-5 mr-2" /> Browse Store
                 </Button>
               </div>
 
@@ -343,8 +348,14 @@ export default function Landing() {
                   <Link to="/" className="hover:text-foreground transition-colors">Dashboard</Link>
                 )}
               </div>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <a href="#" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">📸 Instagram</a>
+                <a href="#" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">🎵 TikTok</a>
+                <a href="#" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">𝕏 Twitter</a>
+                <a href="#" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">📘 Facebook</a>
+              </div>
               <p className="text-sm text-muted-foreground">
-                © 2025 Web3 Commerce Engine. All rights reserved.
+                © {new Date().getFullYear()} TrendVault. All rights reserved.
               </p>
             </div>
           </div>
