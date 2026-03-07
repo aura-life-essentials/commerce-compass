@@ -19,6 +19,7 @@ import { UpsellModal } from "@/components/store/UpsellModal";
 import { LoyaltyBanner } from "@/components/store/LoyaltyBanner";
 import { SocialProofToast } from "@/components/store/SocialProofToast";
 import { StoreFooter } from "@/components/store/StoreFooter";
+import { EmailCapturePopup } from "@/components/store/EmailCapturePopup";
 import { useCart } from "@/hooks/useCart";
 import { Link } from "react-router-dom";
 
