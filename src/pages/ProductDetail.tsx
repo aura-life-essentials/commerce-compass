@@ -35,6 +35,29 @@ const ProductDetail = () => {
     p => p.id !== productId && p.category === product?.category
   ).slice(0, 4) || [];
 
+  const productImages = product && Array.isArray(product.images) && product.images.length > 0
+    ? product.images.map(img => getProductImage(img, product.title))
+    : product ? [getProductImage(null, product.title)] : [];
+
+  const productUrl = `https://trendvault.store/product/${productId}`;
+
+  // Stable review count
+  const stableReviewCount = useMemo(() => {
+    if (!productId) return 100;
+    const hash = productId.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+    return 50 + (hash % 200);
+  }, [productId]);
+
+  // SEO — must be called before any returns
+  useSEOHead({
+    title: product?.title || "Product",
+    description: product?.description || "Shop trending products at TrendVault.",
+    image: productImages[0] || "/og-image.jpg",
+    type: "product",
+    price: product?.price || 0,
+    productName: product?.title,
+  });
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
