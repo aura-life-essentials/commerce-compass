@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  ShoppingCart, Heart, Share2, Star, Zap, TrendingUp,
+  ShoppingCart, Heart, Star, Zap, TrendingUp,
   ChevronLeft, ChevronRight, Package, Truck, Shield, 
   RotateCcw, Check, Minus, Plus, X, ZoomIn
 } from "lucide-react";
@@ -15,6 +15,8 @@ import { getProductImage } from "@/lib/productImages";
 import { ImageGallery } from "@/components/store/ImageGallery";
 import { RelatedProducts } from "@/components/store/RelatedProducts";
 import { CartDrawer } from "@/components/store/CartDrawer";
+import { SocialShareButtons } from "@/components/store/SocialShareButtons";
+import { useSEOHead } from "@/hooks/useSEOHead";
 
 const ProductDetail = () => {
   const { productId } = useParams<{ productId: string }>();
