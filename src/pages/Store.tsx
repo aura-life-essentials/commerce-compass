@@ -24,6 +24,11 @@ import { useCart } from "@/hooks/useCart";
 import { Link } from "react-router-dom";
 
 const Store = () => {
+  useSEOHead({
+    title: "Shop Viral Products & Trending Deals",
+    description: "Discover curated TikTok-viral products with up to 70% off. Fast shipping, easy returns, and flash sales daily.",
+  });
+
   const { data: products, isLoading } = useProducts();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
