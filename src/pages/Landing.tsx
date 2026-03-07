@@ -348,8 +348,14 @@ export default function Landing() {
                   <Link to="/" className="hover:text-foreground transition-colors">Dashboard</Link>
                 )}
               </div>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <a href="#" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">📸 Instagram</a>
+                <a href="#" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">🎵 TikTok</a>
+                <a href="#" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">𝕏 Twitter</a>
+                <a href="#" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">📘 Facebook</a>
+              </div>
               <p className="text-sm text-muted-foreground">
-                © 2025 Web3 Commerce Engine. All rights reserved.
+                © {new Date().getFullYear()} TrendVault. All rights reserved.
               </p>
             </div>
           </div>
