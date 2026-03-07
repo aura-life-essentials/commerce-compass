@@ -54,13 +54,25 @@ const ProductDetail = () => {
     );
   }
 
-  const discount = product.compare_at_price 
-    ? Math.round((1 - (product.price || 0) / product.compare_at_price) * 100) 
-    : 0;
-
   const productImages = Array.isArray(product.images) && product.images.length > 0
     ? product.images.map(img => getProductImage(img, product.title))
     : [getProductImage(null, product.title)];
+
+  const productUrl = `https://trendvault.store/product/${product.id}`;
+
+  // SEO for this product
+  useSEOHead({
+    title: product.title,
+    description: product.description || `Shop ${product.title} at TrendVault. Fast shipping & easy returns.`,
+    image: productImages[0],
+    type: "product",
+    price: product.price || 0,
+    productName: product.title,
+  });
+
+  const discount = product.compare_at_price 
+    ? Math.round((1 - (product.price || 0) / product.compare_at_price) * 100) 
+    : 0;
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
