@@ -4,6 +4,7 @@ import {
   ShoppingCart, Sparkles, Zap, Gift, 
   Timer, TrendingUp, Heart, Package, ChevronRight
 } from "lucide-react";
+import { useSEOHead } from "@/hooks/useSEOHead";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useProducts } from "@/hooks/useProducts";
