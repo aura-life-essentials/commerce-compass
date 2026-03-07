@@ -225,6 +225,9 @@ const Store = () => {
 
       {/* Social Proof Toast */}
       <SocialProofToast products={products || []} />
+
+      {/* Email Capture Popup */}
+      <EmailCapturePopup />
     </div>
   );
 };
