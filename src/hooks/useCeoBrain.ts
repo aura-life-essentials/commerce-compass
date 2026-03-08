@@ -62,25 +62,31 @@ export const useCeoBrain = () => {
   const { data: metrics } = useQuery({
     queryKey: ['ceo-metrics'],
     queryFn: async () => {
-      const [revenueRes, productsRes] = await Promise.all([
+      const [revenueRes, productsRes, ordersRes, stripeRes] = await Promise.all([
         supabase.from('revenue_metrics').select('revenue, orders_count, conversion_rate, avg_order_value'),
         supabase.from('products').select('id', { count: 'exact' }),
+        supabase.from('orders').select('id,total_amount'),
+        supabase.from('stripe_transactions').select('amount,status'),
       ]);
-      
-      const totalRevenue = revenueRes.data?.reduce((sum, r) => sum + (r.revenue || 0), 0) || 0;
-      const totalOrders = revenueRes.data?.reduce((sum, r) => sum + (r.orders_count || 0), 0) || 0;
-      const avgConversion = revenueRes.data?.length 
-        ? revenueRes.data.reduce((sum, r) => sum + (r.conversion_rate || 0), 0) / revenueRes.data.length 
+
+      const metricsRevenue = revenueRes.data?.reduce((sum, r) => sum + Number(r.revenue || 0), 0) || 0;
+      const ordersRevenue = ordersRes.data?.reduce((sum, o) => sum + Number(o.total_amount || 0), 0) || 0;
+      const stripeRevenue = stripeRes.data
+        ?.filter((t) => t.status === 'succeeded')
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0) || 0;
+
+      const totalRevenue = Math.max(metricsRevenue, ordersRevenue, stripeRevenue);
+      const totalOrders = ordersRes.data?.length || revenueRes.data?.reduce((sum, r) => sum + (r.orders_count || 0), 0) || 0;
+      const avgConversion = revenueRes.data?.length
+        ? revenueRes.data.reduce((sum, r) => sum + Number(r.conversion_rate || 0), 0) / revenueRes.data.length
         : 0;
-      const avgAOV = revenueRes.data?.length
-        ? revenueRes.data.reduce((sum, r) => sum + (r.avg_order_value || 0), 0) / revenueRes.data.length
-        : 0;
+      const avgAOV = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
       return {
         revenue: totalRevenue,
         orders: totalOrders,
         products: productsRes.count || 0,
-        activeAgents: 6, // Default active agents
+        activeAgents: 6,
         conversionRate: avgConversion * 100,
         avgOrderValue: avgAOV,
       } as CEOMetrics;
@@ -88,22 +94,50 @@ export const useCeoBrain = () => {
     refetchInterval: 5000,
   });
 
-  // Think mutation
+  // Think / command mutation
   const thinkMutation = useMutation({
     mutationFn: async (focusArea: string) => {
       setIsThinking(true);
+
+      const commandLike = /sell now|deploy|launch|execute|run\s+sales|autonomous loop/i.test(focusArea);
       const response = await supabase.functions.invoke('ceo-brain', {
-        body: { action: 'think', focusArea },
+        body: commandLike
+          ? { action: 'command', command: focusArea }
+          : { action: 'think', focusArea },
       });
+
       if (response.error) throw response.error;
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ai-decisions'] });
+      queryClient.invalidateQueries({ queryKey: ['agent-brains'] });
+      queryClient.invalidateQueries({ queryKey: ['ceo-metrics'] });
       setIsThinking(false);
     },
     onError: () => {
       setIsThinking(false);
+    },
+  });
+
+  // Execute full live sales run
+  const salesRunMutation = useMutation({
+    mutationFn: async () => {
+      const response = await supabase.functions.invoke('ceo-brain', {
+        body: {
+          action: 'command',
+          command: 'SELL NOW: run live sales workflow, deploy all active teams, and launch campaigns from current data',
+        },
+      });
+
+      if (response.error) throw response.error;
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ai-decisions'] });
+      queryClient.invalidateQueries({ queryKey: ['agent-brains'] });
+      queryClient.invalidateQueries({ queryKey: ['ceo-metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['agent_logs'] });
     },
   });
 
@@ -132,6 +166,8 @@ export const useCeoBrain = () => {
     agentBrains,
     isThinking,
     think,
+    runSalesNow: salesRunMutation.mutate,
+    isRunningSalesNow: salesRunMutation.isPending,
     executeDecision: executeMutation.mutate,
   };
 };

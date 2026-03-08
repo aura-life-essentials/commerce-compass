@@ -20,6 +20,12 @@ interface BusinessMetrics {
   totalProducts: number;
   totalOrders: number;
   avgOrderValue: number;
+  totalStripeRevenue: number;
+  totalOrderRevenue: number;
+  conversions24h: number;
+  trafficEvents24h: number;
+  topSources: Array<{ source: string; events: number; revenue: number }>;
+  activeCampaigns: number;
   topProducts: any[];
   recentDecisions: any[];
   marketData: any[];
@@ -176,12 +182,28 @@ const BUSINESS_TOOLS = [
 // Business Metrics Gathering
 // ═══════════════════════════════════════════════════════════════
 async function gatherBusinessMetrics(supabase: any): Promise<BusinessMetrics> {
-  const [revenueResult, productsResult, decisionsResult, marketsResult, agentsResult] = await Promise.all([
+  const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+  const [
+    revenueResult,
+    productsResult,
+    decisionsResult,
+    marketsResult,
+    agentsResult,
+    ordersResult,
+    stripeResult,
+    trafficResult,
+    campaignsResult
+  ] = await Promise.all([
     supabase.from("revenue_metrics").select("*").order("date", { ascending: false }).limit(30),
     supabase.from("products").select("*").eq("status", "active"),
     supabase.from("ai_decisions").select("*").order("created_at", { ascending: false }).limit(20),
     supabase.from("global_markets").select("*").eq("is_active", true),
-    supabase.from("agent_brains").select("*").eq("is_active", true)
+    supabase.from("agent_brains").select("*").eq("is_active", true),
+    supabase.from("orders").select("id,total_amount,created_at,status").order("created_at", { ascending: false }).limit(500),
+    supabase.from("stripe_transactions").select("amount,status,created_at").order("created_at", { ascending: false }).limit(500),
+    supabase.from("traffic_webhooks").select("source,revenue,webhook_type,created_at").gte("created_at", since24h).limit(1000),
+    supabase.from("marketing_campaigns").select("id,status")
   ]);
 
   const revenue = revenueResult.data || [];
@@ -189,15 +211,39 @@ async function gatherBusinessMetrics(supabase: any): Promise<BusinessMetrics> {
   const decisions = decisionsResult.data || [];
   const markets = marketsResult.data || [];
   const agents = agentsResult.data || [];
+  const orders = ordersResult.data || [];
+  const stripe = stripeResult.data || [];
+  const traffic = trafficResult.data || [];
+  const campaigns = campaignsResult.data || [];
 
-  const totalRevenue = revenue.reduce((sum: number, r: any) => sum + (r.revenue || 0), 0);
-  const totalOrders = revenue.reduce((sum: number, r: any) => sum + (r.orders_count || 0), 0);
+  const revenueFromMetrics = revenue.reduce((sum: number, r: any) => sum + Number(r.revenue || 0), 0);
+  const totalOrderRevenue = orders.reduce((sum: number, o: any) => sum + Number(o.total_amount || 0), 0);
+  const totalStripeRevenue = stripe
+    .filter((t: any) => t.status === "succeeded")
+    .reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0);
+
+  const totalRevenue = Math.max(revenueFromMetrics, totalOrderRevenue, totalStripeRevenue);
+  const totalOrders = orders.length || revenue.reduce((sum: number, r: any) => sum + (r.orders_count || 0), 0);
+
+  const sourceAgg = (traffic || []).reduce((acc: Record<string, { source: string; events: number; revenue: number }>, event: any) => {
+    const key = event.source || "unknown";
+    if (!acc[key]) acc[key] = { source: key, events: 0, revenue: 0 };
+    acc[key].events += 1;
+    acc[key].revenue += Number(event.revenue || 0);
+    return acc;
+  }, {});
 
   return {
     totalRevenue,
     totalProducts: products.length,
     totalOrders,
     avgOrderValue: totalOrders > 0 ? totalRevenue / totalOrders : 0,
+    totalStripeRevenue,
+    totalOrderRevenue,
+    conversions24h: traffic.filter((t: any) => ["purchase", "conversion"].includes(t.webhook_type)).length,
+    trafficEvents24h: traffic.length,
+    topSources: Object.values(sourceAgg).sort((a, b) => b.revenue - a.revenue).slice(0, 5),
+    activeCampaigns: campaigns.filter((c: any) => c.status === "active").length,
     topProducts: products.slice(0, 10).map((p: any) => ({
       id: p.id, title: p.title, price: p.price, category: p.category,
       inventory: p.inventory_quantity,
@@ -479,6 +525,101 @@ async function saveDecisions(supabase: any, brainOutput: any, engine: string): P
   });
 }
 
+async function invokeAutonomousBrain(supabaseUrl: string, serviceRoleKey: string, payload: Record<string, any>) {
+  const response = await fetch(`${supabaseUrl}/functions/v1/autonomous-brain`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${serviceRoleKey}`,
+      "apikey": serviceRoleKey,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    return { success: false, error: data?.error || `autonomous-brain ${response.status}` };
+  }
+
+  return { success: true, data };
+}
+
+async function runSalesWorkflow(supabase: any, supabaseUrl: string, serviceRoleKey: string, command: string) {
+  const metrics = await gatherBusinessMetrics(supabase);
+
+  const { data: existingCampaigns } = await supabase
+    .from("marketing_campaigns")
+    .select("id")
+    .eq("status", "active")
+    .limit(1);
+
+  const campaignResults: any[] = [];
+  if (!existingCampaigns?.length) {
+    const channels = ["tiktok", "instagram", "email"];
+    for (const channel of channels) {
+      const { data: campaign } = await supabase
+        .from("marketing_campaigns")
+        .insert({
+          campaign_name: `Auto ${channel} sales push ${new Date().toISOString().slice(0, 10)}`,
+          channel,
+          status: "active",
+          budget: 150,
+          ai_generated_content: {
+            source: "ceo_command",
+            command,
+            objective: "drive immediate product checkout traffic"
+          }
+        })
+        .select("id,campaign_name,channel")
+        .single();
+
+      if (campaign) campaignResults.push(campaign);
+    }
+  }
+
+  const deployRes = await invokeAutonomousBrain(supabaseUrl, serviceRoleKey, { action: "deploy_all" });
+
+  const executionResult = {
+    command,
+    metrics_snapshot: {
+      total_revenue: metrics.totalRevenue,
+      total_orders: metrics.totalOrders,
+      traffic_events_24h: metrics.trafficEvents24h,
+      conversions_24h: metrics.conversions24h,
+      active_campaigns: metrics.activeCampaigns,
+    },
+    campaigns_created: campaignResults.length,
+    campaign_details: campaignResults,
+    deployment: deployRes,
+  };
+
+  await supabase.from("ai_decisions").insert({
+    decision_type: "sales_command_execution",
+    reasoning: "Executed SELL NOW command with live campaign + swarm deployment workflow",
+    confidence_score: 0.92,
+    executed: true,
+    input_data: { command },
+    output_action: {
+      action: "run_sales_workflow",
+      category: "AGENT_DEPLOYMENT",
+      priority: "urgent",
+      expected_impact: "Activates campaign + autonomous teams from live metrics"
+    },
+    execution_result: executionResult,
+  });
+
+  await supabase.from("agent_logs").insert({
+    agent_name: "CEO Brain",
+    agent_role: "Sales Command",
+    action: `SELL NOW workflow triggered (${campaignResults.length} campaigns)` ,
+    status: deployRes.success ? "completed" : "error",
+    details: executionResult,
+    error_message: deployRes.success ? null : deployRes.error,
+  });
+
+  return executionResult;
+}
+
 // ═══════════════════════════════════════════════════════════════
 // Main Server
 // ═══════════════════════════════════════════════════════════════
@@ -496,7 +637,7 @@ serve(async (req) => {
 
     const validActions = [
       "think", "think_fast", "quick_ops", "get_state", "execute_decision",
-      "autonomous_loop", "research", "research_x", "full_intelligence"
+      "autonomous_loop", "research", "research_x", "full_intelligence", "command", "sales_run"
     ];
     if (action && !validActions.includes(action)) {
       return new Response(JSON.stringify({ error: "Invalid action" }), {
@@ -508,14 +649,18 @@ serve(async (req) => {
 
     const metricsPrompt = metrics ? `
 ## Current Business State:
-- Revenue (30d): $${metrics.totalRevenue.toLocaleString()}
+- Revenue (best live source): $${metrics.totalRevenue.toLocaleString()}
+- Stripe Revenue: $${metrics.totalStripeRevenue.toLocaleString()} | Orders Revenue: $${metrics.totalOrderRevenue.toLocaleString()}
 - Products: ${metrics.totalProducts} | Orders: ${metrics.totalOrders} | AOV: $${metrics.avgOrderValue.toFixed(2)}
+- Traffic 24h: ${metrics.trafficEvents24h} events | Conversions 24h: ${metrics.conversions24h}
+- Active Campaigns: ${metrics.activeCampaigns}
+- Top Sources: ${JSON.stringify(metrics.topSources)}
 - Top Products: ${JSON.stringify(metrics.topProducts)}
 - Markets: ${JSON.stringify(metrics.marketData)}
 - Agents: ${JSON.stringify(metrics.agentPerformance)}
 ${focusArea ? `\n### Focus: ${focusArea}` : ''}
 
-Analyze and make 3-5 strategic decisions.` : "";
+Analyze and make 3-5 strategic decisions with immediate execution options.` : "";
 
     switch (action) {
       // ── Deep reasoning + ALL tools (web, X, code, functions) ──
@@ -652,6 +797,81 @@ Be aggressive. Think like a CEO who wants 10x growth.` }
           thinking_cycle: parsed, citations: result.citations,
           tool_executions: toolResults,
           metrics_analyzed: metrics ? { products: metrics.totalProducts, revenue: metrics.totalRevenue } : null
+        }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      // ── Explicit command router for operational control ──
+      case "command":
+      case "sales_run": {
+        const command = (body.command || body.focusArea || "").toString();
+        const normalized = command.toLowerCase();
+
+        if (!command.trim()) {
+          return new Response(JSON.stringify({ error: "command is required" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        if (normalized.includes("sell now") || normalized.includes("run live sales") || normalized.includes("deploy all")) {
+          const execution = await runSalesWorkflow(supabase, supabaseUrl, supabaseKey, command);
+          return new Response(JSON.stringify({
+            success: true,
+            mode: "sales_workflow",
+            execution,
+          }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        if (normalized.includes("traffic")) {
+          const trafficRes = await fetch(`${supabaseUrl}/functions/v1/traffic-webhook`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${supabaseKey}`,
+              "apikey": supabaseKey,
+            },
+            body: JSON.stringify({ action: "optimize" }),
+          });
+          const trafficData = await trafficRes.json().catch(() => ({}));
+          return new Response(JSON.stringify({ success: trafficRes.ok, mode: "traffic_optimize", result: trafficData }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        // Deterministic fallback (no model credits required)
+        const quickDecisionPack = {
+          thinking: "Rule-based command execution from live backend metrics",
+          analysis: `Revenue $${metrics?.totalRevenue || 0}, orders ${metrics?.totalOrders || 0}, traffic24h ${metrics?.trafficEvents24h || 0}`,
+          decisions: [
+            {
+              category: "OPTIMIZATION",
+              action: "Prioritize top-traffic source into active campaigns",
+              reasoning: "Highest immediate lift usually comes from channels already generating traffic.",
+              priority: "high",
+              expected_impact: "Improved conversion from existing visitors",
+              confidence: 0.82,
+              data_sources: ["internal_metrics"]
+            },
+            {
+              category: "AGENT_DEPLOYMENT",
+              action: "Deploy all active teams for coordinated lead->close workflow",
+              reasoning: "Cross-role handoff execution increases throughput without waiting for manual ops.",
+              priority: "high",
+              expected_impact: "More decision cycles and campaign output per hour",
+              confidence: 0.84,
+              data_sources: ["internal_metrics"]
+            }
+          ],
+          kpis_to_monitor: ["orders", "totalRevenue", "conversions24h"],
+          next_thinking_cycle: "Re-run after next 50 traffic events"
+        };
+
+        await saveDecisions(supabase, quickDecisionPack, "deterministic_command");
+
+        return new Response(JSON.stringify({
+          success: true,
+          mode: "strategic_command",
+          thinking_cycle: quickDecisionPack,
         }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 

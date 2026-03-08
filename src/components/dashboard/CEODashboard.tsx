@@ -32,7 +32,7 @@ const categoryIcons = {
 };
 
 export const CEODashboard = () => {
-  const { decisions, metrics, isThinking, think, agentBrains } = useCeoBrain();
+  const { decisions, metrics, isThinking, think, agentBrains, runSalesNow, isRunningSalesNow } = useCeoBrain();
   const { data: topProducts } = useTopProducts(5);
   const [commandInput, setCommandInput] = useState("");
   const [pulseAnimation, setPulseAnimation] = useState(false);
@@ -230,25 +230,45 @@ export const CEODashboard = () => {
               <Sparkles className="w-5 h-5 text-emerald-400" />
               AI Strategic Decisions
             </h3>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => think("Generate new growth strategy")}
-              disabled={isThinking}
-              className="border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
-            >
-              {isThinking ? (
-                <>
-                  <Activity className="w-4 h-4 mr-2 animate-spin" />
-                  Thinking...
-                </>
-              ) : (
-                <>
-                  <Brain className="w-4 h-4 mr-2" />
-                  New Cycle
-                </>
-              )}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                onClick={() => {
+                  runSalesNow();
+                  toast.success("🔥 Live sales run started");
+                }}
+                disabled={isRunningSalesNow}
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                {isRunningSalesNow ? (
+                  <>
+                    <Activity className="w-4 h-4 mr-2 animate-spin" />
+                    Running...
+                  </>
+                ) : (
+                  <>🔥 Sell Now</>
+                )}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => think("Generate new growth strategy")}
+                disabled={isThinking}
+                className="border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
+              >
+                {isThinking ? (
+                  <>
+                    <Activity className="w-4 h-4 mr-2 animate-spin" />
+                    Thinking...
+                  </>
+                ) : (
+                  <>
+                    <Brain className="w-4 h-4 mr-2" />
+                    New Cycle
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
 
           <div className="space-y-3">
