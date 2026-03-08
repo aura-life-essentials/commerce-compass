@@ -1,4 +1,4 @@
-import { Brain, Bell, Settings, Command, LogOut, Shield, Crown, CreditCard, Globe, Sparkles } from "lucide-react";
+import { Brain, Bell, Settings, Command, LogOut, Shield, Crown, CreditCard, Globe, Sparkles, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";

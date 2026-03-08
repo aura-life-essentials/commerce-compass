@@ -6,6 +6,7 @@ import { AutonomousEngine } from "@/components/dashboard/AutonomousEngine";
 import { CEODashboard } from "@/components/dashboard/CEODashboard";
 import { SwarmTeams } from "@/components/dashboard/SwarmTeams";
 import { MetricCard } from "@/components/dashboard/MetricCard";
+import { VoiceControlPanel } from "@/components/dashboard/VoiceControlPanel";
 import { useAgentLogs } from "@/hooks/useAgentLogs";
 import { useAggregatedRevenue } from "@/hooks/useRevenueMetrics";
 import { useCeoBrain } from "@/hooks/useCeoBrain";
