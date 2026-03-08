@@ -49,7 +49,8 @@ const MarketingBlitz = () => {
     }
 
     setIsGenerating(true);
-    setProgress(0);
+    setProgress(10);
+    setGeneratingStatus("Preparing local-first AI workflows...");
 
     const products = shopifyProducts.slice(0, 5).map((p) => ({
       title: p.node.title,
@@ -58,31 +59,33 @@ const MarketingBlitz = () => {
       handle: p.node.handle,
     }));
 
-    const totalJobs = products.length * 4;
-    let completed = 0;
+    try {
+      setProgress(35);
+      setGeneratingStatus("Generating cross-platform campaigns...");
 
-    // Generate one product at a time to avoid rate limits
-    for (const product of products) {
-      for (const platform of ["tiktok", "instagram", "twitter", "facebook"]) {
-        setGeneratingStatus(`${product.title} → ${platform}`);
-        try {
-          await supabase.functions.invoke("marketing-blitz", {
-            body: { action: "single", product, platform },
-          });
-          completed++;
-          setProgress(Math.round((completed / totalJobs) * 100));
-        } catch (e) {
-          console.error(e);
-          completed++;
-          setProgress(Math.round((completed / totalJobs) * 100));
-        }
-      }
+      const { data, error } = await supabase.functions.invoke("marketing-blitz", {
+        body: { action: "blitz_all", products, mode: "local" },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setProgress(100);
+      setGeneratingStatus("Campaigns ready");
+      refetchCampaigns();
+
+      const total = data?.total || 0;
+      toast.success(`Generated ${total} local AI content pieces`);
+    } catch (e) {
+      console.error(e);
+      toast.error("Blitz generation failed");
+    } finally {
+      setTimeout(() => {
+        setIsGenerating(false);
+        setGeneratingStatus("");
+        setProgress(0);
+      }, 300);
     }
-
-    setIsGenerating(false);
-    setGeneratingStatus("");
-    refetchCampaigns();
-    toast.success(`Generated ${completed} pieces of marketing content!`);
   };
 
   const handleCopy = (text: string, id: string) => {
@@ -122,7 +125,7 @@ const MarketingBlitz = () => {
                 Marketing Blitz 🚀
               </h1>
               <p className="text-muted-foreground mt-1">
-                AI-generated marketing content for every product × every platform
+                Local-first AI engine generating real campaign assets for every product × platform
               </p>
             </div>
             <Button
