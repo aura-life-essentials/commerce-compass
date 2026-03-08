@@ -24,6 +24,7 @@ import SubscriptionManagement from "./pages/SubscriptionManagement";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import RefundPolicy from "./pages/RefundPolicy";
+import ViralEngine from "./pages/ViralEngine";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
