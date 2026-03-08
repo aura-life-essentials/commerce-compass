@@ -17,7 +17,9 @@ export type Database = {
       agent_brains: {
         Row: {
           agent_name: string
+          agent_role: string | null
           agent_type: string
+          brain_template: string | null
           created_at: string
           current_state: Json | null
           decision_history: Json | null
@@ -26,11 +28,16 @@ export type Database = {
           last_decision_at: string | null
           learning_data: Json | null
           performance_score: number | null
+          revenue_generated: number | null
+          tasks_completed: number | null
+          team_id: string | null
           updated_at: string
         }
         Insert: {
           agent_name: string
+          agent_role?: string | null
           agent_type: string
+          brain_template?: string | null
           created_at?: string
           current_state?: Json | null
           decision_history?: Json | null
@@ -39,11 +46,16 @@ export type Database = {
           last_decision_at?: string | null
           learning_data?: Json | null
           performance_score?: number | null
+          revenue_generated?: number | null
+          tasks_completed?: number | null
+          team_id?: string | null
           updated_at?: string
         }
         Update: {
           agent_name?: string
+          agent_role?: string | null
           agent_type?: string
+          brain_template?: string | null
           created_at?: string
           current_state?: Json | null
           decision_history?: Json | null
@@ -52,9 +64,20 @@ export type Database = {
           last_decision_at?: string | null
           learning_data?: Json | null
           performance_score?: number | null
+          revenue_generated?: number | null
+          tasks_completed?: number | null
+          team_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "agent_brains_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "agent_teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       agent_conversations: {
         Row: {
@@ -185,6 +208,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      agent_teams: {
+        Row: {
+          campaigns_run: number | null
+          created_at: string
+          current_workflow: string | null
+          deals_closed: number | null
+          id: string
+          is_active: boolean | null
+          last_active_at: string | null
+          niche: string
+          performance_score: number | null
+          team_name: string
+          team_number: number
+          team_type: string
+          total_revenue: number | null
+          updated_at: string
+        }
+        Insert: {
+          campaigns_run?: number | null
+          created_at?: string
+          current_workflow?: string | null
+          deals_closed?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_active_at?: string | null
+          niche?: string
+          performance_score?: number | null
+          team_name: string
+          team_number: number
+          team_type?: string
+          total_revenue?: number | null
+          updated_at?: string
+        }
+        Update: {
+          campaigns_run?: number | null
+          created_at?: string
+          current_workflow?: string | null
+          deals_closed?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_active_at?: string | null
+          niche?: string
+          performance_score?: number | null
+          team_name?: string
+          team_number?: number
+          team_type?: string
+          total_revenue?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       ai_decisions: {
         Row: {
