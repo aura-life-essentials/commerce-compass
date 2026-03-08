@@ -93,6 +93,9 @@ const AppContent = () => {
         </ProtectedRoute>
       } />
       
+      {/* Contact */}
+      <Route path="/contact" element={<Contact />} />
+      
       {/* Legal pages */}
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsOfService />} />
