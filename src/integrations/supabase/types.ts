@@ -350,6 +350,66 @@ export type Database = {
         }
         Relationships: []
       }
+      content_pipeline: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          metadata: Json | null
+          platform: string
+          post_id: string | null
+          post_url: string | null
+          product_data: Json | null
+          product_name: string
+          script: string | null
+          source: string
+          stage: string
+          status: string
+          thumbnail_url: string | null
+          updated_at: string
+          video_request_id: string | null
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          platform?: string
+          post_id?: string | null
+          post_url?: string | null
+          product_data?: Json | null
+          product_name: string
+          script?: string | null
+          source?: string
+          stage?: string
+          status?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          video_request_id?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          platform?: string
+          post_id?: string | null
+          post_url?: string | null
+          product_data?: Json | null
+          product_name?: string
+          script?: string | null
+          source?: string
+          stage?: string
+          status?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          video_request_id?: string | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       crypto_transactions: {
         Row: {
           amount: number
