@@ -75,6 +75,13 @@ const AppContent = () => {
       {/* Subscription Management */}
       <Route path="/subscription" element={<SubscriptionManagement />} />
       
+      {/* Viral Engine */}
+      <Route path="/viral-engine" element={
+        <ProtectedRoute requireAdmin>
+          <ViralEngine />
+        </ProtectedRoute>
+      } />
+      
       {/* Legal pages */}
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsOfService />} />
