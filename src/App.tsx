@@ -105,6 +105,13 @@ const AppContent = () => {
         </ProtectedRoute>
       } />
       
+      {/* Bot Swarm */}
+      <Route path="/bot-swarm" element={
+        <ProtectedRoute requireAdmin>
+          <BotSwarm />
+        </ProtectedRoute>
+      } />
+      
       {/* Legal pages */}
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsOfService />} />
