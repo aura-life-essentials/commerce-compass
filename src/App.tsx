@@ -28,6 +28,7 @@ import ViralEngine from "./pages/ViralEngine";
 import ContentFactory from "./pages/ContentFactory";
 import Welcome from "./pages/Welcome";
 import Contact from "./pages/Contact";
+import WarRoom from "./pages/WarRoom";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
