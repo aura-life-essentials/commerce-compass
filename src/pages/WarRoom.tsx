@@ -6,6 +6,7 @@ import { AutonomousEngine } from "@/components/dashboard/AutonomousEngine";
 import { CEODashboard } from "@/components/dashboard/CEODashboard";
 import { SwarmTeams } from "@/components/dashboard/SwarmTeams";
 import { MetricCard } from "@/components/dashboard/MetricCard";
+import { VoiceControlPanel } from "@/components/dashboard/VoiceControlPanel";
 import { useAgentLogs } from "@/hooks/useAgentLogs";
 import { useAggregatedRevenue } from "@/hooks/useRevenueMetrics";
 import { useCeoBrain } from "@/hooks/useCeoBrain";
@@ -64,6 +65,11 @@ const WarRoom = () => {
               </Badge>
             </div>
           </motion.div>
+
+          {/* Voice Control */}
+          <div className="mb-8">
+            <VoiceControlPanel />
+          </div>
 
           {/* Key Battle Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
