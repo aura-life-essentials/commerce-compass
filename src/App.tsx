@@ -29,6 +29,7 @@ import ContentFactory from "./pages/ContentFactory";
 import Welcome from "./pages/Welcome";
 import Contact from "./pages/Contact";
 import WarRoom from "./pages/WarRoom";
+import BotSwarm from "./pages/BotSwarm";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
