@@ -20,6 +20,12 @@ interface BusinessMetrics {
   totalProducts: number;
   totalOrders: number;
   avgOrderValue: number;
+  totalStripeRevenue: number;
+  totalOrderRevenue: number;
+  conversions24h: number;
+  trafficEvents24h: number;
+  topSources: Array<{ source: string; events: number; revenue: number }>;
+  activeCampaigns: number;
   topProducts: any[];
   recentDecisions: any[];
   marketData: any[];
