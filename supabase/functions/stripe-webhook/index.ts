@@ -30,7 +30,10 @@ serve(async (req) => {
 
     let event: Stripe.Event;
 
-    // Verify webhook signature if secret is configured
+    // Verify webhook signature - REQUIRED for production security
+    if (!STRIPE_WEBHOOK_SECRET) {
+      logStep("WARNING: STRIPE_WEBHOOK_SECRET not configured - webhook signature verification disabled");
+    }
     if (STRIPE_WEBHOOK_SECRET && signature) {
       try {
         event = stripe.webhooks.constructEvent(body, signature, STRIPE_WEBHOOK_SECRET);

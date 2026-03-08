@@ -307,7 +307,14 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const body = await req.json().catch(() => ({}));
-    const { action, focusArea } = body;
+    const { action } = body;
+    const focusArea = typeof body.focusArea === "string" ? body.focusArea.slice(0, 500) : undefined;
+    const validActions = ["think", "get_state", "execute_decision", "autonomous_loop"];
+    if (action && !validActions.includes(action)) {
+      return new Response(JSON.stringify({ error: "Invalid action" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     switch (action) {
       case "think": {

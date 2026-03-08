@@ -51,7 +51,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: systemPrompts[type] || systemPrompts.research
+            content: systemPrompts[safeType] || systemPrompts.research
           },
           {
             role: "user",

@@ -38,7 +38,16 @@ serve(async (req) => {
 
   try {
     const body: CheckoutRequest = await req.json();
-    console.log("[CREATE-CHECKOUT] Request received:", JSON.stringify(body));
+    
+    // Input validation
+    if (body.items && body.items.length > 50) {
+      throw new Error("Maximum 50 items per checkout");
+    }
+    if (body.customerEmail && (typeof body.customerEmail !== "string" || body.customerEmail.length > 255)) {
+      throw new Error("Invalid customer email");
+    }
+    
+    console.log("[CREATE-CHECKOUT] Request received:", JSON.stringify({ itemCount: body.items?.length, productId: body.productId }));
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");

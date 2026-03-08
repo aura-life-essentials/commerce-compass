@@ -107,7 +107,21 @@ serve(async (req) => {
   }
 
   try {
-    const { action, agent_type, context } = await req.json();
+    const body = await req.json();
+    const { action, agent_type, context } = body;
+    
+    // Input validation
+    const validActions = ["think", "execute", "status"];
+    if (!action || !validActions.includes(action)) {
+      return new Response(JSON.stringify({ error: "Invalid action. Must be: think, execute, or status" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (action === "think" && (!agent_type || typeof agent_type !== "string" || agent_type.length > 100)) {
+      return new Response(JSON.stringify({ error: "Valid agent_type required" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     logStep("Request received", { action, agent_type });
 
     if (action === "think") {
