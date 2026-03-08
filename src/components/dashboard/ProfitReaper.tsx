@@ -1,164 +1,129 @@
-import { useState, useEffect } from "react";
 import { 
-  Skull, 
-  DollarSign, 
-  TrendingUp, 
-  Package, 
-  Zap, 
-  ArrowUpRight,
-  RefreshCw,
-  Target,
-  Flame
+  Skull, DollarSign, TrendingUp, Package, Zap, ArrowUpRight, Target, Flame, AlertCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useShopifyProducts } from "@/hooks/useShopifyProducts";
+import { Skeleton } from "@/components/ui/skeleton";
 import profitReaperAvatar from "@/assets/profit-reaper-avatar.jpg";
 
-interface ProfitMetric {
-  label: string;
-  value: string;
-  change: string;
-  trend: "up" | "down" | "neutral";
-}
-
-const PROFIT_MARGIN = 0.67; // 67% profit margin
-
 export const ProfitReaper = () => {
-  const [isActive, setIsActive] = useState(true);
-  const [productsProcessed, setProductsProcessed] = useState(0);
-  const [totalProfit, setTotalProfit] = useState(0);
-  const [reapingProgress, setReapingProgress] = useState(0);
+  // Real data from database
+  const { data: orderStats, isLoading: ordersLoading } = useQuery({
+    queryKey: ["profit-reaper-orders"],
+    queryFn: async () => {
+      const { data, error, count } = await supabase
+        .from("orders")
+        .select("total_amount, subtotal, created_at", { count: "exact" });
+      if (error) throw error;
+      const totalRevenue = data?.reduce((sum, o) => sum + Number(o.total_amount || 0), 0) || 0;
+      return { totalRevenue, orderCount: count || 0 };
+    },
+    refetchInterval: 30000,
+  });
 
-  // Simulate live profit reaping
-  useEffect(() => {
-    if (!isActive) return;
-    
-    const interval = setInterval(() => {
-      setProductsProcessed(prev => prev + Math.floor(Math.random() * 3) + 1);
-      setTotalProfit(prev => prev + Math.random() * 50 + 10);
-      setReapingProgress(prev => (prev + 2) % 100);
-    }, 2000);
+  const { data: stripeStats } = useQuery({
+    queryKey: ["profit-reaper-stripe"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("stripe_transactions")
+        .select("amount, status");
+      if (error) throw error;
+      const succeeded = data?.filter(t => t.status === 'succeeded') || [];
+      const totalRevenue = succeeded.reduce((sum, t) => sum + Number(t.amount), 0);
+      return { totalRevenue, transactionCount: succeeded.length };
+    },
+    refetchInterval: 30000,
+  });
 
-    return () => clearInterval(interval);
-  }, [isActive]);
+  const { data: shopifyProducts } = useShopifyProducts(50);
 
-  const metrics: ProfitMetric[] = [
+  const realRevenue = (orderStats?.totalRevenue || 0) + (stripeStats?.totalRevenue || 0);
+  const realProfit = realRevenue * 0.67;
+  const productCount = shopifyProducts?.length || 0;
+
+  const metrics = [
     { 
-      label: "Products Sourced", 
-      value: productsProcessed.toString(), 
-      change: "+12/hr", 
-      trend: "up" 
+      label: "Shopify Products", 
+      value: productCount.toString(), 
+      detail: "Live on store",
+      isReal: true,
     },
     { 
       label: "Profit Margin", 
       value: "67%", 
-      change: "Fixed", 
-      trend: "neutral" 
+      detail: "Target (if selling)",
+      isReal: true,
     },
     { 
-      label: "Total Profit", 
-      value: `$${totalProfit.toFixed(2)}`, 
-      change: "+$847 today", 
-      trend: "up" 
+      label: "Total Revenue", 
+      value: `$${realRevenue.toFixed(2)}`, 
+      detail: realRevenue > 0 ? "From real orders" : "No sales yet",
+      isReal: realRevenue > 0,
     },
     { 
-      label: "Active Stores", 
-      value: "4", 
-      change: "All synced", 
-      trend: "neutral" 
+      label: "Est. Profit", 
+      value: `$${realProfit.toFixed(2)}`, 
+      detail: realProfit > 0 ? "@ 67% margin" : "No profit yet",
+      isReal: realProfit > 0,
     },
   ];
-
-  const calculateCustomerPrice = (cost: number, shippingCost: number) => {
-    const totalCost = cost + shippingCost;
-    return totalCost * (1 + PROFIT_MARGIN);
-  };
 
   return (
     <div className="glass rounded-xl overflow-hidden">
       {/* Hero Header with Avatar */}
       <div className="relative h-48 overflow-hidden">
-        <img 
-          src={profitReaperAvatar} 
-          alt="Profit Reaper" 
-          className="w-full h-full object-cover opacity-40"
-        />
+        <img src={profitReaperAvatar} alt="Profit Reaper" className="w-full h-full object-cover opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-t from-card via-card/80 to-transparent" />
-        
-        {/* Floating Title */}
         <div className="absolute bottom-4 left-6 right-6">
           <div className="flex items-center gap-3">
-            <div className={cn(
-              "w-14 h-14 rounded-xl flex items-center justify-center",
-              "bg-gradient-to-br from-emerald-500/30 to-red-500/30",
-              "border border-emerald-500/30",
-              isActive && "animate-pulse"
-            )}>
+            <div className="w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-emerald-500/30 to-red-500/30 border border-emerald-500/30">
               <Skull className="w-7 h-7 text-emerald-400" />
             </div>
             <div>
               <h3 className="text-xl font-bold text-gradient flex items-center gap-2">
                 Profit Reaper
-                {isActive && (
-                  <span className="flex items-center gap-1 text-xs font-normal text-emerald-400">
-                    <Zap className="w-3 h-3" />
-                    ACTIVE
-                  </span>
-                )}
+                <Badge variant="outline" className={cn(
+                  "text-xs",
+                  realRevenue > 0 ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : "bg-amber-500/20 text-amber-400 border-amber-500/30"
+                )}>
+                  {realRevenue > 0 ? "EARNING" : "STANDBY"}
+                </Badge>
               </h3>
-              <p className="text-sm text-muted-foreground">
-                Autonomous 67% Margin Optimizer
-              </p>
+              <p className="text-sm text-muted-foreground">Real revenue tracking — no fake numbers</p>
             </div>
           </div>
         </div>
-
-        {/* Toggle Button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setIsActive(!isActive)}
-          className="absolute top-4 right-4 gap-2"
-        >
-          <RefreshCw className={cn("w-4 h-4", isActive && "animate-spin")} />
-          {isActive ? "Pause" : "Resume"}
-        </Button>
       </div>
 
-      {/* Metrics Grid */}
       <div className="p-6">
+        {/* Truth Notice */}
+        {realRevenue === 0 && (
+          <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 mb-4 flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+            <p className="text-xs text-amber-400">
+              No real sales recorded yet. Revenue will appear here once actual Stripe payments or Shopify orders come through.
+            </p>
+          </div>
+        )}
+
+        {/* Metrics Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          {metrics.map((metric, idx) => (
-            <div 
-              key={metric.label}
-              className="p-4 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-all"
-            >
+          {metrics.map((metric) => (
+            <div key={metric.label} className="p-4 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-all">
               <p className="text-xs text-muted-foreground mb-1">{metric.label}</p>
-              <p className="text-xl font-bold">{metric.value}</p>
+              <p className="text-xl font-bold">{ordersLoading ? "..." : metric.value}</p>
               <p className={cn(
-                "text-xs flex items-center gap-1",
-                metric.trend === "up" && "text-emerald-400",
-                metric.trend === "down" && "text-red-400",
-                metric.trend === "neutral" && "text-muted-foreground"
+                "text-xs",
+                metric.isReal ? "text-emerald-400" : "text-muted-foreground"
               )}>
-                {metric.trend === "up" && <ArrowUpRight className="w-3 h-3" />}
-                {metric.change}
+                {metric.detail}
               </p>
             </div>
           ))}
-        </div>
-
-        {/* Reaping Progress */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium flex items-center gap-2">
-              <Flame className="w-4 h-4 text-orange-400" />
-              Product Sourcing Pipeline
-            </span>
-            <span className="text-sm text-muted-foreground">{reapingProgress}%</span>
-          </div>
-          <Progress value={reapingProgress} className="h-2" />
         </div>
 
         {/* Pricing Formula */}
@@ -175,46 +140,8 @@ export const ProfitReaper = () => {
             <span className="text-orange-400">1.67</span>
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            Auto-applied to all Aura Dropshipping products across connected stores
+            Applied when products are sourced and listed
           </p>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="mt-6">
-          <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-            <Package className="w-4 h-4 text-primary" />
-            Recent Profit Events
-          </h4>
-          <div className="space-y-2">
-            {[
-              { product: "Wireless Earbuds Pro", cost: 12.50, profit: 8.38 },
-              { product: "Smart Watch Band", cost: 8.20, profit: 5.49 },
-              { product: "LED Desk Lamp", cost: 15.80, profit: 10.59 },
-            ].map((event, idx) => (
-              <div 
-                key={idx}
-                className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                    <DollarSign className="w-4 h-4 text-emerald-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">{event.product}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Cost: ${event.cost.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-bold text-emerald-400">
-                    +${event.profit.toFixed(2)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">profit</p>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </div>
