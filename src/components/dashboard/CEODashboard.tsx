@@ -32,7 +32,7 @@ const categoryIcons = {
 };
 
 export const CEODashboard = () => {
-  const { decisions, metrics, isThinking, think, agentBrains } = useCeoBrain();
+  const { decisions, metrics, isThinking, think, agentBrains, runSalesNow, isRunningSalesNow } = useCeoBrain();
   const { data: topProducts } = useTopProducts(5);
   const [commandInput, setCommandInput] = useState("");
   const [pulseAnimation, setPulseAnimation] = useState(false);
