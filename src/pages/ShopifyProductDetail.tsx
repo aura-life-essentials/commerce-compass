@@ -11,6 +11,12 @@ import { ShopifyProductCard } from "@/components/store/ShopifyProductCard";
 import { StoreFooter } from "@/components/store/StoreFooter";
 import {
   ArrowLeft, ShoppingCart, Loader2, Zap, Minus, Plus,
+  Truck, Shield, RotateCcw, Star, Check, Package, TrendingUp
+} from "lucide-react";
+import { ShopifyProductCard } from "@/components/store/ShopifyProductCard";
+import { StoreFooter } from "@/components/store/StoreFooter";
+import {
+  ArrowLeft, ShoppingCart, Loader2, Zap, Minus, Plus,
   Truck, Shield, RotateCcw, Star, Check, Package
 } from "lucide-react";
 import { toast } from "sonner";
