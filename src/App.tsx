@@ -113,6 +113,13 @@ const AppContent = () => {
         </ProtectedRoute>
       } />
       
+      {/* Marketing Blitz */}
+      <Route path="/marketing-blitz" element={
+        <ProtectedRoute requireAdmin>
+          <MarketingBlitz />
+        </ProtectedRoute>
+      } />
+      
       {/* Legal pages */}
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsOfService />} />
