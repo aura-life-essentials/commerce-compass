@@ -213,7 +213,7 @@ const Store = () => {
       </main>
 
       <StoreFooter />
-      <SocialProofToast />
+      <SocialProofToast products={products || []} />
       <EmailCapturePopup />
 
       {/* Back to top */}
