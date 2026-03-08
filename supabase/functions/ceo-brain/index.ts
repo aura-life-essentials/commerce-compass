@@ -839,24 +839,21 @@ Be aggressive. Think like a CEO who wants 10x growth.` }
         }
 
         // Fallback to strategic think for open-ended commands
-        const result = await callWithTools(
-          [{ role: "system", content: CEO_SYSTEM_PROMPT }, { role: "user", content: `${metricsPrompt}\n\nUser command: ${command}` }],
-          [{ type: "web_search" }, { type: "x_search" }, ...BUSINESS_TOOLS],
-          GROK_REASONING
+        const content = await callChatFallback(
+          [
+            { role: "system", content: CEO_SYSTEM_PROMPT },
+            { role: "user", content: `${metricsPrompt}\n\nUser command: ${command}` }
+          ],
+          "reasoning"
         );
 
-        for (const tc of result.tool_calls) {
-          await executeToolCall(supabase, tc);
-        }
-
-        const parsed = parseAIResponse(result.content);
-        await saveDecisions(supabase, parsed, `${GROK_REASONING}+command`);
+        const parsed = parseAIResponse(content);
+        await saveDecisions(supabase, parsed, `${GROK_REASONING}+command_fallback`);
 
         return new Response(JSON.stringify({
           success: true,
           mode: "strategic_command",
           thinking_cycle: parsed,
-          citations: result.citations,
         }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
