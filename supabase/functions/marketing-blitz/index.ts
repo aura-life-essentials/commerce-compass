@@ -86,6 +86,12 @@ Return JSON with these exact fields:
   if (!response.ok) {
     const err = await response.text();
     console.error(`AI error for ${platform}:`, err);
+    if (response.status === 402) {
+      throw new Error("AI credits depleted. Please add credits in Settings → Workspace → Usage.");
+    }
+    if (response.status === 429) {
+      throw new Error("Rate limited. Retrying in a moment...");
+    }
     throw new Error(`AI generation failed: ${response.status}`);
   }
 
