@@ -554,14 +554,18 @@ serve(async (req) => {
 
     const metricsPrompt = metrics ? `
 ## Current Business State:
-- Revenue (30d): $${metrics.totalRevenue.toLocaleString()}
+- Revenue (best live source): $${metrics.totalRevenue.toLocaleString()}
+- Stripe Revenue: $${metrics.totalStripeRevenue.toLocaleString()} | Orders Revenue: $${metrics.totalOrderRevenue.toLocaleString()}
 - Products: ${metrics.totalProducts} | Orders: ${metrics.totalOrders} | AOV: $${metrics.avgOrderValue.toFixed(2)}
+- Traffic 24h: ${metrics.trafficEvents24h} events | Conversions 24h: ${metrics.conversions24h}
+- Active Campaigns: ${metrics.activeCampaigns}
+- Top Sources: ${JSON.stringify(metrics.topSources)}
 - Top Products: ${JSON.stringify(metrics.topProducts)}
 - Markets: ${JSON.stringify(metrics.marketData)}
 - Agents: ${JSON.stringify(metrics.agentPerformance)}
 ${focusArea ? `\n### Focus: ${focusArea}` : ''}
 
-Analyze and make 3-5 strategic decisions.` : "";
+Analyze and make 3-5 strategic decisions with immediate execution options.` : "";
 
     switch (action) {
       // ── Deep reasoning + ALL tools (web, X, code, functions) ──
