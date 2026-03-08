@@ -525,6 +525,101 @@ async function saveDecisions(supabase: any, brainOutput: any, engine: string): P
   });
 }
 
+async function invokeAutonomousBrain(supabaseUrl: string, serviceRoleKey: string, payload: Record<string, any>) {
+  const response = await fetch(`${supabaseUrl}/functions/v1/autonomous-brain`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${serviceRoleKey}`,
+      "apikey": serviceRoleKey,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    return { success: false, error: data?.error || `autonomous-brain ${response.status}` };
+  }
+
+  return { success: true, data };
+}
+
+async function runSalesWorkflow(supabase: any, supabaseUrl: string, serviceRoleKey: string, command: string) {
+  const metrics = await gatherBusinessMetrics(supabase);
+
+  const { data: existingCampaigns } = await supabase
+    .from("marketing_campaigns")
+    .select("id")
+    .eq("status", "active")
+    .limit(1);
+
+  const campaignResults: any[] = [];
+  if (!existingCampaigns?.length) {
+    const channels = ["tiktok", "instagram", "email"];
+    for (const channel of channels) {
+      const { data: campaign } = await supabase
+        .from("marketing_campaigns")
+        .insert({
+          campaign_name: `Auto ${channel} sales push ${new Date().toISOString().slice(0, 10)}`,
+          channel,
+          status: "active",
+          budget: 150,
+          ai_generated_content: {
+            source: "ceo_command",
+            command,
+            objective: "drive immediate product checkout traffic"
+          }
+        })
+        .select("id,campaign_name,channel")
+        .single();
+
+      if (campaign) campaignResults.push(campaign);
+    }
+  }
+
+  const deployRes = await invokeAutonomousBrain(supabaseUrl, serviceRoleKey, { action: "deploy_all" });
+
+  const executionResult = {
+    command,
+    metrics_snapshot: {
+      total_revenue: metrics.totalRevenue,
+      total_orders: metrics.totalOrders,
+      traffic_events_24h: metrics.trafficEvents24h,
+      conversions_24h: metrics.conversions24h,
+      active_campaigns: metrics.activeCampaigns,
+    },
+    campaigns_created: campaignResults.length,
+    campaign_details: campaignResults,
+    deployment: deployRes,
+  };
+
+  await supabase.from("ai_decisions").insert({
+    decision_type: "sales_command_execution",
+    reasoning: "Executed SELL NOW command with live campaign + swarm deployment workflow",
+    confidence_score: 0.92,
+    executed: true,
+    input_data: { command },
+    output_action: {
+      action: "run_sales_workflow",
+      category: "AGENT_DEPLOYMENT",
+      priority: "urgent",
+      expected_impact: "Activates campaign + autonomous teams from live metrics"
+    },
+    execution_result: executionResult,
+  });
+
+  await supabase.from("agent_logs").insert({
+    agent_name: "CEO Brain",
+    agent_role: "Sales Command",
+    action: `SELL NOW workflow triggered (${campaignResults.length} campaigns)` ,
+    status: deployRes.success ? "completed" : "error",
+    details: executionResult,
+    error_message: deployRes.success ? null : deployRes.error,
+  });
+
+  return executionResult;
+}
+
 // ═══════════════════════════════════════════════════════════════
 // Main Server
 // ═══════════════════════════════════════════════════════════════
