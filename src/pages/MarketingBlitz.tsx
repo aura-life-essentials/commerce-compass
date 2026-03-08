@@ -125,7 +125,7 @@ const MarketingBlitz = () => {
                 Marketing Blitz 🚀
               </h1>
               <p className="text-muted-foreground mt-1">
-                AI-generated marketing content for every product × every platform
+                Local-first AI engine generating real campaign assets for every product × platform
               </p>
             </div>
             <Button
