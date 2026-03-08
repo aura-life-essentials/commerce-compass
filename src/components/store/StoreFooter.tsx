@@ -25,6 +25,7 @@ export const StoreFooter = () => {
           <div>
             <h4 className="font-semibold text-white mb-4">Support</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
+              <li><Link to="/contact" className="hover:text-primary transition-colors">Contact Us</Link></li>
               <li><Link to="/refunds" className="hover:text-primary transition-colors">Shipping & Returns</Link></li>
               <li><Link to="/orders" className="hover:text-primary transition-colors">Track Order</Link></li>
               <li><Link to="/refunds" className="hover:text-primary transition-colors">Refund Policy</Link></li>
