@@ -13,7 +13,6 @@ serve(async (req) => {
   try {
     const { query, type = "research" } = await req.json();
 
-    // Input validation
     if (!query || typeof query !== "string") {
       return new Response(JSON.stringify({ error: "Query is required and must be a string" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -27,10 +26,9 @@ serve(async (req) => {
     const validTypes = ["research", "competitor", "trend", "financial"];
     const safeType = validTypes.includes(type) ? type : "research";
 
-    const PERPLEXITY_API_KEY = Deno.env.get("PERPLEXITY_API_KEY");
-
-    if (!PERPLEXITY_API_KEY) {
-      throw new Error("Perplexity API key not configured");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY is not configured");
     }
 
     const systemPrompts: Record<string, string> = {
@@ -40,14 +38,14 @@ serve(async (req) => {
       financial: "You are a financial analyst. Provide detailed financial analysis, valuation insights, and investment recommendations with supporting data."
     };
 
-    const response = await fetch("https://api.perplexity.ai/chat/completions", {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${PERPLEXITY_API_KEY}`,
+        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "sonar",
+        model: "google/gemini-3-flash-preview",
         messages: [
           {
             role: "system",
@@ -60,14 +58,22 @@ serve(async (req) => {
         ],
         temperature: 0.2,
         max_tokens: 2000,
-        return_citations: true,
-        search_recency_filter: "week"
       }),
     });
 
     if (!response.ok) {
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: "Rate limited, please try again later." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "Payment required, please add funds." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       const error = await response.text();
-      throw new Error(`Perplexity API error: ${error}`);
+      throw new Error(`AI gateway error: ${error}`);
     }
 
     const data = await response.json();
@@ -75,7 +81,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         content: data.choices[0]?.message?.content || "",
-        citations: data.citations || [],
+        citations: [],
         model: data.model
       }),
       { 

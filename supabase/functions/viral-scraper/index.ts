@@ -6,9 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
-const PERPLEXITY_API_KEY = Deno.env.get("PERPLEXITY_API_KEY");
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
@@ -21,42 +20,45 @@ const logStep = (step: string, details?: unknown) => {
 async function searchViralContent(query: string, platform: string) {
   logStep("Searching viral content", { query, platform });
 
-  // Use Perplexity to find viral content
-  const response = await fetch("https://api.perplexity.ai/chat/completions", {
+  if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${PERPLEXITY_API_KEY}`,
+      Authorization: `Bearer ${LOVABLE_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "sonar",
+      model: "google/gemini-3-flash-preview",
       messages: [
+        {
+          role: "system",
+          content: "You are a viral content research expert specializing in social media trends. Provide detailed, actionable insights about viral content."
+        },
         { 
           role: "user", 
           content: `Find the top 10 most viral ${platform} videos/posts about "${query}" from the past week. 
-          For each, provide: URL, estimated views, likes, shares, key hooks used, hashtags, and why it went viral.
+          For each, provide: estimated views, likes, shares, key hooks used, hashtags, and why it went viral.
           Focus on content with high engagement rates that could be replicated for e-commerce marketing.`
         }
       ],
-      search_recency_filter: "week",
     }),
   });
 
   if (!response.ok) {
-    throw new Error(`Perplexity search failed: ${response.status}`);
+    throw new Error(`AI gateway error: ${response.status}`);
   }
 
   const data = await response.json();
   return {
     content: data.choices?.[0]?.message?.content || "",
-    citations: data.citations || [],
+    citations: [],
   };
 }
 
 async function scrapeAndAnalyze(url: string) {
   logStep("Scraping URL", { url });
 
-  // Use Firecrawl to scrape the page
   const response = await fetch("https://api.firecrawl.dev/v1/scrape", {
     method: "POST",
     headers: {
@@ -83,6 +85,8 @@ async function scrapeAndAnalyze(url: string) {
 async function analyzeViralPatterns(content: string) {
   logStep("Analyzing viral patterns");
 
+  if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -90,7 +94,7 @@ async function analyzeViralPatterns(content: string) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
+      model: "google/gemini-3-flash-preview",
       messages: [
         { 
           role: "system", 
@@ -123,7 +127,6 @@ Return as structured JSON.`
   const data = await response.json();
   const analysisContent = data.choices?.[0]?.message?.content || "";
   
-  // Extract JSON
   const jsonMatch = analysisContent.match(/\{[\s\S]*\}/);
   if (jsonMatch) {
     try {
@@ -146,26 +149,13 @@ serve(async (req) => {
 
     if (action === "search") {
       const searchResults = await searchViralContent(query, platform || "tiktok");
-      
-      // Analyze the patterns
       const analysis = await analyzeViralPatterns(searchResults.content);
-
-      // Store citations as viral content
-      for (const citation of searchResults.citations.slice(0, 5)) {
-        await supabase.from("viral_content").upsert({
-          source_url: citation,
-          platform: platform || "tiktok",
-          content_type: "video",
-          extracted_hooks: analysis.hook_patterns || [],
-          analyzed_at: new Date().toISOString(),
-        }, { onConflict: "source_url", ignoreDuplicates: true });
-      }
 
       return new Response(JSON.stringify({ 
         success: true, 
         results: searchResults,
         analysis,
-        saved_count: searchResults.citations.length
+        saved_count: 0
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -181,7 +171,6 @@ serve(async (req) => {
 
       const analysis = await analyzeViralPatterns(scraped.markdown || scraped.html || "");
 
-      // Store in database
       const { data: saved, error } = await supabase.from("viral_content").insert({
         source_url: url,
         platform: platform || "unknown",
@@ -204,7 +193,6 @@ serve(async (req) => {
     }
 
     if (action === "trending") {
-      // Get trending viral content from database
       const { data: trending, error } = await supabase
         .from("viral_content")
         .select("*")
