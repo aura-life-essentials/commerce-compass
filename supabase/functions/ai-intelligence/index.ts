@@ -12,6 +12,21 @@ serve(async (req) => {
 
   try {
     const { query, type = "research" } = await req.json();
+
+    // Input validation
+    if (!query || typeof query !== "string") {
+      return new Response(JSON.stringify({ error: "Query is required and must be a string" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (query.length > 2000) {
+      return new Response(JSON.stringify({ error: "Query must be under 2000 characters" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const validTypes = ["research", "competitor", "trend", "financial"];
+    const safeType = validTypes.includes(type) ? type : "research";
+
     const PERPLEXITY_API_KEY = Deno.env.get("PERPLEXITY_API_KEY");
 
     if (!PERPLEXITY_API_KEY) {
