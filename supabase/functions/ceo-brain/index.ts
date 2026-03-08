@@ -800,6 +800,66 @@ Be aggressive. Think like a CEO who wants 10x growth.` }
         }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
+      // ── Explicit command router for operational control ──
+      case "command":
+      case "sales_run": {
+        const command = (body.command || body.focusArea || "").toString();
+        const normalized = command.toLowerCase();
+
+        if (!command.trim()) {
+          return new Response(JSON.stringify({ error: "command is required" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        if (normalized.includes("sell now") || normalized.includes("run live sales") || normalized.includes("deploy all")) {
+          const execution = await runSalesWorkflow(supabase, supabaseUrl, supabaseKey, command);
+          return new Response(JSON.stringify({
+            success: true,
+            mode: "sales_workflow",
+            execution,
+          }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        if (normalized.includes("traffic")) {
+          const trafficRes = await fetch(`${supabaseUrl}/functions/v1/traffic-webhook`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${supabaseKey}`,
+              "apikey": supabaseKey,
+            },
+            body: JSON.stringify({ action: "optimize" }),
+          });
+          const trafficData = await trafficRes.json().catch(() => ({}));
+          return new Response(JSON.stringify({ success: trafficRes.ok, mode: "traffic_optimize", result: trafficData }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        // Fallback to strategic think for open-ended commands
+        const result = await callWithTools(
+          [{ role: "system", content: CEO_SYSTEM_PROMPT }, { role: "user", content: `${metricsPrompt}\n\nUser command: ${command}` }],
+          [{ type: "web_search" }, { type: "x_search" }, ...BUSINESS_TOOLS],
+          GROK_REASONING
+        );
+
+        for (const tc of result.tool_calls) {
+          await executeToolCall(supabase, tc);
+        }
+
+        const parsed = parseAIResponse(result.content);
+        await saveDecisions(supabase, parsed, `${GROK_REASONING}+command`);
+
+        return new Response(JSON.stringify({
+          success: true,
+          mode: "strategic_command",
+          thinking_cycle: parsed,
+          citations: result.citations,
+        }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
       // ── Quick ops (no tools, fast response) ──
       case "quick_ops": {
         const { prompt } = body;
