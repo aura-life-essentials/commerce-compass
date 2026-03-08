@@ -62,25 +62,31 @@ export const useCeoBrain = () => {
   const { data: metrics } = useQuery({
     queryKey: ['ceo-metrics'],
     queryFn: async () => {
-      const [revenueRes, productsRes] = await Promise.all([
+      const [revenueRes, productsRes, ordersRes, stripeRes] = await Promise.all([
         supabase.from('revenue_metrics').select('revenue, orders_count, conversion_rate, avg_order_value'),
         supabase.from('products').select('id', { count: 'exact' }),
+        supabase.from('orders').select('id,total_amount'),
+        supabase.from('stripe_transactions').select('amount,status'),
       ]);
-      
-      const totalRevenue = revenueRes.data?.reduce((sum, r) => sum + (r.revenue || 0), 0) || 0;
-      const totalOrders = revenueRes.data?.reduce((sum, r) => sum + (r.orders_count || 0), 0) || 0;
-      const avgConversion = revenueRes.data?.length 
-        ? revenueRes.data.reduce((sum, r) => sum + (r.conversion_rate || 0), 0) / revenueRes.data.length 
+
+      const metricsRevenue = revenueRes.data?.reduce((sum, r) => sum + Number(r.revenue || 0), 0) || 0;
+      const ordersRevenue = ordersRes.data?.reduce((sum, o) => sum + Number(o.total_amount || 0), 0) || 0;
+      const stripeRevenue = stripeRes.data
+        ?.filter((t) => t.status === 'succeeded')
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0) || 0;
+
+      const totalRevenue = Math.max(metricsRevenue, ordersRevenue, stripeRevenue);
+      const totalOrders = ordersRes.data?.length || revenueRes.data?.reduce((sum, r) => sum + (r.orders_count || 0), 0) || 0;
+      const avgConversion = revenueRes.data?.length
+        ? revenueRes.data.reduce((sum, r) => sum + Number(r.conversion_rate || 0), 0) / revenueRes.data.length
         : 0;
-      const avgAOV = revenueRes.data?.length
-        ? revenueRes.data.reduce((sum, r) => sum + (r.avg_order_value || 0), 0) / revenueRes.data.length
-        : 0;
+      const avgAOV = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
       return {
         revenue: totalRevenue,
         orders: totalOrders,
         products: productsRes.count || 0,
-        activeAgents: 6, // Default active agents
+        activeAgents: 6,
         conversionRate: avgConversion * 100,
         avgOrderValue: avgAOV,
       } as CEOMetrics;
