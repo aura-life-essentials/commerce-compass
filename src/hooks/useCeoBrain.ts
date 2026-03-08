@@ -88,22 +88,50 @@ export const useCeoBrain = () => {
     refetchInterval: 5000,
   });
 
-  // Think mutation
+  // Think / command mutation
   const thinkMutation = useMutation({
     mutationFn: async (focusArea: string) => {
       setIsThinking(true);
+
+      const commandLike = /sell now|deploy|launch|execute|run\s+sales|autonomous loop/i.test(focusArea);
       const response = await supabase.functions.invoke('ceo-brain', {
-        body: { action: 'think', focusArea },
+        body: commandLike
+          ? { action: 'command', command: focusArea }
+          : { action: 'think', focusArea },
       });
+
       if (response.error) throw response.error;
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ai-decisions'] });
+      queryClient.invalidateQueries({ queryKey: ['agent-brains'] });
+      queryClient.invalidateQueries({ queryKey: ['ceo-metrics'] });
       setIsThinking(false);
     },
     onError: () => {
       setIsThinking(false);
+    },
+  });
+
+  // Execute full live sales run
+  const salesRunMutation = useMutation({
+    mutationFn: async () => {
+      const response = await supabase.functions.invoke('ceo-brain', {
+        body: {
+          action: 'command',
+          command: 'SELL NOW: run live sales workflow, deploy all active teams, and launch campaigns from current data',
+        },
+      });
+
+      if (response.error) throw response.error;
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ai-decisions'] });
+      queryClient.invalidateQueries({ queryKey: ['agent-brains'] });
+      queryClient.invalidateQueries({ queryKey: ['ceo-metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['agent_logs'] });
     },
   });
 
@@ -132,6 +160,8 @@ export const useCeoBrain = () => {
     agentBrains,
     isThinking,
     think,
+    runSalesNow: salesRunMutation.mutate,
+    isRunningSalesNow: salesRunMutation.isPending,
     executeDecision: executeMutation.mutate,
   };
 };
