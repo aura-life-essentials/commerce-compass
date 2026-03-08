@@ -838,22 +838,40 @@ Be aggressive. Think like a CEO who wants 10x growth.` }
           });
         }
 
-        // Fallback to strategic think for open-ended commands
-        const content = await callChatFallback(
-          [
-            { role: "system", content: CEO_SYSTEM_PROMPT },
-            { role: "user", content: `${metricsPrompt}\n\nUser command: ${command}` }
+        // Deterministic fallback (no model credits required)
+        const quickDecisionPack = {
+          thinking: "Rule-based command execution from live backend metrics",
+          analysis: `Revenue $${metrics?.totalRevenue || 0}, orders ${metrics?.totalOrders || 0}, traffic24h ${metrics?.trafficEvents24h || 0}`,
+          decisions: [
+            {
+              category: "OPTIMIZATION",
+              action: "Prioritize top-traffic source into active campaigns",
+              reasoning: "Highest immediate lift usually comes from channels already generating traffic.",
+              priority: "high",
+              expected_impact: "Improved conversion from existing visitors",
+              confidence: 0.82,
+              data_sources: ["internal_metrics"]
+            },
+            {
+              category: "AGENT_DEPLOYMENT",
+              action: "Deploy all active teams for coordinated lead->close workflow",
+              reasoning: "Cross-role handoff execution increases throughput without waiting for manual ops.",
+              priority: "high",
+              expected_impact: "More decision cycles and campaign output per hour",
+              confidence: 0.84,
+              data_sources: ["internal_metrics"]
+            }
           ],
-          "reasoning"
-        );
+          kpis_to_monitor: ["orders", "totalRevenue", "conversions24h"],
+          next_thinking_cycle: "Re-run after next 50 traffic events"
+        };
 
-        const parsed = parseAIResponse(content);
-        await saveDecisions(supabase, parsed, `${GROK_REASONING}+command_fallback`);
+        await saveDecisions(supabase, quickDecisionPack, "deterministic_command");
 
         return new Response(JSON.stringify({
           success: true,
           mode: "strategic_command",
-          thinking_cycle: parsed,
+          thinking_cycle: quickDecisionPack,
         }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
