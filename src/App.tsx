@@ -26,6 +26,8 @@ import TermsOfService from "./pages/TermsOfService";
 import RefundPolicy from "./pages/RefundPolicy";
 import ViralEngine from "./pages/ViralEngine";
 import ContentFactory from "./pages/ContentFactory";
+import Welcome from "./pages/Welcome";
+import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,8 +46,9 @@ const AppContent = () => {
         } 
       />
       
-      {/* Public landing page */}
-      <Route path="/welcome" element={<Landing />} />
+      {/* Public welcome/landing pages */}
+      <Route path="/welcome" element={<Welcome />} />
+      <Route path="/about" element={<Landing />} />
       
       {/* Public store routes */}
       <Route path="/store" element={<Store />} />
