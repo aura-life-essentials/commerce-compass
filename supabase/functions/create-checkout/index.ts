@@ -4,7 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 // Map product IDs to Stripe price IDs
@@ -38,7 +38,16 @@ serve(async (req) => {
 
   try {
     const body: CheckoutRequest = await req.json();
-    console.log("[CREATE-CHECKOUT] Request received:", JSON.stringify(body));
+    
+    // Input validation
+    if (body.items && body.items.length > 50) {
+      throw new Error("Maximum 50 items per checkout");
+    }
+    if (body.customerEmail && (typeof body.customerEmail !== "string" || body.customerEmail.length > 255)) {
+      throw new Error("Invalid customer email");
+    }
+    
+    console.log("[CREATE-CHECKOUT] Request received:", JSON.stringify({ itemCount: body.items?.length, productId: body.productId }));
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");

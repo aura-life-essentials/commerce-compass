@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -107,7 +107,21 @@ serve(async (req) => {
   }
 
   try {
-    const { action, agent_type, context } = await req.json();
+    const body = await req.json();
+    const { action, agent_type, context } = body;
+    
+    // Input validation
+    const validActions = ["think", "execute", "status"];
+    if (!action || !validActions.includes(action)) {
+      return new Response(JSON.stringify({ error: "Invalid action. Must be: think, execute, or status" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (action === "think" && (!agent_type || typeof agent_type !== "string" || agent_type.length > 100)) {
+      return new Response(JSON.stringify({ error: "Valid agent_type required" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     logStep("Request received", { action, agent_type });
 
     if (action === "think") {
