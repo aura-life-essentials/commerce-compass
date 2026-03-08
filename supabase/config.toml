@@ -50,3 +50,9 @@ verify_jwt = false
 
 [functions.send-subscription-email]
 verify_jwt = false
+
+[functions.viral-product-research]
+verify_jwt = false
+
+[functions.xai-video-generate]
+verify_jwt = false
