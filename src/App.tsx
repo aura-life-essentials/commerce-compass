@@ -94,59 +94,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            {/* Protected CEO Dashboard - requires admin access */}
-            <Route 
-              path="/" 
-              element={
-                <ProtectedRoute requireAdmin>
-                  <Index />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Public landing page */}
-            <Route path="/welcome" element={<Landing />} />
-            
-            {/* Public store routes */}
-            <Route path="/store" element={<Store />} />
-            <Route path="/product/:productId" element={<ProductDetail />} />
-            <Route path="/orders" element={<OrderHistory />} />
-            <Route path="/wishlist" element={<Wishlist />} />
-            <Route path="/checkout-success" element={<CheckoutSuccess />} />
-            <Route 
-              path="/metaverse" 
-              element={
-                <ProtectedRoute>
-                  <Metaverse />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Public pricing page */}
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/subscription-success" element={<SubscriptionSuccess />} />
-            
-            {/* Casino Launch page */}
-            <Route path="/casino" element={<CasinoLaunch />} />
-            
-            {/* Industry Roadmaps page */}
-            <Route path="/industry-roadmaps" element={<IndustryRoadmaps />} />
-            
-            {/* Subscription Management */}
-            <Route path="/subscription" element={<SubscriptionManagement />} />
-            
-            {/* Legal pages - Required for app store compliance */}
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/terms" element={<TermsOfService />} />
-            <Route path="/refunds" element={<RefundPolicy />} />
-            
-            {/* Auth route */}
-            <Route path="/auth" element={<Auth />} />
-            
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AppContent />
         </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>
