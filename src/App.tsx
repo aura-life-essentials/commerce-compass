@@ -83,6 +83,13 @@ const AppContent = () => {
         </ProtectedRoute>
       } />
       
+      {/* Content Factory */}
+      <Route path="/content-factory" element={
+        <ProtectedRoute requireAdmin>
+          <ContentFactory />
+        </ProtectedRoute>
+      } />
+      
       {/* Legal pages */}
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsOfService />} />
