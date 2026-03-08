@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { useCartSync } from "@/hooks/useCartSync";
 import Index from "./pages/Index";
 import Store from "./pages/Store";
 import ProductDetail from "./pages/ProductDetail";
