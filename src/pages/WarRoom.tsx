@@ -4,6 +4,7 @@ import { ProfitReaper } from "@/components/dashboard/ProfitReaper";
 import { AgentMonitor } from "@/components/dashboard/AgentMonitor";
 import { AutonomousEngine } from "@/components/dashboard/AutonomousEngine";
 import { CEODashboard } from "@/components/dashboard/CEODashboard";
+import { SwarmTeams } from "@/components/dashboard/SwarmTeams";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { useAgentLogs } from "@/hooks/useAgentLogs";
 import { useAggregatedRevenue } from "@/hooks/useRevenueMetrics";
