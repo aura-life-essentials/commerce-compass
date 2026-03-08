@@ -30,6 +30,7 @@ import Welcome from "./pages/Welcome";
 import Contact from "./pages/Contact";
 import WarRoom from "./pages/WarRoom";
 import BotSwarm from "./pages/BotSwarm";
+import MarketingBlitz from "./pages/MarketingBlitz";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -109,6 +110,13 @@ const AppContent = () => {
       <Route path="/bot-swarm" element={
         <ProtectedRoute requireAdmin>
           <BotSwarm />
+        </ProtectedRoute>
+      } />
+      
+      {/* Marketing Blitz */}
+      <Route path="/marketing-blitz" element={
+        <ProtectedRoute requireAdmin>
+          <MarketingBlitz />
         </ProtectedRoute>
       } />
       
