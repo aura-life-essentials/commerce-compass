@@ -70,6 +70,12 @@ export const Header = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            <Link to="/war-room">
+              <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300 hover:bg-red-500/10">
+                <Shield className="w-4 h-4 mr-2" />
+                War Room
+              </Button>
+            </Link>
             <Link to="/casino">
               <Button variant="ghost" size="sm" className="text-amber-400 hover:text-amber-300 hover:bg-amber-500/10">
                 <Sparkles className="w-4 h-4 mr-2" />
