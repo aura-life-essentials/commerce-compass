@@ -182,12 +182,28 @@ const BUSINESS_TOOLS = [
 // Business Metrics Gathering
 // ═══════════════════════════════════════════════════════════════
 async function gatherBusinessMetrics(supabase: any): Promise<BusinessMetrics> {
-  const [revenueResult, productsResult, decisionsResult, marketsResult, agentsResult] = await Promise.all([
+  const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+  const [
+    revenueResult,
+    productsResult,
+    decisionsResult,
+    marketsResult,
+    agentsResult,
+    ordersResult,
+    stripeResult,
+    trafficResult,
+    campaignsResult
+  ] = await Promise.all([
     supabase.from("revenue_metrics").select("*").order("date", { ascending: false }).limit(30),
     supabase.from("products").select("*").eq("status", "active"),
     supabase.from("ai_decisions").select("*").order("created_at", { ascending: false }).limit(20),
     supabase.from("global_markets").select("*").eq("is_active", true),
-    supabase.from("agent_brains").select("*").eq("is_active", true)
+    supabase.from("agent_brains").select("*").eq("is_active", true),
+    supabase.from("orders").select("id,total_amount,created_at,status").order("created_at", { ascending: false }).limit(500),
+    supabase.from("stripe_transactions").select("amount,status,created_at").order("created_at", { ascending: false }).limit(500),
+    supabase.from("traffic_webhooks").select("source,revenue,webhook_type,created_at").gte("created_at", since24h).limit(1000),
+    supabase.from("marketing_campaigns").select("id,status")
   ]);
 
   const revenue = revenueResult.data || [];
@@ -195,15 +211,39 @@ async function gatherBusinessMetrics(supabase: any): Promise<BusinessMetrics> {
   const decisions = decisionsResult.data || [];
   const markets = marketsResult.data || [];
   const agents = agentsResult.data || [];
+  const orders = ordersResult.data || [];
+  const stripe = stripeResult.data || [];
+  const traffic = trafficResult.data || [];
+  const campaigns = campaignsResult.data || [];
 
-  const totalRevenue = revenue.reduce((sum: number, r: any) => sum + (r.revenue || 0), 0);
-  const totalOrders = revenue.reduce((sum: number, r: any) => sum + (r.orders_count || 0), 0);
+  const revenueFromMetrics = revenue.reduce((sum: number, r: any) => sum + Number(r.revenue || 0), 0);
+  const totalOrderRevenue = orders.reduce((sum: number, o: any) => sum + Number(o.total_amount || 0), 0);
+  const totalStripeRevenue = stripe
+    .filter((t: any) => t.status === "succeeded")
+    .reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0);
+
+  const totalRevenue = Math.max(revenueFromMetrics, totalOrderRevenue, totalStripeRevenue);
+  const totalOrders = orders.length || revenue.reduce((sum: number, r: any) => sum + (r.orders_count || 0), 0);
+
+  const sourceAgg = (traffic || []).reduce((acc: Record<string, { source: string; events: number; revenue: number }>, event: any) => {
+    const key = event.source || "unknown";
+    if (!acc[key]) acc[key] = { source: key, events: 0, revenue: 0 };
+    acc[key].events += 1;
+    acc[key].revenue += Number(event.revenue || 0);
+    return acc;
+  }, {});
 
   return {
     totalRevenue,
     totalProducts: products.length,
     totalOrders,
     avgOrderValue: totalOrders > 0 ? totalRevenue / totalOrders : 0,
+    totalStripeRevenue,
+    totalOrderRevenue,
+    conversions24h: traffic.filter((t: any) => ["purchase", "conversion"].includes(t.webhook_type)).length,
+    trafficEvents24h: traffic.length,
+    topSources: Object.values(sourceAgg).sort((a, b) => b.revenue - a.revenue).slice(0, 5),
+    activeCampaigns: campaigns.filter((c: any) => c.status === "active").length,
     topProducts: products.slice(0, 10).map((p: any) => ({
       id: p.id, title: p.title, price: p.price, category: p.category,
       inventory: p.inventory_quantity,
