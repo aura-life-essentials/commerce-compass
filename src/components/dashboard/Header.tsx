@@ -76,6 +76,12 @@ export const Header = () => {
                 War Room
               </Button>
             </Link>
+            <Link to="/bot-swarm">
+              <Button variant="ghost" size="sm" className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10">
+                <Bot className="w-4 h-4 mr-2" />
+                Bot Swarm
+              </Button>
+            </Link>
             <Link to="/casino">
               <Button variant="ghost" size="sm" className="text-amber-400 hover:text-amber-300 hover:bg-amber-500/10">
                 <Sparkles className="w-4 h-4 mr-2" />
