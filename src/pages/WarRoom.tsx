@@ -107,6 +107,11 @@ const WarRoom = () => {
             <ProfitReaper />
           </div>
 
+          {/* 200-Agent Swarm Teams */}
+          <div className="mb-8">
+            <SwarmTeams />
+          </div>
+
           {/* CEO Brain Decisions */}
           <div className="mb-8">
             <CEODashboard />
