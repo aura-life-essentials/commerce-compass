@@ -97,6 +97,13 @@ const AppContent = () => {
       {/* Contact */}
       <Route path="/contact" element={<Contact />} />
       
+      {/* War Room */}
+      <Route path="/war-room" element={
+        <ProtectedRoute requireAdmin>
+          <WarRoom />
+        </ProtectedRoute>
+      } />
+      
       {/* Legal pages */}
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsOfService />} />
