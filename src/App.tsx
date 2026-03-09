@@ -121,6 +121,13 @@ const AppContent = () => {
         </ProtectedRoute>
       } />
       
+      {/* Web3 Launch Center */}
+      <Route path="/web3-launch" element={
+        <ProtectedRoute requireAdmin>
+          <Web3LaunchCenter />
+        </ProtectedRoute>
+      } />
+      
       {/* Legal pages */}
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsOfService />} />
