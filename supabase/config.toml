@@ -56,3 +56,6 @@ verify_jwt = false
 
 [functions.xai-video-generate]
 verify_jwt = false
+
+[functions.web3-launch-engine]
+verify_jwt = false

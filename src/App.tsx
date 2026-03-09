@@ -31,6 +31,7 @@ import Contact from "./pages/Contact";
 import WarRoom from "./pages/WarRoom";
 import BotSwarm from "./pages/BotSwarm";
 import MarketingBlitz from "./pages/MarketingBlitz";
+import Web3LaunchCenter from "./pages/Web3LaunchCenter";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -117,6 +118,13 @@ const AppContent = () => {
       <Route path="/marketing-blitz" element={
         <ProtectedRoute requireAdmin>
           <MarketingBlitz />
+        </ProtectedRoute>
+      } />
+      
+      {/* Web3 Launch Center */}
+      <Route path="/web3-launch" element={
+        <ProtectedRoute requireAdmin>
+          <Web3LaunchCenter />
         </ProtectedRoute>
       } />
       
