@@ -154,37 +154,37 @@ export default function Auth() {
           <p className="text-muted-foreground">Global Enterprise Sales Command Center</p>
         </div>
 
-        <Card className="bg-slate-900/80 border-slate-800 backdrop-blur-xl">
+        <Card className="bg-card/80 border-border backdrop-blur-xl">
           <CardHeader className="text-center pb-4">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <Shield className="h-5 w-5 text-green-400" />
-              <span className="text-sm text-green-400 font-medium">Secure Access</span>
+              <Shield className="h-5 w-5 text-primary" />
+              <span className="text-sm text-primary font-medium">Secure Access</span>
             </div>
-            <CardTitle className="text-xl text-white">Welcome Back</CardTitle>
-            <CardDescription className="text-slate-400">
+            <CardTitle className="text-xl text-foreground">Welcome Back</CardTitle>
+            <CardDescription className="text-muted-foreground">
               Sign in to access your command center
             </CardDescription>
           </CardHeader>
 
           <CardContent>
             {error && (
-              <Alert variant="destructive" className="mb-4 bg-red-900/20 border-red-800">
+              <Alert variant="destructive" className="mb-4">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
 
             {success && (
-              <Alert className="mb-4 bg-green-900/20 border-green-800">
-                <AlertDescription className="text-green-400">{success}</AlertDescription>
+              <Alert className="mb-4 border-primary/30 bg-primary/10">
+                <AlertDescription className="text-foreground">{success}</AlertDescription>
               </Alert>
             )}
 
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-slate-800/50">
-                <TabsTrigger value="login" className="data-[state=active]:bg-purple-600">
+              <TabsList className="grid w-full grid-cols-2 bg-muted/50">
+                <TabsTrigger value="login" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   Login
                 </TabsTrigger>
-                <TabsTrigger value="signup" className="data-[state=active]:bg-purple-600">
+                <TabsTrigger value="signup" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   Sign Up
                 </TabsTrigger>
               </TabsList>
