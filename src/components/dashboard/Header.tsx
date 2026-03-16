@@ -1,4 +1,4 @@
-import { Brain, Bell, Settings, Command, LogOut, Shield, Crown, CreditCard, Globe, Sparkles, Bot } from "lucide-react";
+import { Brain, Bell, Settings, Command, LogOut, Shield, Crown, CreditCard, Globe, Sparkles, Bot, Layers3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
@@ -92,6 +92,12 @@ export const Header = () => {
               <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                 <CreditCard className="w-4 h-4 mr-2" />
                 Pricing
+              </Button>
+            </Link>
+            <Link to="/app-monetizer">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                <Layers3 className="w-4 h-4 mr-2" />
+                Monetizer
               </Button>
             </Link>
             <Link to="/metaverse">

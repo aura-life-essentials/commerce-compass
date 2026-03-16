@@ -32,6 +32,7 @@ import WarRoom from "./pages/WarRoom";
 import BotSwarm from "./pages/BotSwarm";
 import MarketingBlitz from "./pages/MarketingBlitz";
 import Web3LaunchCenter from "./pages/Web3LaunchCenter";
+import AppMonetizer from "./pages/AppMonetizer";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -125,6 +126,13 @@ const AppContent = () => {
       <Route path="/web3-launch" element={
         <ProtectedRoute requireAdmin>
           <Web3LaunchCenter />
+        </ProtectedRoute>
+      } />
+
+      {/* App Monetizer */}
+      <Route path="/app-monetizer" element={
+        <ProtectedRoute requireAdmin>
+          <AppMonetizer />
         </ProtectedRoute>
       } />
       
