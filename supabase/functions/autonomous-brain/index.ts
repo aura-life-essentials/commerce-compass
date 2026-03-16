@@ -237,6 +237,7 @@ serve(async (req) => {
   }
 
   try {
+    await requireAdminUser(req);
     const body = await req.json();
     const { action, agent_type, context, team_id } = body;
 
