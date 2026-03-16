@@ -77,6 +77,11 @@ serve(async (req) => {
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
     const normalizedItems = body.items ?? [];
 
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    );
+
     if (normalizedItems.length > 0) {
       for (const item of normalizedItems) {
         const priceId = PRODUCT_PRICE_MAP[item.productId];
@@ -89,28 +94,37 @@ serve(async (req) => {
           continue;
         }
 
-        if (item.price && item.title) {
-          const optimizedPrice = getOptimizedPrice(item.price, item.compareAtPrice);
-          lineItems.push({
-            price_data: {
-              currency: "usd",
-              product_data: {
-                name: item.title,
-                metadata: {
-                  source_product_id: item.productId,
-                  base_price: String(item.price),
-                  compare_at_price: item.compareAtPrice ? String(item.compareAtPrice) : '',
-                  optimized_price: String(optimizedPrice),
-                },
-              },
-              unit_amount: Math.round(optimizedPrice * 100),
-            },
-            quantity: item.quantity,
-          });
-          continue;
+        const { data: product, error: productError } = await supabase
+          .from("products")
+          .select("id, title, price, compare_at_price")
+          .eq("id", item.productId)
+          .single();
+
+        if (productError || !product || !product.price) {
+          throw new Error(`Product not found or invalid: ${item.productId}`);
         }
 
-        console.warn(`[CREATE-CHECKOUT] Skipping item - no price mapping and no price data:`, item.productId);
+        const optimizedPrice = getOptimizedPrice(Number(product.price), Number(product.compare_at_price ?? 0) || null);
+        if (optimizedPrice <= 0) {
+          throw new Error(`Unable to price product: ${item.productId}`);
+        }
+
+        lineItems.push({
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: product.title,
+              metadata: {
+                source_product_id: product.id,
+                base_price: String(product.price),
+                compare_at_price: product.compare_at_price ? String(product.compare_at_price) : '',
+                optimized_price: String(optimizedPrice),
+              },
+            },
+            unit_amount: Math.round(optimizedPrice * 100),
+          },
+          quantity: item.quantity,
+        });
       }
     } else if (body.productId) {
       const priceId = PRODUCT_PRICE_MAP[body.productId] || body.productId;
@@ -150,11 +164,6 @@ serve(async (req) => {
         dynamicPricing: normalizedItems.length > 0 ? 'true' : 'false',
       },
     });
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    );
 
     await supabase.from("agent_logs").insert({
       agent_name: "Stripe Checkout",
