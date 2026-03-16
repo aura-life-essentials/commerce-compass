@@ -38,58 +38,99 @@ export const useCartStore = create<CartStore>()(
 
       addItem: async (item) => {
         const { items, cartId, clearCart } = get();
-        const existingItem = items.find(i => i.variantId === item.variantId);
+        const existingItem = items.find((i) => i.variantId === item.variantId);
         set({ isLoading: true });
+
         try {
           if (!cartId) {
             const result = await createShopifyCart({ ...item, lineId: null });
             if (result) {
-              set({ cartId: result.cartId, checkoutUrl: result.checkoutUrl, items: [{ ...item, lineId: result.lineId }] });
+              set({
+                cartId: result.cartId,
+                checkoutUrl: result.checkoutUrl,
+                items: [{ ...item, lineId: result.lineId }],
+              });
             }
-          } else if (existingItem) {
+            return;
+          }
+
+          if (existingItem) {
             const newQuantity = existingItem.quantity + item.quantity;
             if (!existingItem.lineId) return;
             const result = await updateShopifyCartLine(cartId, existingItem.lineId, newQuantity);
             if (result.success) {
-              set({ items: get().items.map(i => i.variantId === item.variantId ? { ...i, quantity: newQuantity } : i) });
-            } else if (result.cartNotFound) { clearCart(); }
-          } else {
-            const result = await addLineToShopifyCart(cartId, { ...item, lineId: null });
-            if (result.success) {
-              set({ items: [...get().items, { ...item, lineId: result.lineId ?? null }] });
-            } else if (result.cartNotFound) { clearCart(); }
+              set({
+                items: get().items.map((i) =>
+                  i.variantId === item.variantId ? { ...i, quantity: newQuantity } : i,
+                ),
+              });
+            } else if (result.cartNotFound) {
+              clearCart();
+            }
+            return;
           }
-        } catch (error) { console.error('Failed to add item:', error); }
-        finally { set({ isLoading: false }); }
+
+          const result = await addLineToShopifyCart(cartId, { ...item, lineId: null });
+          if (result.success) {
+            set({
+              items: [...get().items, { ...item, lineId: result.lineId ?? null }],
+            });
+          } else if (result.cartNotFound) {
+            clearCart();
+          }
+        } catch (error) {
+          console.error('Failed to add item:', error);
+        } finally {
+          set({ isLoading: false });
+        }
       },
 
       updateQuantity: async (variantId, quantity) => {
-        if (quantity <= 0) { await get().removeItem(variantId); return; }
+        if (quantity <= 0) {
+          await get().removeItem(variantId);
+          return;
+        }
+
         const { items, cartId, clearCart } = get();
-        const item = items.find(i => i.variantId === variantId);
+        const item = items.find((i) => i.variantId === variantId);
         if (!item?.lineId || !cartId) return;
+
         set({ isLoading: true });
         try {
           const result = await updateShopifyCartLine(cartId, item.lineId, quantity);
-          if (result.success) { set({ items: get().items.map(i => i.variantId === variantId ? { ...i, quantity } : i) }); }
-          else if (result.cartNotFound) { clearCart(); }
-        } catch (error) { console.error('Failed to update quantity:', error); }
-        finally { set({ isLoading: false }); }
+          if (result.success) {
+            set({
+              items: get().items.map((i) => (i.variantId === variantId ? { ...i, quantity } : i)),
+            });
+          } else if (result.cartNotFound) {
+            clearCart();
+          }
+        } catch (error) {
+          console.error('Failed to update quantity:', error);
+        } finally {
+          set({ isLoading: false });
+        }
       },
 
       removeItem: async (variantId) => {
         const { items, cartId, clearCart } = get();
-        const item = items.find(i => i.variantId === variantId);
+        const item = items.find((i) => i.variantId === variantId);
         if (!item?.lineId || !cartId) return;
+
         set({ isLoading: true });
         try {
           const result = await removeLineFromShopifyCart(cartId, item.lineId);
           if (result.success) {
-            const newItems = get().items.filter(i => i.variantId !== variantId);
+            const newItems = get().items.filter((i) => i.variantId !== variantId);
             newItems.length === 0 ? clearCart() : set({ items: newItems });
-          } else if (result.cartNotFound) { clearCart(); }
-        } catch (error) { console.error('Failed to remove item:', error); }
-        finally { set({ isLoading: false }); }
+          } else if (result.cartNotFound) {
+            clearCart();
+          }
+        } catch (error) {
+          console.error('Failed to remove item:', error);
+        } finally {
+          set({ isLoading: false });
+        }
       },
 
       clearCart: () => set({ items: [], cartId: null, checkoutUrl: null }),
@@ -98,20 +139,28 @@ export const useCartStore = create<CartStore>()(
       syncCart: async () => {
         const { cartId, isSyncing, clearCart } = get();
         if (!cartId || isSyncing) return;
+
         set({ isSyncing: true });
         try {
           const data = await storefrontApiRequest(CART_QUERY, { id: cartId });
           if (!data) return;
           const cart = data?.data?.cart;
           if (!cart || cart.totalQuantity === 0) clearCart();
-        } catch (error) { console.error('Failed to sync cart:', error); }
-        finally { set({ isSyncing: false }); }
-      }
+        } catch (error) {
+          console.error('Failed to sync cart:', error);
+        } finally {
+          set({ isSyncing: false });
+        }
+      },
     }),
     {
       name: 'shopify-cart',
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ items: state.items, cartId: state.cartId, checkoutUrl: state.checkoutUrl }),
-    }
-  )
+      partialize: (state) => ({
+        items: state.items,
+        cartId: state.cartId,
+        checkoutUrl: state.checkoutUrl,
+      }),
+    },
+  ),
 );

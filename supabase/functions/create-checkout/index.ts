@@ -7,9 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Map product IDs to Stripe price IDs
 const PRODUCT_PRICE_MAP: Record<string, string> = {
-  // Existing mapped products
   "wireless-earbuds-pro": "price_1StjbfFjshJghowTMCSHB90t",
   "portable-neck-fan-360": "price_1Stjc8FjshJghowTRJA47tX1",
   "led-galaxy-projector": "price_1StjcDFjshJghowTuoy0LUGk",
@@ -22,6 +20,7 @@ interface CartItem {
   quantity: number;
   title?: string;
   price?: number;
+  compareAtPrice?: number | null;
 }
 
 interface CheckoutRequest {
@@ -31,6 +30,24 @@ interface CheckoutRequest {
   customerEmail?: string;
 }
 
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
+const roundPsychologicalPrice = (value: number) => {
+  if (!Number.isFinite(value) || value <= 0) return 0;
+  if (value < 10) return Number((Math.floor(value) + 0.99).toFixed(2));
+  return Number((Math.max(Math.round(value) - 0.01, 0.99)).toFixed(2));
+};
+
+const getOptimizedPrice = (basePrice: number, compareAtPrice?: number | null) => {
+  if (!Number.isFinite(basePrice) || basePrice <= 0) return 0;
+  const normalizedCompareAt = compareAtPrice && compareAtPrice > basePrice ? compareAtPrice : null;
+  const competitorPrice = normalizedCompareAt ?? Number((basePrice * 1.18).toFixed(2));
+  const targetBelowCompetitor = competitorPrice * 0.96;
+  const floor = basePrice;
+  const ceiling = Math.max(basePrice, competitorPrice - 0.01);
+  return roundPsychologicalPrice(clamp(targetBelowCompetitor, floor, ceiling));
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -38,56 +55,59 @@ serve(async (req) => {
 
   try {
     const body: CheckoutRequest = await req.json();
-    
-    // Input validation
+
     if (body.items && body.items.length > 50) {
       throw new Error("Maximum 50 items per checkout");
     }
+
     if (body.customerEmail && (typeof body.customerEmail !== "string" || body.customerEmail.length > 255)) {
       throw new Error("Invalid customer email");
     }
-    
+
     console.log("[CREATE-CHECKOUT] Request received:", JSON.stringify({ itemCount: body.items?.length, productId: body.productId }));
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
+    const normalizedItems = body.items ?? [];
 
-    // Handle both single product and cart checkout
-    let lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
-
-    if (body.items && body.items.length > 0) {
-      // Multi-item cart checkout
-      console.log("[CREATE-CHECKOUT] Processing cart with", body.items.length, "items");
-      
-      for (const item of body.items) {
+    if (normalizedItems.length > 0) {
+      for (const item of normalizedItems) {
         const priceId = PRODUCT_PRICE_MAP[item.productId];
-        
+
         if (priceId) {
-          // Use existing Stripe price
           lineItems.push({
             price: priceId,
             quantity: item.quantity,
           });
-        } else if (item.price && item.title) {
-          // Create price_data for products not in Stripe
+          continue;
+        }
+
+        if (item.price && item.title) {
+          const optimizedPrice = getOptimizedPrice(item.price, item.compareAtPrice);
           lineItems.push({
             price_data: {
               currency: "usd",
               product_data: {
                 name: item.title,
+                metadata: {
+                  source_product_id: item.productId,
+                  compare_at_price: item.compareAtPrice ? String(item.compareAtPrice) : '',
+                  optimized_price: String(optimizedPrice),
+                },
               },
-              unit_amount: Math.round(item.price * 100), // Convert to cents
+              unit_amount: Math.round(optimizedPrice * 100),
             },
             quantity: item.quantity,
           });
-        } else {
-          console.warn(`[CREATE-CHECKOUT] Skipping item - no price mapping and no price data:`, item.productId);
+          continue;
         }
+
+        console.warn(`[CREATE-CHECKOUT] Skipping item - no price mapping and no price data:`, item.productId);
       }
     } else if (body.productId) {
-      // Single product checkout (backward compatibility)
       const priceId = PRODUCT_PRICE_MAP[body.productId] || body.productId;
       lineItems.push({
         price: priceId,
@@ -99,15 +119,11 @@ serve(async (req) => {
       throw new Error("No valid items to checkout");
     }
 
-    console.log("[CREATE-CHECKOUT] Line items:", JSON.stringify(lineItems));
-
-    // Check for existing Stripe customer
     let customerId: string | undefined;
     if (body.customerEmail) {
       const customers = await stripe.customers.list({ email: body.customerEmail, limit: 1 });
       if (customers.data.length > 0) {
         customerId = customers.data[0].id;
-        console.log("[CREATE-CHECKOUT] Found existing customer:", customerId);
       }
     }
 
@@ -126,15 +142,13 @@ serve(async (req) => {
       metadata: {
         source: "trendvault-store",
         itemCount: String(lineItems.length),
+        dynamicPricing: normalizedItems.length > 0 ? 'true' : 'false',
       },
     });
 
-    console.log("[CREATE-CHECKOUT] Session created:", session.id);
-
-    // Log to database
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     );
 
     await supabase.from("agent_logs").insert({
@@ -142,10 +156,10 @@ serve(async (req) => {
       agent_role: "Payment Processing",
       action: `Created checkout session with ${lineItems.length} items`,
       status: "completed",
-      details: { 
-        sessionId: session.id, 
+      details: {
+        sessionId: session.id,
         itemCount: lineItems.length,
-        totalItems: body.items?.reduce((sum, item) => sum + item.quantity, 0) || body.quantity || 1,
+        totalItems: normalizedItems.reduce((sum, item) => sum + item.quantity, 0) || body.quantity || 1,
       },
     });
 

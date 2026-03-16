@@ -1,34 +1,43 @@
 import { motion } from "framer-motion";
-import { ShoppingCart, Loader2 } from "lucide-react";
+import { ShoppingCart, Loader2, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useCartStore, ShopifyProduct } from "@/stores/cartStore";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { getPricingSnapshot } from "@/lib/pricing";
 
 interface Props {
   product: ShopifyProduct;
 }
 
 export const ShopifyProductCard = ({ product }: Props) => {
-  const addItem = useCartStore(state => state.addItem);
-  const isLoading = useCartStore(state => state.isLoading);
+  const addItem = useCartStore((state) => state.addItem);
+  const isLoading = useCartStore((state) => state.isLoading);
   const p = product.node;
   const firstImage = p.images?.edges?.[0]?.node;
   const variant = p.variants?.edges?.[0]?.node;
-  const price = p.priceRange.minVariantPrice;
+
+  const pricing = getPricingSnapshot(
+    Number.parseFloat(variant?.price.amount || p.priceRange.minVariantPrice.amount),
+    variant?.compareAtPrice?.amount ? Number.parseFloat(variant.compareAtPrice.amount) : undefined,
+  );
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!variant) return;
+
     await addItem({
       product,
       variantId: variant.id,
       variantTitle: variant.title,
       price: variant.price,
+      compareAtPrice: variant.compareAtPrice,
       quantity: 1,
       selectedOptions: variant.selectedOptions || [],
     });
+
     toast.success(`${p.title} added to cart`);
   };
 
@@ -44,6 +53,7 @@ export const ShopifyProductCard = ({ product }: Props) => {
               src={firstImage.url}
               alt={firstImage.altText || p.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-muted-foreground">
@@ -51,13 +61,33 @@ export const ShopifyProductCard = ({ product }: Props) => {
             </div>
           )}
         </div>
-        <div className="p-4">
-          <h3 className="font-semibold text-sm truncate">{p.title}</h3>
-          <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{p.description}</p>
-          <div className="flex items-center justify-between mt-3">
-            <span className="text-lg font-bold text-primary">
-              {price.currencyCode} {parseFloat(price.amount).toFixed(2)}
-            </span>
+
+        <div className="p-4 space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="font-semibold text-sm leading-snug line-clamp-2">{p.title}</h3>
+            {pricing.undercutPercent > 0 && (
+              <Badge variant="outline" className="border-primary/30 text-primary whitespace-nowrap">
+                <TrendingDown className="w-3 h-3 mr-1" />
+                {pricing.undercutPercent}% below market
+              </Badge>
+            )}
+          </div>
+
+          <p className="text-xs text-muted-foreground line-clamp-2">{p.description}</p>
+
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <div className="text-lg font-bold text-primary">
+                {variant?.price.currencyCode || pricing.basePrice} {pricing.optimizedPrice.toFixed(2)}
+              </div>
+              {pricing.competitorPrice > pricing.optimizedPrice && (
+                <div className="text-xs text-muted-foreground">
+                  <span className="line-through mr-2">{variant?.price.currencyCode || ''} {pricing.competitorPrice.toFixed(2)}</span>
+                  save {variant?.price.currencyCode || '$'} {pricing.savingsAmount.toFixed(2)}
+                </div>
+              )}
+            </div>
+
             <Button
               size="sm"
               onClick={handleAddToCart}

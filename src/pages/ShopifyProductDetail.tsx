@@ -9,21 +9,38 @@ import { Card } from "@/components/ui/card";
 import { ShopifyCartDrawer } from "@/components/store/ShopifyCartDrawer";
 import { ShopifyProductCard } from "@/components/store/ShopifyProductCard";
 import { StoreFooter } from "@/components/store/StoreFooter";
+import { useSEOHead } from "@/hooks/useSEOHead";
 import {
   ArrowLeft, ShoppingCart, Loader2, Zap, Minus, Plus,
-  Truck, Shield, RotateCcw, Star, Check, Package, TrendingUp
+  Truck, Shield, RotateCcw, Check, Package, TrendingUp
 } from "lucide-react";
 import { toast } from "sonner";
+import { getPricingSnapshot } from "@/lib/pricing";
 
 const ShopifyProductDetail = () => {
   const { handle } = useParams<{ handle: string }>();
   const { data: product, isLoading } = useShopifyProductByHandle(handle || "");
   const { data: allProducts } = useShopifyProducts(50);
-  const addItem = useCartStore(state => state.addItem);
-  const cartLoading = useCartStore(state => state.isLoading);
+  const addItem = useCartStore((state) => state.addItem);
+  const cartLoading = useCartStore((state) => state.isLoading);
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+
+  const variant = product?.variants?.edges?.[selectedVariantIndex]?.node;
+  const images = product?.images?.edges || [];
+  const relatedProducts = allProducts?.filter((p) => p.node.handle !== handle)?.slice(0, 4) || [];
+  const pricing = variant
+    ? getPricingSnapshot(
+        Number.parseFloat(variant.price.amount),
+        variant.compareAtPrice?.amount ? Number.parseFloat(variant.compareAtPrice.amount) : undefined,
+      )
+    : null;
+
+  useSEOHead({
+    title: product ? `${product.title} | TrendVault` : 'Product | TrendVault',
+    description: product?.description || 'Shop curated products priced to win conversion while preserving margin.',
+  });
 
   if (isLoading) {
     return (
@@ -43,10 +60,6 @@ const ShopifyProductDetail = () => {
     );
   }
 
-  const variant = product.variants?.edges?.[selectedVariantIndex]?.node;
-  const images = product.images?.edges || [];
-  const relatedProducts = allProducts?.filter(p => p.node.handle !== handle)?.slice(0, 4) || [];
-
   const handleAddToCart = async () => {
     if (!variant) return;
     await addItem({
@@ -54,6 +67,7 @@ const ShopifyProductDetail = () => {
       variantId: variant.id,
       variantTitle: variant.title,
       price: variant.price,
+      compareAtPrice: variant.compareAtPrice,
       quantity,
       selectedOptions: variant.selectedOptions || [],
     });
@@ -62,7 +76,6 @@ const ShopifyProductDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="sticky top-0 z-50 glass border-b border-border">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/store" className="flex items-center gap-2">
@@ -80,7 +93,6 @@ const ShopifyProductDetail = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link to="/store" className="hover:text-primary transition-colors">Store</Link>
           <span>/</span>
@@ -88,7 +100,6 @@ const ShopifyProductDetail = () => {
         </nav>
 
         <div className="grid md:grid-cols-2 gap-10">
-          {/* Images */}
           <div>
             <motion.div
               key={selectedImage}
@@ -125,35 +136,41 @@ const ShopifyProductDetail = () => {
             )}
           </div>
 
-          {/* Details */}
           <div className="space-y-6">
             <div>
               <Badge variant="outline" className="mb-3 text-primary border-primary/30">
-                <TrendingUp className="w-3 h-3 mr-1" /> Trending
+                <TrendingUp className="w-3 h-3 mr-1" /> Market-smart pricing
               </Badge>
               <h1 className="text-3xl md:text-4xl font-bold mb-3">{product.title}</h1>
               <p className="text-muted-foreground leading-relaxed">{product.description}</p>
             </div>
 
-            {variant && (
-              <div className="flex items-baseline gap-3">
-                <span className="text-4xl font-bold text-primary">
-                  {variant.price.currencyCode} {parseFloat(variant.price.amount).toFixed(2)}
-                </span>
-                <Badge variant="secondary" className="text-xs">
-                  {variant.availableForSale ? 'In Stock' : 'Sold Out'}
-                </Badge>
+            {variant && pricing && (
+              <div className="space-y-2">
+                <div className="flex items-baseline gap-3">
+                  <span className="text-4xl font-bold text-primary">
+                    {variant.price.currencyCode} {pricing.optimizedPrice.toFixed(2)}
+                  </span>
+                  <Badge variant="secondary" className="text-xs">
+                    {variant.availableForSale ? 'In Stock' : 'Sold Out'}
+                  </Badge>
+                </div>
+                {pricing.competitorPrice > pricing.optimizedPrice && (
+                  <div className="text-sm text-muted-foreground">
+                    <span className="line-through mr-2">{variant.price.currencyCode} {pricing.competitorPrice.toFixed(2)}</span>
+                    save {variant.price.currencyCode} {pricing.savingsAmount.toFixed(2)} • {pricing.undercutPercent}% below market
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Variant selection */}
             {product.options?.filter((o: any) => o.name !== "Title").map((option: any) => (
               <div key={option.name}>
                 <label className="text-sm font-medium mb-2 block">{option.name}</label>
                 <div className="flex gap-2 flex-wrap">
                   {option.values.map((val: string) => {
                     const idx = product.variants.edges.findIndex((v: any) =>
-                      v.node.selectedOptions.some((o: any) => o.name === option.name && o.value === val)
+                      v.node.selectedOptions.some((o: any) => o.name === option.name && o.value === val),
                     );
                     const isSelected = product.variants.edges[idx]?.node?.id === variant?.id;
                     return (
@@ -172,21 +189,19 @@ const ShopifyProductDetail = () => {
               </div>
             ))}
 
-            {/* Quantity */}
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium">Quantity</span>
               <div className="flex items-center gap-1 bg-muted/30 rounded-xl p-1">
-                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg" onClick={() => setQuantity(q => Math.max(1, q - 1))}>
+                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg" onClick={() => setQuantity((q) => Math.max(1, q - 1))}>
                   <Minus className="w-4 h-4" />
                 </Button>
                 <span className="w-10 text-center font-semibold">{quantity}</span>
-                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg" onClick={() => setQuantity(q => q + 1)}>
+                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg" onClick={() => setQuantity((q) => q + 1)}>
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
             </div>
 
-            {/* Add to Cart */}
             <Button
               size="lg"
               className="w-full h-14 text-lg font-semibold rounded-xl bg-gradient-to-r from-primary to-cyan-500 hover:opacity-90 gap-2"
@@ -194,16 +209,15 @@ const ShopifyProductDetail = () => {
               disabled={cartLoading || !variant?.availableForSale}
             >
               {cartLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShoppingCart className="w-5 h-5" />}
-              {variant?.availableForSale ? "Add to Cart" : "Sold Out"}
+              {variant?.availableForSale ? `Add to Cart${pricing ? ` • ${variant.price.currencyCode} ${(pricing.optimizedPrice * quantity).toFixed(2)}` : ''}` : "Sold Out"}
             </Button>
 
-            {/* Trust Features */}
             <div className="grid grid-cols-3 gap-3">
               {[
-                { icon: Truck, label: 'Free Shipping', sub: 'Orders $25+' },
-                { icon: Shield, label: 'Secure Pay', sub: 'SSL Encrypted' },
+                { icon: Truck, label: 'Fast Shipping', sub: 'Tracked delivery' },
+                { icon: Shield, label: 'Secure Pay', sub: 'Stripe checkout' },
                 { icon: RotateCcw, label: 'Easy Returns', sub: '30-Day Policy' },
-              ].map(f => (
+              ].map((f) => (
                 <Card key={f.label} className="p-3 bg-muted/20 border-border text-center">
                   <f.icon className="w-5 h-5 mx-auto mb-1 text-primary" />
                   <p className="text-xs font-medium">{f.label}</p>
@@ -211,10 +225,21 @@ const ShopifyProductDetail = () => {
                 </Card>
               ))}
             </div>
+
+            <div className="rounded-2xl border border-border bg-muted/20 p-4">
+              <div className="flex items-start gap-3">
+                <Check className="w-5 h-5 text-primary mt-0.5" />
+                <div>
+                  <p className="font-medium">Price strategy baked in</p>
+                  <p className="text-sm text-muted-foreground">
+                    This offer is positioned to stay just below the visible market anchor while routing into Stripe for cleaner monetization control.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Related Products */}
         {relatedProducts.length > 0 && (
           <section className="mt-16">
             <h2 className="text-2xl font-bold mb-6">You May Also Like</h2>
