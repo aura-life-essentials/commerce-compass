@@ -10,6 +10,7 @@ const corsHeaders = {
 const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -17,6 +18,31 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 const logStep = (step: string, details?: unknown) => {
   console.log(`[CONTENT-GENERATOR] ${step}`, details ? JSON.stringify(details) : "");
 };
+
+async function requireAuthenticatedUser(req: Request) {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    throw new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const token = authHeader.replace("Bearer ", "");
+  const authClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    global: { headers: { Authorization: authHeader } },
+  });
+
+  const { data, error } = await authClient.auth.getClaims(token);
+  if (error || !data?.claims?.sub) {
+    throw new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  return data.claims.sub;
+}
 
 async function generateVideoScript(product: any, viralPatterns: any, channel: string) {
   logStep("Generating video script", { product: product.title, channel });
@@ -30,14 +56,14 @@ async function generateVideoScript(product: any, viralPatterns: any, channel: st
     body: JSON.stringify({
       model: "google/gemini-2.5-flash",
       messages: [
-        { 
-          role: "system", 
+        {
+          role: "system",
           content: `You are a viral video scriptwriter who creates engaging, high-converting marketing content.
           Your scripts are designed for ${channel} and follow viral patterns that drive sales.
           You write punchy, emotional hooks and clear calls-to-action.`
         },
-        { 
-          role: "user", 
+        {
+          role: "user",
           content: `Create a viral ${channel} video script for this product:
 
 Product: ${product.title}
@@ -75,7 +101,7 @@ Return as JSON with:
 
   const data = await response.json();
   const content = data.choices?.[0]?.message?.content || "";
-  
+
   const jsonMatch = content.match(/\{[\s\S]*\}/);
   if (jsonMatch) {
     try {
@@ -87,15 +113,10 @@ Return as JSON with:
   return { script: content };
 }
 
-// Helper function to extract plain text from script (which may be array of objects or string)
 function extractScriptText(script: unknown): string {
-  if (typeof script === "string") {
-    return script;
-  }
+  if (typeof script === "string") return script;
   if (Array.isArray(script)) {
-    return script.map((item: { text?: string; dialogue?: string }) => 
-      item.text || item.dialogue || ""
-    ).join(" ");
+    return script.map((item: { text?: string; dialogue?: string }) => item.text || item.dialogue || "").join(" ");
   }
   return "";
 }
@@ -131,14 +152,12 @@ async function generateVoiceover(text: string, voiceId: string = "JBFqnCBsd6RMkj
   }
 
   const audioBuffer = await response.arrayBuffer();
-  
-  // Convert to base64 for storage/transfer (using Deno's encoding library)
   const base64Audio = base64Encode(audioBuffer);
-  
+
   return {
     audio_base64: base64Audio,
     format: "mp3",
-    duration_estimate: Math.ceil(text.length / 15), // Rough estimate: 15 chars per second
+    duration_estimate: Math.ceil(text.length / 15),
   };
 }
 
@@ -148,11 +167,12 @@ serve(async (req) => {
   }
 
   try {
+    await requireAuthenticatedUser(req);
+
     const { action, product, channel, store_id, script_text, voice_id } = await req.json();
     logStep("Request received", { action, channel });
 
     if (action === "generate_script") {
-      // Get viral patterns for inspiration
       const { data: viralContent } = await supabase
         .from("viral_content")
         .select("extracted_hooks, audio_trends")
@@ -160,10 +180,8 @@ serve(async (req) => {
         .limit(5);
 
       const viralPatterns = viralContent?.map(v => v.extracted_hooks).flat() || [];
-      
       const script = await generateVideoScript(product, viralPatterns, channel || "tiktok");
 
-      // Save campaign
       const { data: campaign, error } = await supabase.from("marketing_campaigns").insert({
         store_id,
         campaign_name: `${product.title} - ${channel} Campaign`,
@@ -175,10 +193,10 @@ serve(async (req) => {
 
       if (error) logStep("Error saving campaign", error);
 
-      return new Response(JSON.stringify({ 
-        success: true, 
+      return new Response(JSON.stringify({
+        success: true,
         script,
-        campaign 
+        campaign
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -189,16 +207,15 @@ serve(async (req) => {
 
       const voiceover = await generateVoiceover(script_text, voice_id);
 
-      return new Response(JSON.stringify({ 
-        success: true, 
-        voiceover 
+      return new Response(JSON.stringify({
+        success: true,
+        voiceover
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     if (action === "full_campaign") {
-      // Generate complete campaign with script + voiceover
       const { data: viralContent } = await supabase
         .from("viral_content")
         .select("extracted_hooks, audio_trends")
@@ -206,10 +223,8 @@ serve(async (req) => {
         .limit(5);
 
       const viralPatterns = viralContent?.map(v => v.extracted_hooks).flat() || [];
-      
       const script = await generateVideoScript(product, viralPatterns, channel || "tiktok");
-      
-      // Generate voiceover for the script
+
       let voiceover = null;
       const scriptForVoiceover = extractScriptText(script.script);
       if (scriptForVoiceover) {
@@ -220,7 +235,6 @@ serve(async (req) => {
         }
       }
 
-      // Save complete campaign
       const { data: campaign, error } = await supabase.from("marketing_campaigns").insert({
         store_id,
         campaign_name: `${product.title} - ${channel} Full Campaign`,
@@ -234,11 +248,11 @@ serve(async (req) => {
 
       if (error) logStep("Error saving campaign", error);
 
-      return new Response(JSON.stringify({ 
-        success: true, 
+      return new Response(JSON.stringify({
+        success: true,
         script,
         voiceover,
-        campaign 
+        campaign
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -246,6 +260,7 @@ serve(async (req) => {
 
     throw new Error(`Unknown action: ${action}`);
   } catch (error) {
+    if (error instanceof Response) return error;
     logStep("Error", { message: (error as Error).message });
     return new Response(JSON.stringify({ error: (error as Error).message }), {
       status: 500,

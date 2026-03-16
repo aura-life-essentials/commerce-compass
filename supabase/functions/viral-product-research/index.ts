@@ -1,13 +1,42 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+
 const log = (step: string, details?: unknown) => {
   console.log(`[VIRAL-RESEARCH] ${step}`, details ? JSON.stringify(details) : "");
 };
+
+async function requireAuthenticatedUser(req: Request) {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    throw new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const token = authHeader.replace("Bearer ", "");
+  const authClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    global: { headers: { Authorization: authHeader } },
+  });
+
+  const { data, error } = await authClient.auth.getClaims(token);
+  if (error || !data?.claims?.sub) {
+    throw new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  return data.claims.sub;
+}
 
 async function callAI(apiKey: string, messages: Array<{ role: string; content: string }>, tools?: any[], tool_choice?: any) {
   const body: any = {
@@ -207,6 +236,8 @@ serve(async (req) => {
   }
 
   try {
+    await requireAuthenticatedUser(req);
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
@@ -248,6 +279,7 @@ serve(async (req) => {
 
     throw new Error(`Unknown action: ${action}`);
   } catch (error) {
+    if (error instanceof Response) return error;
     log("Error", { message: (error as Error).message });
     return new Response(JSON.stringify({ error: (error as Error).message }), {
       status: 500,
