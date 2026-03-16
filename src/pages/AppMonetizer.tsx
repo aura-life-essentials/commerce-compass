@@ -21,6 +21,7 @@ const audienceOptions: { value: MonetizationAudience; label: string }[] = [
 
 const defaultApps = `CEO Brain | AI Agents | Runs strategic decisions and agent orchestration | 299
 Autonomous Sales Network | AI Agents | Automates the full sales cycle from research to close | 499
+200-Agent Autonomous Sales Network | AI Agents | Deploys 40 teams with interchangeable brains across research, content, market, close, and analysis | 1499
 Checkout Conversion Engine | E-commerce | Lifts conversion rate with upsells and cart optimization | 149
 Web3 Launch Engine | Web3 | Launches communities, tokens, NFTs, and investor-ready assets | 249
 Content Factory | Media / Content | Produces videos, scripts, voiceovers, and presentations fast | 179`;
