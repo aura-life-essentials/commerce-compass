@@ -124,6 +124,11 @@ export default function AppMonetizer() {
                       <li>Use done-for-you and optimization add-ons as recurring upsells.</li>
                     </ul>
                   </div>
+
+                  <div className="rounded-xl border border-primary/20 bg-primary/10 p-4">
+                    <p className="text-sm font-medium text-foreground">Flagship app loaded</p>
+                    <p className="mt-1 text-sm text-muted-foreground">200-Agent Autonomous Sales Network • 40 teams × 5 agents • Strategic, Creative, Aggressive, Persuasive, Analytical brains • Research → Content → Market → Close → Analyze</p>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
