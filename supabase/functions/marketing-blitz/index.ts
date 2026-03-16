@@ -276,6 +276,7 @@ serve(async (req) => {
   }
 
   try {
+    await requireAuthenticatedUser(req);
     const { action, products, platform, product, mode = "local" } = await req.json();
     const engineMode: EngineMode = mode === "external" ? "external" : "local";
 

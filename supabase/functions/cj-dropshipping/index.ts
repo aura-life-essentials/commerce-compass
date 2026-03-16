@@ -300,6 +300,7 @@ serve(async (req) => {
   }
 
   try {
+    await requireAuthenticatedUser(req);
     const CJ_API_KEY = Deno.env.get("CJ_DROPSHIPPING_API_KEY");
     
     if (!CJ_API_KEY) {
