@@ -21,6 +21,7 @@ const audienceOptions: { value: MonetizationAudience; label: string }[] = [
 
 const defaultApps = `CEO Brain | AI Agents | Runs strategic decisions and agent orchestration | 299
 Autonomous Sales Network | AI Agents | Automates the full sales cycle from research to close | 499
+200-Agent Autonomous Sales Network | AI Agents | Deploys 40 teams with interchangeable brains across research, content, market, close, and analysis | 1499
 Checkout Conversion Engine | E-commerce | Lifts conversion rate with upsells and cart optimization | 149
 Web3 Launch Engine | Web3 | Launches communities, tokens, NFTs, and investor-ready assets | 249
 Content Factory | Media / Content | Produces videos, scripts, voiceovers, and presentations fast | 179`;
@@ -57,7 +58,7 @@ export default function AppMonetizer() {
               <Badge className="bg-primary/15 text-primary border-primary/30">Monthly subscription architect</Badge>
               <div className="space-y-3">
                 <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Turn your apps into individual tools, bundles, suites, and high-margin upsells.</h1>
-                <p className="text-muted-foreground max-w-2xl">Add your apps now and I’ll instantly structure a monetization ladder with entry offers, expansion bundles, flagship suites, and recurring add-ons.</p>
+                <p className="text-muted-foreground max-w-2xl">Add your apps now and I’ll instantly structure a monetization ladder with entry offers, expansion bundles, flagship suites, and recurring add-ons — including premium packaging for command-center products like your 200-Agent Autonomous Sales Network.</p>
               </div>
               <div className="grid gap-4 sm:grid-cols-3">
                 <Card className="glass-subtle">
@@ -122,6 +123,11 @@ export default function AppMonetizer() {
                       <li>Use suites for agencies, enterprise, and your 200-agent flagship positioning.</li>
                       <li>Use done-for-you and optimization add-ons as recurring upsells.</li>
                     </ul>
+                  </div>
+
+                  <div className="rounded-xl border border-primary/20 bg-primary/10 p-4">
+                    <p className="text-sm font-medium text-foreground">Flagship app loaded</p>
+                    <p className="mt-1 text-sm text-muted-foreground">200-Agent Autonomous Sales Network • 40 teams × 5 agents • Strategic, Creative, Aggressive, Persuasive, Analytical brains • Research → Content → Market → Close → Analyze</p>
                   </div>
                 </CardContent>
               </Card>
