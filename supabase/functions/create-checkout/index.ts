@@ -98,6 +98,7 @@ serve(async (req) => {
                 name: item.title,
                 metadata: {
                   source_product_id: item.productId,
+                  base_price: String(item.price),
                   compare_at_price: item.compareAtPrice ? String(item.compareAtPrice) : '',
                   optimized_price: String(optimizedPrice),
                 },

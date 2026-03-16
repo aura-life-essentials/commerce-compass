@@ -55,9 +55,11 @@ export const BundleSection = ({ products, onAddToCart }: BundleSectionProps) => 
       });
 
       const originalPrice = productPricing.reduce((sum, item) => sum + item.pricing.optimizedPrice, 0);
-      const bundlePrice = Number((originalPrice * 0.92).toFixed(2));
+      const protectedFloor = productPricing.reduce((sum, item) => sum + item.pricing.marginFloorPrice, 0);
+      const targetBundlePrice = Number((originalPrice * 0.94).toFixed(2));
+      const bundlePrice = Number(Math.max(targetBundlePrice, protectedFloor).toFixed(2));
       const savings = Number((originalPrice - bundlePrice).toFixed(2));
-      const discount = Math.round((savings / originalPrice) * 100);
+      const discount = originalPrice > 0 ? Math.max(0, Math.round((savings / originalPrice) * 100)) : 0;
 
       return {
         ...bundle,

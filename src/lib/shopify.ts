@@ -272,7 +272,7 @@ export const toStripeCheckoutItem = (item: CartItem): StripeCheckoutItem => {
     productId: item.product.node.handle,
     title: item.product.node.title,
     quantity: item.quantity,
-    price: getOptimizedPrice(basePrice, compareAtPrice),
+    price: basePrice,
     compareAtPrice,
   };
 };
