@@ -17,10 +17,9 @@ import { AgentMonitor } from "@/components/dashboard/AgentMonitor";
 import { MarketingEngine } from "@/components/dashboard/MarketingEngine";
 import { Web3Dashboard } from "@/components/dashboard/Web3Dashboard";
 import { MetaverseHub } from "@/components/metaverse/MetaverseHub";
-import { useStores, useCreateStore } from "@/hooks/useStores";
-import { useAgentLogs, useCreateAgentLog } from "@/hooks/useAgentLogs";
-import { useCreateRevenueMetric } from "@/hooks/useRevenueMetrics";
-import { useCreateGovernanceEvent } from "@/hooks/useGovernance";
+import { SalesRaceMonitor } from "@/components/dashboard/SalesRaceMonitor";
+import { useStores } from "@/hooks/useStores";
+import { useAgentLogs } from "@/hooks/useAgentLogs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Layers, Bot } from "lucide-react";
 import { toast } from "sonner";
@@ -29,15 +28,9 @@ import { formatDistanceToNow } from "date-fns";
 const Index = () => {
   const { data: stores, isLoading: storesLoading } = useStores();
   const { data: agentLogs, isLoading: agentsLoading } = useAgentLogs(undefined, 100);
-  
-  const createStore = useCreateStore();
-  const createAgentLog = useCreateAgentLog();
-  const createRevenueMetric = useCreateRevenueMetric();
-  const createGovernanceEvent = useCreateGovernanceEvent();
 
   const hasData = stores && stores.length > 0;
 
-  // Aggregate agent stats from real logs
   const agentStats = agentLogs?.reduce((acc, log) => {
     const key = log.agent_name;
     if (!acc[key]) {
@@ -57,8 +50,8 @@ const Index = () => {
     return acc;
   }, {} as Record<string, { name: string; role: string; tasksCompleted: number; lastActive: string; status: "active" | "idle" | "processing" }>) || {};
 
-  const agents = Object.values(agentStats).length > 0 
-    ? Object.values(agentStats).map(a => ({
+  const agents = Object.values(agentStats).length > 0
+    ? Object.values(agentStats).map((a) => ({
         ...a,
         status: (Date.now() - new Date(a.lastActive).getTime() < 300000 ? "active" : "idle") as "active" | "idle" | "processing",
         lastActive: formatDistanceToNow(new Date(a.lastActive), { addSuffix: false }),
@@ -71,36 +64,34 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Ambient glow effect */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[128px]" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-[128px]" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[128px]" />
       </div>
 
       <div className="relative z-10">
         <Header />
 
         <main className="container mx-auto px-6 py-8">
-          {/* Hero Banner */}
           <HeroBanner onSeedData={seedDemoData} hasData={hasData} />
 
-          {/* REAL METRICS — No fake data */}
+          <div className="mb-8">
+            <SalesRaceMonitor />
+          </div>
+
           <div className="mb-8">
             <RealMetrics />
           </div>
 
-          {/* Profit Reaper & Omega Swarm — Real DB data */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <ProfitReaper />
             <OmegaSwarm />
           </div>
 
-          {/* LIVE ACTIVITY FEED — Real events from database */}
           <div className="mb-8">
             <RealTimeFeed />
           </div>
 
-          {/* Revenue Chart */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <div className="lg:col-span-2">
               <RevenueChart />
@@ -110,49 +101,39 @@ const Index = () => {
             </div>
           </div>
 
-          {/* CEO Dashboard with Voice Control */}
           <div className="mb-8">
             <CEODashboard />
           </div>
 
-          {/* Autonomous AI Engine */}
           <div className="mb-8">
             <AutonomousEngine />
           </div>
 
-          {/* Autonomous Sales Panel */}
           <div className="mb-8">
             <AutonomousSalesPanel />
           </div>
 
-          {/* Enterprise CRM */}
           <div className="mb-8">
             <CRMDashboard />
           </div>
 
-          {/* Real-time Agent Monitor */}
           <div className="mb-8">
             <AgentMonitor />
           </div>
 
-          {/* Global Marketing Engine */}
           <div className="mb-8">
             <MarketingEngine />
           </div>
 
-          {/* Web3 Command Center */}
           <div className="mb-8">
             <Web3Dashboard />
           </div>
 
-          {/* Metaverse Business Hub */}
           <div className="mb-8">
             <MetaverseHub />
           </div>
 
-          {/* Stores and Agents Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Connected Stores */}
             <div className="glass rounded-xl p-6">
               <div className="flex items-center gap-2 mb-6">
                 <Layers className="w-5 h-5 text-primary" />
@@ -181,13 +162,12 @@ const Index = () => {
               </div>
             </div>
 
-            {/* AI Agents from real logs */}
             <div className="glass rounded-xl p-6">
               <div className="flex items-center gap-2 mb-6">
                 <Bot className="w-5 h-5 text-primary" />
                 <h3 className="font-semibold text-lg">Agent Activity Log</h3>
                 <span className="ml-auto text-sm text-primary">
-                  {agents.filter(a => a.status === "active").length} recently active
+                  {agents.filter((a) => a.status === "active").length} recently active
                 </span>
               </div>
               <div className="space-y-3">
@@ -204,7 +184,6 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Governance Panel */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <GovernancePanel />
             <div className="lg:col-span-2 glass rounded-xl p-6">
@@ -214,7 +193,7 @@ const Index = () => {
                   { label: "Sync Aura Products", desc: "Import catalog", action: () => toast.info("Syncing Aura Dropshipping...") },
                   { label: "Deploy Reaper", desc: "Activate profit engine", action: () => toast.info("Profit Reaper deploying...") },
                   { label: "Omega Swarm", desc: "Scale agents", action: () => toast.info("Omega Swarm scaling...") },
-                  { label: "Audit Margins", desc: "Verify 67% profit", action: () => toast.info("Auditing profit margins...") },
+                  { label: "Audit Margins", desc: "Verify monetization", action: () => toast.info("Auditing monetization surfaces...") },
                 ].map((action) => (
                   <button
                     key={action.label}
@@ -233,7 +212,7 @@ const Index = () => {
         <footer className="border-t border-border mt-12">
           <div className="container mx-auto px-6 py-6">
             <p className="text-center text-sm text-muted-foreground">
-              CEO Brain • Real Data Dashboard • All metrics from live database
+              CEO Brain • Global sales race monitoring • Live backend telemetry
             </p>
           </div>
         </footer>
