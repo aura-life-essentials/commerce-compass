@@ -1726,6 +1726,232 @@ export type Database = {
           },
         ]
       }
+      sales_race_agents: {
+        Row: {
+          agent_brain_id: string | null
+          agent_name: string
+          agent_role: string | null
+          agent_type: string | null
+          avg_order_value: number
+          campaigns_launched: number
+          conversion_rate: number
+          created_at: string
+          fastest_sale_at: string | null
+          id: string
+          is_winner: boolean
+          lane_number: number
+          last_action_at: string | null
+          metadata: Json
+          orders_count: number
+          outreach_count: number
+          products_pitched: number
+          rank_position: number | null
+          revenue_generated: number
+          sales_race_id: string
+          status: string
+          target_amount: number
+          updated_at: string
+        }
+        Insert: {
+          agent_brain_id?: string | null
+          agent_name: string
+          agent_role?: string | null
+          agent_type?: string | null
+          avg_order_value?: number
+          campaigns_launched?: number
+          conversion_rate?: number
+          created_at?: string
+          fastest_sale_at?: string | null
+          id?: string
+          is_winner?: boolean
+          lane_number: number
+          last_action_at?: string | null
+          metadata?: Json
+          orders_count?: number
+          outreach_count?: number
+          products_pitched?: number
+          rank_position?: number | null
+          revenue_generated?: number
+          sales_race_id: string
+          status?: string
+          target_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          agent_brain_id?: string | null
+          agent_name?: string
+          agent_role?: string | null
+          agent_type?: string | null
+          avg_order_value?: number
+          campaigns_launched?: number
+          conversion_rate?: number
+          created_at?: string
+          fastest_sale_at?: string | null
+          id?: string
+          is_winner?: boolean
+          lane_number?: number
+          last_action_at?: string | null
+          metadata?: Json
+          orders_count?: number
+          outreach_count?: number
+          products_pitched?: number
+          rank_position?: number | null
+          revenue_generated?: number
+          sales_race_id?: string
+          status?: string
+          target_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_race_agents_agent_brain_id_fkey"
+            columns: ["agent_brain_id"]
+            isOneToOne: false
+            referencedRelation: "agent_brains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_race_agents_sales_race_id_fkey"
+            columns: ["sales_race_id"]
+            isOneToOne: false
+            referencedRelation: "sales_races"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_race_events: {
+        Row: {
+          agent_brain_id: string | null
+          created_at: string
+          details: Json
+          event_label: string
+          event_type: string
+          id: string
+          order_delta: number
+          revenue_delta: number
+          sales_race_agent_id: string | null
+          sales_race_id: string
+          status: string
+        }
+        Insert: {
+          agent_brain_id?: string | null
+          created_at?: string
+          details?: Json
+          event_label: string
+          event_type: string
+          id?: string
+          order_delta?: number
+          revenue_delta?: number
+          sales_race_agent_id?: string | null
+          sales_race_id: string
+          status?: string
+        }
+        Update: {
+          agent_brain_id?: string | null
+          created_at?: string
+          details?: Json
+          event_label?: string
+          event_type?: string
+          id?: string
+          order_delta?: number
+          revenue_delta?: number
+          sales_race_agent_id?: string | null
+          sales_race_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_race_events_agent_brain_id_fkey"
+            columns: ["agent_brain_id"]
+            isOneToOne: false
+            referencedRelation: "agent_brains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_race_events_sales_race_agent_id_fkey"
+            columns: ["sales_race_agent_id"]
+            isOneToOne: false
+            referencedRelation: "sales_race_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_race_events_sales_race_id_fkey"
+            columns: ["sales_race_id"]
+            isOneToOne: false
+            referencedRelation: "sales_races"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_races: {
+        Row: {
+          command_text: string | null
+          completed_at: string | null
+          connected_product_count: number
+          connected_store_count: number
+          created_at: string
+          created_by_user_id: string | null
+          currency: string
+          id: string
+          metadata: Json
+          objective: string
+          started_at: string | null
+          status: string
+          target_amount: number
+          title: string
+          total_orders: number
+          total_revenue: number
+          updated_at: string
+          winning_agent_id: string | null
+          winning_agent_name: string | null
+          winning_revenue: number
+        }
+        Insert: {
+          command_text?: string | null
+          completed_at?: string | null
+          connected_product_count?: number
+          connected_store_count?: number
+          created_at?: string
+          created_by_user_id?: string | null
+          currency?: string
+          id?: string
+          metadata?: Json
+          objective?: string
+          started_at?: string | null
+          status?: string
+          target_amount?: number
+          title: string
+          total_orders?: number
+          total_revenue?: number
+          updated_at?: string
+          winning_agent_id?: string | null
+          winning_agent_name?: string | null
+          winning_revenue?: number
+        }
+        Update: {
+          command_text?: string | null
+          completed_at?: string | null
+          connected_product_count?: number
+          connected_store_count?: number
+          created_at?: string
+          created_by_user_id?: string | null
+          currency?: string
+          id?: string
+          metadata?: Json
+          objective?: string
+          started_at?: string | null
+          status?: string
+          target_amount?: number
+          title?: string
+          total_orders?: number
+          total_revenue?: number
+          updated_at?: string
+          winning_agent_id?: string | null
+          winning_agent_name?: string | null
+          winning_revenue?: number
+        }
+        Relationships: []
+      }
       service_requests: {
         Row: {
           ai_response: Json | null
@@ -2434,6 +2660,10 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      refresh_sales_race_leaderboard: {
+        Args: { _sales_race_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "super_admin" | "admin" | "moderator" | "user"
