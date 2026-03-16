@@ -31,6 +31,9 @@ interface CheckoutRequest {
 }
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+const DEFAULT_MARGIN_MULTIPLIER = 1.28;
+const DEFAULT_COMPETITOR_MULTIPLIER = 1.22;
+const MAX_UNDERCUT_PERCENT = 0.035;
 
 const roundPsychologicalPrice = (value: number) => {
   if (!Number.isFinite(value) || value <= 0) return 0;
@@ -41,10 +44,11 @@ const roundPsychologicalPrice = (value: number) => {
 const getOptimizedPrice = (basePrice: number, compareAtPrice?: number | null) => {
   if (!Number.isFinite(basePrice) || basePrice <= 0) return 0;
   const normalizedCompareAt = compareAtPrice && compareAtPrice > basePrice ? compareAtPrice : null;
-  const competitorPrice = normalizedCompareAt ?? Number((basePrice * 1.18).toFixed(2));
-  const targetBelowCompetitor = competitorPrice * 0.96;
-  const floor = basePrice;
-  const ceiling = Math.max(basePrice, competitorPrice - 0.01);
+  const competitorPrice = normalizedCompareAt ?? Number((basePrice * DEFAULT_COMPETITOR_MULTIPLIER).toFixed(2));
+  const targetBelowCompetitor = competitorPrice * (1 - MAX_UNDERCUT_PERCENT);
+  const marginFloorPrice = Number((basePrice * DEFAULT_MARGIN_MULTIPLIER).toFixed(2));
+  const floor = Math.max(basePrice, marginFloorPrice);
+  const ceiling = Math.max(floor, competitorPrice - 0.01);
   return roundPsychologicalPrice(clamp(targetBelowCompetitor, floor, ceiling));
 };
 
