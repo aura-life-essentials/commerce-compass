@@ -128,6 +128,13 @@ const AppContent = () => {
           <Web3LaunchCenter />
         </ProtectedRoute>
       } />
+
+      {/* App Monetizer */}
+      <Route path="/app-monetizer" element={
+        <ProtectedRoute requireAdmin>
+          <AppMonetizer />
+        </ProtectedRoute>
+      } />
       
       {/* Legal pages */}
       <Route path="/privacy" element={<PrivacyPolicy />} />

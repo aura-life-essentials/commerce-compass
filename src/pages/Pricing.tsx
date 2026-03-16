@@ -111,25 +111,26 @@ export default function Pricing() {
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="max-w-4xl mx-auto text-center p-12 rounded-3xl bg-gradient-to-br from-primary/20 via-purple-500/10 to-cyan-500/20 border border-primary/30"
+            className="max-w-4xl mx-auto text-center p-12 rounded-3xl bg-gradient-to-br from-primary/20 via-primary/10 to-accent/40 border border-primary/30"
           >
-            <h2 className="text-3xl font-bold mb-4">Ready to Revolutionize Your Business?</h2>
+            <h2 className="text-3xl font-bold mb-4">Ready to Productize Your App Stack?</h2>
             <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Join the elite businesses already using our platform to generate massive revenue through Web3.
-              Your subscription NFT can be traded, staked, or held for governance rights.
+              Add your apps, turn them into monthly subscriptions, bundle them into suites, and build a cleaner upsell ladder before you push traffic.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
+              <a href="/app-monetizer" className="inline-flex">
+                <Badge variant="outline" className="text-sm py-2 px-4 border-primary/30 text-primary">
+                  ✓ Build monetization matrix
+                </Badge>
+              </a>
               <Badge variant="outline" className="text-sm py-2 px-4">
-                ✓ Cancel Anytime
+                ✓ Individual tools
               </Badge>
               <Badge variant="outline" className="text-sm py-2 px-4">
-                ✓ NFT Ownership
+                ✓ Bundles + suites
               </Badge>
               <Badge variant="outline" className="text-sm py-2 px-4">
-                ✓ Revenue Share
-              </Badge>
-              <Badge variant="outline" className="text-sm py-2 px-4">
-                ✓ 24/7 AI Support
+                ✓ Recurring upsells
               </Badge>
             </div>
           </motion.div>
