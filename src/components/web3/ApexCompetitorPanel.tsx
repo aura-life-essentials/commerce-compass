@@ -7,9 +7,11 @@ import {
   Loader2,
   Radar,
   ScanSearch,
+  ShieldAlert,
   Sparkles,
   Target,
   TrendingUp,
+  Waves,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,21 +27,37 @@ type IntelSignal = {
   source: string;
 };
 
+type IntelMeta = {
+  searchQueries: string[];
+  sourcesScanned: number;
+  partialFailure: boolean;
+  warnings: string[];
+  generatedAt: string;
+};
+
 type IntelResponse = {
   summary: string;
   themes: string[];
   opportunities: string[];
   threats: string[];
+  watchlist: string[];
   signals: IntelSignal[];
+  meta?: IntelMeta;
 };
 
 const seedBrands = ["OpenSea", "Coinbase", "Zora", "Base", "Mirror", "Shopify"];
+const queryPresets = [
+  "web3 social commerce growth platform",
+  "creator economy protocol community monetization",
+  "onchain marketplace discovery and distribution",
+];
 
 export function ApexCompetitorPanel() {
   const [brands, setBrands] = useState(seedBrands.join(", "));
   const [query, setQuery] = useState("web3 growth platform ai commerce social community marketplace");
   const [loading, setLoading] = useState(false);
   const [intel, setIntel] = useState<IntelResponse | null>(null);
+  const [errorState, setErrorState] = useState<string | null>(null);
 
   const brandList = useMemo(
     () => brands.split(",").map((item) => item.trim()).filter(Boolean).slice(0, 8),
@@ -53,6 +71,7 @@ export function ApexCompetitorPanel() {
     }
 
     setLoading(true);
+    setErrorState(null);
     try {
       const { data, error } = await supabase.functions.invoke("apex-intelligence", {
         body: {
@@ -62,10 +81,15 @@ export function ApexCompetitorPanel() {
       });
 
       if (error) throw error;
+      if ((data as { error?: string })?.error) {
+        throw new Error((data as { error: string }).error);
+      }
+
       setIntel(data as IntelResponse);
       toast.success("Competitor radar updated.");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to scan competitors.";
+      setErrorState(message);
       toast.error(message);
     } finally {
       setLoading(false);
@@ -87,7 +111,7 @@ export function ApexCompetitorPanel() {
                 Scan the web for product, platform, growth, community, and commerce signals powering the next Web3 leaders.
               </CardDescription>
             </div>
-            <Button onClick={runScan} disabled={loading} className="min-w-36">
+            <Button onClick={runScan} disabled={loading} className="min-w-36 rounded-2xl">
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ScanSearch className="h-4 w-4" />}
               {loading ? "Scanning" : "Run live scan"}
             </Button>
@@ -115,40 +139,87 @@ export function ApexCompetitorPanel() {
               />
             </div>
           </div>
+
+          <div className="flex flex-wrap gap-2">
+            {queryPresets.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                onClick={() => setQuery(preset)}
+                className="rounded-full border border-border/70 bg-secondary/35 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+              >
+                {preset}
+              </button>
+            ))}
+          </div>
         </CardHeader>
 
         <CardContent className="grid gap-4">
-          {intel ? (
+          {loading ? (
+            <div className="grid gap-4">
+              <div className="rounded-3xl border border-border/60 bg-secondary/30 p-5">
+                <div className="mb-3 flex items-center gap-2 text-sm font-medium text-primary">
+                  <Waves className="h-4 w-4 animate-pulse" />
+                  Live scan in progress
+                </div>
+                <p className="text-sm leading-7 text-muted-foreground">
+                  Sweeping live sources, deduplicating results, and synthesizing the strongest platform signals into one operator readout.
+                </p>
+              </div>
+              <div className="grid gap-4 lg:grid-cols-3">
+                {[0, 1, 2].map((item) => (
+                  <div key={item} className="rounded-3xl border border-border/60 bg-secondary/25 p-4">
+                    <div className="mb-3 h-4 w-24 rounded-full bg-muted/70" />
+                    <div className="space-y-2">
+                      <div className="h-10 rounded-2xl bg-muted/50" />
+                      <div className="h-10 rounded-2xl bg-muted/40" />
+                      <div className="h-10 rounded-2xl bg-muted/30" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : errorState ? (
+            <div className="rounded-3xl border border-destructive/30 bg-destructive/10 p-6">
+              <div className="mb-3 flex items-center gap-2 text-sm font-medium text-destructive">
+                <ShieldAlert className="h-4 w-4" />
+                Live scan blocked
+              </div>
+              <p className="text-sm leading-7 text-foreground/90">{errorState}</p>
+            </div>
+          ) : intel ? (
             <>
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="rounded-3xl border border-border/60 bg-secondary/30 p-5"
               >
-                <div className="mb-3 flex items-center gap-2 text-sm font-medium text-primary">
-                  <BrainCircuit className="h-4 w-4" />
-                  Strategic readout
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                    <BrainCircuit className="h-4 w-4" />
+                    Strategic readout
+                  </div>
+                  {intel.meta?.sourcesScanned ? (
+                    <Badge variant="outline" className="border-border/70 text-muted-foreground">
+                      {intel.meta.sourcesScanned} live sources
+                    </Badge>
+                  ) : null}
                 </div>
                 <p className="text-base leading-7 text-foreground/90">{intel.summary}</p>
+                {intel.meta?.partialFailure ? (
+                  <p className="mt-4 text-xs uppercase tracking-[0.2em] text-warning">
+                    Partial scan recovery active
+                  </p>
+                ) : null}
               </motion.div>
 
               <div className="grid gap-4 lg:grid-cols-3">
-                <InsightList
-                  title="Themes"
-                  icon={Sparkles}
-                  items={intel.themes}
-                />
-                <InsightList
-                  title="Opportunities"
-                  icon={TrendingUp}
-                  items={intel.opportunities}
-                />
-                <InsightList
-                  title="Threats"
-                  icon={Target}
-                  items={intel.threats}
-                />
+                <InsightList title="Themes" icon={Sparkles} items={intel.themes} />
+                <InsightList title="Opportunities" icon={TrendingUp} items={intel.opportunities} />
+                <InsightList title="Threats" icon={Target} items={intel.threats} />
               </div>
+
+              <InsightList title="Watchlist" icon={Radar} items={intel.watchlist} />
             </>
           ) : (
             <div className="rounded-3xl border border-dashed border-border/70 bg-secondary/20 p-10 text-center">
@@ -198,6 +269,17 @@ export function ApexCompetitorPanel() {
               Run a scan to populate the live signal stream.
             </div>
           )}
+
+          {intel?.meta?.warnings?.length ? (
+            <div className="rounded-2xl border border-warning/30 bg-warning/10 p-4">
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-warning">Scan warnings</p>
+              <ul className="mt-2 space-y-2 text-sm leading-6 text-foreground/85">
+                {intel.meta.warnings.map((warning) => (
+                  <li key={warning}>• {warning}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </CardContent>
       </Card>
     </div>

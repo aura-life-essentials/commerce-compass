@@ -12,6 +12,14 @@ type FirecrawlSearchResult = {
   markdown?: string;
 };
 
+type IntelligenceSynthesis = {
+  summary: string;
+  themes: string[];
+  opportunities: string[];
+  threats: string[];
+  watchlist: string[];
+};
+
 function sanitizeText(value: unknown, maxLength: number) {
   if (typeof value !== "string") return "";
   return value.replace(/\s+/g, " ").trim().slice(0, maxLength);
@@ -26,27 +34,46 @@ function normalizeBrands(value: unknown) {
 }
 
 async function searchFirecrawl(apiKey: string, query: string) {
-  const response = await fetch("https://api.firecrawl.dev/v1/search", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query,
-      limit: 4,
-      scrapeOptions: {
-        formats: ["markdown"],
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+
+  try {
+    const response = await fetch("https://api.firecrawl.dev/v1/search", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
-    }),
-  });
+      body: JSON.stringify({
+        query,
+        limit: 4,
+        scrapeOptions: {
+          formats: ["markdown"],
+        },
+      }),
+      signal: controller.signal,
+    });
 
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data?.error || `Firecrawl search failed with status ${response.status}`);
+    const data = await response.json();
+    if (response.status === 402) {
+      throw new Error("Firecrawl credits required for live scanning.");
+    }
+    if (response.status === 429) {
+      throw new Error("Firecrawl rate limit reached. Try again shortly.");
+    }
+    if (!response.ok) {
+      throw new Error(data?.error || `Firecrawl search failed with status ${response.status}`);
+    }
+
+    return (data?.data || []) as FirecrawlSearchResult[];
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error("Firecrawl scan timed out. Please retry.");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
   }
-
-  return (data?.data || []) as FirecrawlSearchResult[];
 }
 
 async function summarizeWithLovable(query: string, brands: string[], signals: FirecrawlSearchResult[]) {
@@ -59,7 +86,7 @@ async function summarizeWithLovable(query: string, brands: string[], signals: Fi
     title: sanitizeText(signal.title, 120),
     url: sanitizeText(signal.url, 240),
     description: sanitizeText(signal.description, 280),
-    markdown: sanitizeText(signal.markdown, 1600),
+    markdown: sanitizeText(signal.markdown, 1200),
   }));
 
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -74,7 +101,7 @@ async function summarizeWithLovable(query: string, brands: string[], signals: Fi
         {
           role: "system",
           content:
-            "You are a market intelligence strategist for a Web3 super-app. Analyze competitor signals and return concise strategic output. Focus on platform, social, commerce, creator, community, and growth patterns.",
+            "You are a market intelligence strategist for an all-in-one Web3 operating system. Analyze live competitor signals and return concise executive output for platform, social, creator, commerce, community, and growth positioning. Keep every item sharp, specific, and action-oriented.",
         },
         {
           role: "user",
@@ -105,8 +132,13 @@ async function summarizeWithLovable(query: string, brands: string[], signals: Fi
                 items: { type: "string" },
                 maxItems: 5,
               },
+              watchlist: {
+                type: "array",
+                items: { type: "string" },
+                maxItems: 4,
+              },
             },
-            required: ["summary", "themes", "opportunities", "threats"],
+            required: ["summary", "themes", "opportunities", "threats", "watchlist"],
           },
         },
       },
@@ -130,7 +162,7 @@ async function summarizeWithLovable(query: string, brands: string[], signals: Fi
     throw new Error("No intelligence summary returned");
   }
 
-  return JSON.parse(content);
+  return JSON.parse(content) as IntelligenceSynthesis;
 }
 
 serve(async (req) => {
@@ -160,10 +192,21 @@ serve(async (req) => {
       ...brands.map((brand) => `${brand} web3 platform social commerce growth`),
     ].slice(0, 5);
 
-    const searchResults = (await Promise.all(searchQueries.map((item) => searchFirecrawl(FIRECRAWL_API_KEY, item))))
-      .flat()
+    const settledResults = await Promise.allSettled(searchQueries.map((item) => searchFirecrawl(FIRECRAWL_API_KEY, item)));
+    const failures = settledResults
+      .filter((result): result is PromiseRejectedResult => result.status === "rejected")
+      .map((result) => result.reason instanceof Error ? result.reason.message : "Search failed");
+
+    const searchResults = settledResults
+      .filter((result): result is PromiseFulfilledResult<FirecrawlSearchResult[]> => result.status === "fulfilled")
+      .flatMap((result) => result.value)
       .filter((result) => result.url && result.title)
+      .filter((result, index, array) => array.findIndex((item) => item.url === result.url) === index)
       .slice(0, 10);
+
+    if (!searchResults.length && failures.length) {
+      throw new Error(failures[0]);
+    }
 
     const synthesis = await summarizeWithLovable(query, brands, searchResults);
 
@@ -185,6 +228,13 @@ serve(async (req) => {
       JSON.stringify({
         ...synthesis,
         signals,
+        meta: {
+          searchQueries,
+          sourcesScanned: searchResults.length,
+          partialFailure: failures.length > 0,
+          warnings: failures.slice(0, 3),
+          generatedAt: new Date().toISOString(),
+        },
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
