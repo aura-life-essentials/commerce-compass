@@ -192,32 +192,32 @@ export default function Auth() {
               <TabsContent value="login" className="mt-4">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email" className="text-slate-200">Email</Label>
+                    <Label htmlFor="login-email" className="text-foreground">Email</Label>
                     <Input
                       id="login-email"
                       type="email"
                       placeholder="you@example.com"
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
-                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                      className="bg-background"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password" className="text-slate-200">Password</Label>
+                    <Label htmlFor="login-password" className="text-foreground">Password</Label>
                     <Input
                       id="login-password"
                       type="password"
                       placeholder="••••••••"
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
-                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                      className="bg-background"
                       required
                     />
                   </div>
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                    className="w-full"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
