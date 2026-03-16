@@ -8,6 +8,7 @@ const corsHeaders = {
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -16,10 +17,34 @@ const logStep = (step: string, details?: unknown) => {
   console.log(`[TRAFFIC-WEBHOOK] ${step}`, details ? JSON.stringify(details) : "");
 };
 
+async function requireAuthenticatedUser(req: Request) {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    throw new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const token = authHeader.replace("Bearer ", "");
+  const authClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    global: { headers: { Authorization: authHeader } },
+  });
+
+  const { data, error } = await authClient.auth.getClaims(token);
+  if (error || !data?.claims?.sub) {
+    throw new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  return data.claims.sub;
+}
+
 async function analyzeTrafficPatterns() {
-  // Get last 24 hours of traffic
   const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  
+
   const { data: traffic, error } = await supabase
     .from("traffic_webhooks")
     .select("*")
@@ -30,7 +55,6 @@ async function analyzeTrafficPatterns() {
     return null;
   }
 
-  // Aggregate by source and country
   const bySource: Record<string, { count: number; revenue: number }> = {};
   const byCountry: Record<string, { count: number; revenue: number }> = {};
 
@@ -66,13 +90,13 @@ async function optimizeTraffic(analysis: any) {
     body: JSON.stringify({
       model: "google/gemini-2.5-flash",
       messages: [
-        { 
-          role: "system", 
+        {
+          role: "system",
           content: `You are a traffic optimization AI. Your goal is to increase organic traffic by 300% daily.
           Analyze traffic patterns and provide actionable recommendations for scaling.`
         },
-        { 
-          role: "user", 
+        {
+          role: "user",
           content: `Based on this traffic analysis, provide optimization recommendations:
 
 ${JSON.stringify(analysis, null, 2)}
@@ -96,7 +120,7 @@ Return as JSON with prioritized actions.`
 
   const data = await response.json();
   const content = data.choices?.[0]?.message?.content || "";
-  
+
   const jsonMatch = content.match(/\{[\s\S]*\}/);
   if (jsonMatch) {
     try {
@@ -114,11 +138,12 @@ serve(async (req) => {
   }
 
   try {
+    await requireAuthenticatedUser(req);
+
     const { action, event_type, source, country, device, utm_data, revenue, store_id } = await req.json();
     logStep("Request received", { action, event_type, source });
 
     if (action === "track") {
-      // Track a traffic event
       const { data: webhook, error } = await supabase.from("traffic_webhooks").insert({
         webhook_type: event_type || "click",
         source: source || "unknown",
@@ -132,10 +157,9 @@ serve(async (req) => {
 
       if (error) throw error;
 
-      // Check if this is a conversion and update revenue metrics
       if (event_type === "purchase" && revenue && store_id) {
         const today = new Date().toISOString().split("T")[0];
-        
+
         await supabase.from("revenue_metrics").upsert({
           store_id,
           date: today,
@@ -153,7 +177,7 @@ serve(async (req) => {
 
     if (action === "analyze") {
       const analysis = await analyzeTrafficPatterns();
-      
+
       return new Response(JSON.stringify({ success: true, analysis }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -163,7 +187,6 @@ serve(async (req) => {
       const analysis = await analyzeTrafficPatterns();
       const recommendations = await optimizeTraffic(analysis);
 
-      // Log the optimization decision
       await supabase.from("ai_decisions").insert({
         decision_type: "traffic_optimization",
         input_data: analysis,
@@ -173,23 +196,21 @@ serve(async (req) => {
         executed: false,
       });
 
-      return new Response(JSON.stringify({ 
-        success: true, 
+      return new Response(JSON.stringify({
+        success: true,
         analysis,
-        recommendations 
+        recommendations
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     if (action === "daily_report") {
-      // Generate daily traffic report
       const analysis = await analyzeTrafficPatterns();
-      
-      // Calculate growth metrics
+
       const previousDay = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
       const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
-      
+
       const { data: previousTraffic } = await supabase
         .from("traffic_webhooks")
         .select("*")
@@ -200,8 +221,8 @@ serve(async (req) => {
       const currentTotal = analysis?.total_events || 0;
       const growthRate = ((currentTotal - previousTotal) / previousTotal) * 100;
 
-      return new Response(JSON.stringify({ 
-        success: true, 
+      return new Response(JSON.stringify({
+        success: true,
         analysis,
         growth_rate: growthRate.toFixed(2),
         target_300_percent: growthRate >= 300 ? "ACHIEVED!" : `${(300 - growthRate).toFixed(2)}% to go`
@@ -212,6 +233,7 @@ serve(async (req) => {
 
     throw new Error(`Unknown action: ${action}`);
   } catch (error) {
+    if (error instanceof Response) return error;
     logStep("Error", { message: (error as Error).message });
     return new Response(JSON.stringify({ error: (error as Error).message }), {
       status: 500,

@@ -28,25 +28,30 @@ serve(async (req) => {
     const signature = req.headers.get("stripe-signature");
     const body = await req.text();
 
+    if (!STRIPE_WEBHOOK_SECRET) {
+      return new Response(JSON.stringify({ error: "Webhook secret not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!signature) {
+      return new Response(JSON.stringify({ error: "Missing stripe-signature header" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     let event: Stripe.Event;
 
-    // Verify webhook signature - REQUIRED for production security
-    if (!STRIPE_WEBHOOK_SECRET) {
-      logStep("WARNING: STRIPE_WEBHOOK_SECRET not configured - webhook signature verification disabled");
-    }
-    if (STRIPE_WEBHOOK_SECRET && signature) {
-      try {
-        event = stripe.webhooks.constructEvent(body, signature, STRIPE_WEBHOOK_SECRET);
-      } catch (err) {
-        logStep("Webhook signature verification failed", { error: (err as Error).message });
-        return new Response(JSON.stringify({ error: "Invalid signature" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-    } else {
-      // For testing without signature verification
-      event = JSON.parse(body);
+    try {
+      event = stripe.webhooks.constructEvent(body, signature, STRIPE_WEBHOOK_SECRET);
+    } catch (err) {
+      logStep("Webhook signature verification failed", { error: (err as Error).message });
+      return new Response(JSON.stringify({ error: "Invalid signature" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     logStep("Event received", { type: event.type, id: event.id });
@@ -54,17 +59,16 @@ serve(async (req) => {
     switch (event.type) {
       case "payment_intent.succeeded": {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        logStep("Payment succeeded", { 
-          id: paymentIntent.id, 
+        logStep("Payment succeeded", {
+          id: paymentIntent.id,
           amount: paymentIntent.amount,
-          customer: paymentIntent.customer 
+          customer: paymentIntent.customer
         });
 
-        // Record transaction
         const { error } = await supabase.from("stripe_transactions").insert({
           stripe_payment_id: paymentIntent.id,
           stripe_customer_id: paymentIntent.customer as string,
-          amount: paymentIntent.amount / 100, // Convert cents to dollars
+          amount: paymentIntent.amount / 100,
           currency: paymentIntent.currency,
           status: "succeeded",
           customer_email: paymentIntent.receipt_email,
@@ -73,7 +77,6 @@ serve(async (req) => {
 
         if (error) logStep("Error saving transaction", error);
 
-        // Update traffic webhook if purchase came from tracked source
         if (paymentIntent.metadata?.utm_source) {
           await supabase.from("traffic_webhooks").insert({
             webhook_type: "purchase",
@@ -85,7 +88,6 @@ serve(async (req) => {
           });
         }
 
-        // Log to agent for learning
         await supabase.from("ai_decisions").insert({
           decision_type: "payment_received",
           input_data: { payment_id: paymentIntent.id, amount: paymentIntent.amount / 100 },
@@ -115,13 +117,12 @@ serve(async (req) => {
 
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        logStep("Checkout completed", { 
-          id: session.id, 
+        logStep("Checkout completed", {
+          id: session.id,
           amount: session.amount_total,
-          customer_email: session.customer_email 
+          customer_email: session.customer_email
         });
 
-        // Record the successful checkout
         await supabase.from("stripe_transactions").insert({
           stripe_payment_id: session.payment_intent as string,
           stripe_customer_id: session.customer as string,
@@ -133,7 +134,6 @@ serve(async (req) => {
           metadata: session.metadata,
         });
 
-        // Track organic traffic conversion
         await supabase.from("traffic_webhooks").insert({
           webhook_type: "conversion",
           source: session.metadata?.source || "direct",

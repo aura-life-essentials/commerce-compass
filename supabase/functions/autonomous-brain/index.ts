@@ -8,6 +8,7 @@ const corsHeaders = {
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -15,6 +16,40 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 const logStep = (step: string, details?: unknown) => {
   console.log(`[AUTONOMOUS-BRAIN] ${step}`, details ? JSON.stringify(details) : "");
 };
+
+async function requireAdminUser(req: Request) {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    throw new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const token = authHeader.replace("Bearer ", "");
+  const authClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    global: { headers: { Authorization: authHeader } },
+  });
+
+  const { data, error } = await authClient.auth.getClaims(token);
+  const userId = data?.claims?.sub;
+  if (error || !userId) {
+    throw new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const { data: isAdmin, error: roleError } = await supabase.rpc("is_admin", { _user_id: userId });
+  if (roleError || !isAdmin) {
+    throw new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  return userId;
+}
 
 const rolePrompts: Record<string, string> = {
   team_lead: `You are a Sales Team Lead AI. You coordinate your team of 5, assign priorities, and ensure the full sales pipeline runs smoothly. You decide which products to push, which markets to target, and how to allocate team resources. Output JSON with: action, assignments (array of role+task), priority, expected_revenue.`,
