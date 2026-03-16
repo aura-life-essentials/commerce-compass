@@ -988,20 +988,24 @@ Be aggressive. Think like a CEO who wants 10x growth.` }
           }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
         }
 
-        if (normalized.includes("traffic")) {
-          const trafficRes = await fetch(`${supabaseUrl}/functions/v1/traffic-webhook`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${supabaseKey}`,
-              "apikey": supabaseKey,
-            },
-            body: JSON.stringify({ action: "optimize" }),
-          });
-          const trafficData = await trafficRes.json().catch(() => ({}));
-          return new Response(JSON.stringify({ success: trafficRes.ok, mode: "traffic_optimize", result: trafficData }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
+        if (
+          normalized.includes("traffic") ||
+          normalized.includes("market") ||
+          normalized.includes("campaign") ||
+          normalized.includes("content") ||
+          normalized.includes("social") ||
+          normalized.includes("analytics") ||
+          normalized.includes("track") ||
+          normalized.includes("video") ||
+          normalized.includes("swarm") ||
+          normalized.includes("team")
+        ) {
+          const orchestration = await runMarketingCommand(supabase, supabaseUrl, supabaseKey, command, metrics!);
+          if (orchestration) {
+            return new Response(JSON.stringify({ success: true, mode: "marketing_command", execution: orchestration }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
         }
 
         // Deterministic fallback (no model credits required)
