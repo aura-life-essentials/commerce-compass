@@ -33,6 +33,7 @@ import BotSwarm from "./pages/BotSwarm";
 import MarketingBlitz from "./pages/MarketingBlitz";
 import Web3LaunchCenter from "./pages/Web3LaunchCenter";
 import AppMonetizer from "./pages/AppMonetizer";
+import MainHub from "./pages/MainHub";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,9 +42,12 @@ const AppContent = () => {
   useCartSync();
   return (
     <Routes>
+      {/* Public main hub */}
+      <Route path="/" element={<MainHub />} />
+      
       {/* Protected CEO Dashboard - requires admin access */}
       <Route 
-        path="/" 
+        path="/command-center" 
         element={
           <ProtectedRoute requireAdmin>
             <Index />
