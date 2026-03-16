@@ -134,24 +134,24 @@ export default function Auth() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-              <Zap className="h-6 w-6 text-white" />
+            <div className="h-12 w-12 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shadow-[0_0_32px_hsl(var(--primary)/0.35)]">
+              <Zap className="h-6 w-6" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Profit Reaper</h1>
-          <p className="text-slate-400">Autonomous Commerce Command Center</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">CEO Brain</h1>
+          <p className="text-muted-foreground">Global Enterprise Sales Command Center</p>
         </div>
 
         <Card className="bg-slate-900/80 border-slate-800 backdrop-blur-xl">
