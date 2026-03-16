@@ -119,6 +119,12 @@ const IndustryRoadmaps = () => {
                       This is the apex ecosystem interface: one polished operating surface where small businesses, global agencies, founders, and enterprise teams discover opportunities, monitor competitors live, launch ecosystems, and execute growth faster than the market.
                     </p>
 
+                    <div className="mt-6 flex flex-wrap gap-3 text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                      <span className="rounded-full border border-border/70 bg-secondary/30 px-3 py-1.5">Live search intelligence</span>
+                      <span className="rounded-full border border-border/70 bg-secondary/30 px-3 py-1.5">Universal operator shell</span>
+                      <span className="rounded-full border border-border/70 bg-secondary/30 px-3 py-1.5">Firecrawl-powered radar</span>
+                    </div>
+
                     <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                       <Button size="lg" className="rounded-2xl px-7">
                         Enter apex mode
