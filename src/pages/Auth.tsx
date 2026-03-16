@@ -46,7 +46,7 @@ export default function Auth() {
   // Redirect if already logged in
   useEffect(() => {
     if (user && !isLoading) {
-      navigate('/');
+      navigate('/command-center');
     }
   }, [user, isLoading, navigate]);
 
@@ -78,7 +78,7 @@ export default function Auth() {
           setError(error.message);
         }
       } else {
-        navigate('/');
+        navigate('/command-center');
       }
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
@@ -134,57 +134,57 @@ export default function Auth() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-              <Zap className="h-6 w-6 text-white" />
+            <div className="h-12 w-12 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shadow-[0_0_32px_hsl(var(--primary)/0.35)]">
+              <Zap className="h-6 w-6" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Profit Reaper</h1>
-          <p className="text-slate-400">Autonomous Commerce Command Center</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">CEO Brain</h1>
+          <p className="text-muted-foreground">Global Enterprise Sales Command Center</p>
         </div>
 
-        <Card className="bg-slate-900/80 border-slate-800 backdrop-blur-xl">
+        <Card className="bg-card/80 border-border backdrop-blur-xl">
           <CardHeader className="text-center pb-4">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <Shield className="h-5 w-5 text-green-400" />
-              <span className="text-sm text-green-400 font-medium">Secure Access</span>
+              <Shield className="h-5 w-5 text-primary" />
+              <span className="text-sm text-primary font-medium">Secure Access</span>
             </div>
-            <CardTitle className="text-xl text-white">Welcome Back</CardTitle>
-            <CardDescription className="text-slate-400">
+            <CardTitle className="text-xl text-foreground">Welcome Back</CardTitle>
+            <CardDescription className="text-muted-foreground">
               Sign in to access your command center
             </CardDescription>
           </CardHeader>
 
           <CardContent>
             {error && (
-              <Alert variant="destructive" className="mb-4 bg-red-900/20 border-red-800">
+              <Alert variant="destructive" className="mb-4">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
 
             {success && (
-              <Alert className="mb-4 bg-green-900/20 border-green-800">
-                <AlertDescription className="text-green-400">{success}</AlertDescription>
+              <Alert className="mb-4 border-primary/30 bg-primary/10">
+                <AlertDescription className="text-foreground">{success}</AlertDescription>
               </Alert>
             )}
 
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-slate-800/50">
-                <TabsTrigger value="login" className="data-[state=active]:bg-purple-600">
+              <TabsList className="grid w-full grid-cols-2 bg-muted/50">
+                <TabsTrigger value="login" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   Login
                 </TabsTrigger>
-                <TabsTrigger value="signup" className="data-[state=active]:bg-purple-600">
+                <TabsTrigger value="signup" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   Sign Up
                 </TabsTrigger>
               </TabsList>
@@ -192,32 +192,32 @@ export default function Auth() {
               <TabsContent value="login" className="mt-4">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email" className="text-slate-200">Email</Label>
+                    <Label htmlFor="login-email" className="text-foreground">Email</Label>
                     <Input
                       id="login-email"
                       type="email"
                       placeholder="you@example.com"
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
-                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                      className="bg-background"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password" className="text-slate-200">Password</Label>
+                    <Label htmlFor="login-password" className="text-foreground">Password</Label>
                     <Input
                       id="login-password"
                       type="password"
                       placeholder="••••••••"
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
-                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                      className="bg-background"
                       required
                     />
                   </div>
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                    className="w-full"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
@@ -235,45 +235,45 @@ export default function Auth() {
               <TabsContent value="signup" className="mt-4">
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name" className="text-slate-200">Display Name (optional)</Label>
+                    <Label htmlFor="signup-name" className="text-foreground">Display Name (optional)</Label>
                     <Input
                       id="signup-name"
                       type="text"
                       placeholder="Ryan Puddy"
                       value={signupDisplayName}
                       onChange={(e) => setSignupDisplayName(e.target.value)}
-                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                      className="bg-background"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="text-slate-200">Email</Label>
+                    <Label htmlFor="signup-email" className="text-foreground">Email</Label>
                     <Input
                       id="signup-email"
                       type="email"
                       placeholder="you@example.com"
                       value={signupEmail}
                       onChange={(e) => setSignupEmail(e.target.value)}
-                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                      className="bg-background"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password" className="text-slate-200">Password</Label>
+                    <Label htmlFor="signup-password" className="text-foreground">Password</Label>
                     <Input
                       id="signup-password"
                       type="password"
                       placeholder="••••••••"
                       value={signupPassword}
                       onChange={(e) => setSignupPassword(e.target.value)}
-                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                      className="bg-background"
                       required
                       minLength={8}
                     />
-                    <p className="text-xs text-slate-500">Minimum 8 characters</p>
+                    <p className="text-xs text-muted-foreground">Minimum 8 characters</p>
                   </div>
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                    className="w-full"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
@@ -294,12 +294,12 @@ export default function Auth() {
         <div className="text-center mt-6 space-y-3">
           <Link 
             to="/store" 
-            className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors font-medium"
+            className="inline-flex items-center gap-2 text-primary hover:opacity-80 transition-opacity font-medium"
           >
             <ShoppingBag className="h-4 w-4" />
             Browse Store Without Logging In
           </Link>
-          <p className="text-slate-500 text-sm">
+          <p className="text-muted-foreground text-sm">
             Protected by enterprise-grade security
           </p>
         </div>
