@@ -46,7 +46,7 @@ export default function Auth() {
   // Redirect if already logged in
   useEffect(() => {
     if (user && !isLoading) {
-      navigate('/');
+      navigate('/command-center');
     }
   }, [user, isLoading, navigate]);
 
