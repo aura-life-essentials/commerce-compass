@@ -235,45 +235,45 @@ export default function Auth() {
               <TabsContent value="signup" className="mt-4">
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name" className="text-slate-200">Display Name (optional)</Label>
+                    <Label htmlFor="signup-name" className="text-foreground">Display Name (optional)</Label>
                     <Input
                       id="signup-name"
                       type="text"
                       placeholder="Ryan Puddy"
                       value={signupDisplayName}
                       onChange={(e) => setSignupDisplayName(e.target.value)}
-                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                      className="bg-background"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="text-slate-200">Email</Label>
+                    <Label htmlFor="signup-email" className="text-foreground">Email</Label>
                     <Input
                       id="signup-email"
                       type="email"
                       placeholder="you@example.com"
                       value={signupEmail}
                       onChange={(e) => setSignupEmail(e.target.value)}
-                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                      className="bg-background"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password" className="text-slate-200">Password</Label>
+                    <Label htmlFor="signup-password" className="text-foreground">Password</Label>
                     <Input
                       id="signup-password"
                       type="password"
                       placeholder="••••••••"
                       value={signupPassword}
                       onChange={(e) => setSignupPassword(e.target.value)}
-                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                      className="bg-background"
                       required
                       minLength={8}
                     />
-                    <p className="text-xs text-slate-500">Minimum 8 characters</p>
+                    <p className="text-xs text-muted-foreground">Minimum 8 characters</p>
                   </div>
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                    className="w-full"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
@@ -294,12 +294,12 @@ export default function Auth() {
         <div className="text-center mt-6 space-y-3">
           <Link 
             to="/store" 
-            className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors font-medium"
+            className="inline-flex items-center gap-2 text-primary hover:opacity-80 transition-opacity font-medium"
           >
             <ShoppingBag className="h-4 w-4" />
             Browse Store Without Logging In
           </Link>
-          <p className="text-slate-500 text-sm">
+          <p className="text-muted-foreground text-sm">
             Protected by enterprise-grade security
           </p>
         </div>
