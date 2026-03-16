@@ -58,7 +58,7 @@ export default function AppMonetizer() {
               <Badge className="bg-primary/15 text-primary border-primary/30">Monthly subscription architect</Badge>
               <div className="space-y-3">
                 <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Turn your apps into individual tools, bundles, suites, and high-margin upsells.</h1>
-                <p className="text-muted-foreground max-w-2xl">Add your apps now and I’ll instantly structure a monetization ladder with entry offers, expansion bundles, flagship suites, and recurring add-ons.</p>
+                <p className="text-muted-foreground max-w-2xl">Add your apps now and I’ll instantly structure a monetization ladder with entry offers, expansion bundles, flagship suites, and recurring add-ons — including premium packaging for command-center products like your 200-Agent Autonomous Sales Network.</p>
               </div>
               <div className="grid gap-4 sm:grid-cols-3">
                 <Card className="glass-subtle">
