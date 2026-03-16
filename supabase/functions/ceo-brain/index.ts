@@ -525,8 +525,13 @@ async function saveDecisions(supabase: any, brainOutput: any, engine: string): P
   });
 }
 
-async function invokeAutonomousBrain(supabaseUrl: string, serviceRoleKey: string, payload: Record<string, any>) {
-  const response = await fetch(`${supabaseUrl}/functions/v1/autonomous-brain`, {
+async function invokeEdgeFunction(
+  supabaseUrl: string,
+  serviceRoleKey: string,
+  functionName: string,
+  payload: Record<string, any>
+) {
+  const response = await fetch(`${supabaseUrl}/functions/v1/${functionName}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -538,10 +543,167 @@ async function invokeAutonomousBrain(supabaseUrl: string, serviceRoleKey: string
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    return { success: false, error: data?.error || `autonomous-brain ${response.status}` };
+    return { success: false, error: data?.error || `${functionName} ${response.status}`, data };
   }
 
   return { success: true, data };
+}
+
+async function invokeAutonomousBrain(supabaseUrl: string, serviceRoleKey: string, payload: Record<string, any>) {
+  return invokeEdgeFunction(supabaseUrl, serviceRoleKey, "autonomous-brain", payload);
+}
+
+async function getCommandProducts(supabase: any) {
+  const { data: products } = await supabase
+    .from("products")
+    .select("title, description, price")
+    .eq("status", "active")
+    .order("updated_at", { ascending: false })
+    .limit(5);
+
+  return (products || []).map((product: any) => ({
+    title: product.title,
+    description: product.description || "",
+    price: String(product.price ?? 0),
+    handle: product.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+  }));
+}
+
+async function runMarketingCommand(
+  supabase: any,
+  supabaseUrl: string,
+  serviceRoleKey: string,
+  command: string,
+  metrics: BusinessMetrics
+) {
+  const normalized = command.toLowerCase();
+  const products = await getCommandProducts(supabase);
+  const actions: Array<Promise<any>> = [];
+  const actionLabels: string[] = [];
+
+  if (
+    normalized.includes("market") ||
+    normalized.includes("campaign") ||
+    normalized.includes("blitz") ||
+    normalized.includes("launch") ||
+    normalized.includes("social")
+  ) {
+    if (products.length) {
+      actions.push(invokeEdgeFunction(supabaseUrl, serviceRoleKey, "marketing-blitz", {
+        action: products.length > 1 ? "blitz_all" : "single",
+        products,
+        product: products[0],
+        mode: "local",
+      }));
+      actionLabels.push("marketing_blitz");
+    }
+  }
+
+  if (
+    normalized.includes("content") ||
+    normalized.includes("creative") ||
+    normalized.includes("video") ||
+    normalized.includes("youtube")
+  ) {
+    if (products.length) {
+      actions.push(invokeEdgeFunction(supabaseUrl, serviceRoleKey, "content-factory", {
+        action: products.length > 1 ? "start_batch" : "start_single",
+        products,
+        product: products[0],
+      }));
+      actionLabels.push("content_factory");
+    }
+  }
+
+  if (normalized.includes("traffic") || normalized.includes("optimize") || normalized.includes("funnel")) {
+    actions.push(invokeEdgeFunction(supabaseUrl, serviceRoleKey, "traffic-webhook", { action: "optimize" }));
+    actionLabels.push("traffic_optimization");
+  }
+
+  if (normalized.includes("analytics") || normalized.includes("track") || normalized.includes("measure")) {
+    actions.push(invokeEdgeFunction(supabaseUrl, serviceRoleKey, "track-analytics", {
+      event_type: "user_action",
+      event_name: "ceo_marketing_command",
+      event_data: {
+        command,
+        triggered_actions: actionLabels,
+        metrics_snapshot: {
+          totalRevenue: metrics.totalRevenue,
+          totalOrders: metrics.totalOrders,
+          trafficEvents24h: metrics.trafficEvents24h,
+          conversions24h: metrics.conversions24h,
+        },
+      },
+      page_url: "backend://ceo-brain-command",
+      referrer: "backend://ceo-brain",
+      session_id: `ceo-brain-${Date.now()}`,
+    }));
+    actionLabels.push("analytics_tracking");
+  }
+
+  if (normalized.includes("milestone") || normalized.includes("announce") || normalized.includes("discord") || normalized.includes("twitter")) {
+    actions.push(invokeEdgeFunction(supabaseUrl, serviceRoleKey, "social-milestone-post", { action: "check_milestone" }));
+    actionLabels.push("social_milestone_post");
+  }
+
+  if (normalized.includes("deploy all") || normalized.includes("swarm") || normalized.includes("agents") || normalized.includes("team")) {
+    actions.push(invokeAutonomousBrain(supabaseUrl, serviceRoleKey, { action: "deploy_all" }));
+    actionLabels.push("autonomous_deploy_all");
+  }
+
+  if (!actions.length) {
+    return null;
+  }
+
+  const settled = await Promise.allSettled(actions);
+  const results = settled.map((result, index) =>
+    result.status === "fulfilled"
+      ? { action: actionLabels[index], ...result.value }
+      : { action: actionLabels[index], success: false, error: String(result.reason) }
+  );
+
+  const successfulActions = results.filter((item) => item.success).length;
+  const status = successfulActions === results.length ? "completed" : successfulActions > 0 ? "partial" : "error";
+
+  const executionResult = {
+    command,
+    mode: "marketing_orchestration",
+    products_considered: products.length,
+    metrics_snapshot: {
+      total_revenue: metrics.totalRevenue,
+      total_orders: metrics.totalOrders,
+      traffic_events_24h: metrics.trafficEvents24h,
+      conversions_24h: metrics.conversions24h,
+      active_campaigns: metrics.activeCampaigns,
+    },
+    results,
+  };
+
+  await supabase.from("ai_decisions").insert({
+    decision_type: "marketing_command_execution",
+    reasoning: "Executed typed marketing orchestration command across backend webhook functions",
+    confidence_score: 0.91,
+    executed: true,
+    input_data: { command, routed_actions: actionLabels },
+    output_action: {
+      action: "run_marketing_orchestration",
+      category: "MARKETING",
+      priority: "urgent",
+      expected_impact: "Triggers campaigns, content, analytics, traffic optimization, and swarm workflows"
+    },
+    execution_result: executionResult,
+  });
+
+  await supabase.from("agent_logs").insert({
+    agent_name: "CEO Brain",
+    agent_role: "Marketing Command",
+    action: `Typed marketing command executed (${successfulActions}/${results.length} actions succeeded)`,
+    status,
+    details: executionResult,
+    error_message: status === "error" ? "All marketing orchestration actions failed" : null,
+  });
+
+  return executionResult;
 }
 
 async function runSalesWorkflow(supabase: any, supabaseUrl: string, serviceRoleKey: string, command: string) {
@@ -577,7 +739,10 @@ async function runSalesWorkflow(supabase: any, supabaseUrl: string, serviceRoleK
     }
   }
 
-  const deployRes = await invokeAutonomousBrain(supabaseUrl, serviceRoleKey, { action: "deploy_all" });
+  const [deployRes, marketingRes] = await Promise.all([
+    invokeAutonomousBrain(supabaseUrl, serviceRoleKey, { action: "deploy_all" }),
+    runMarketingCommand(supabase, supabaseUrl, serviceRoleKey, `${command} marketing blitz traffic analytics`, metrics),
+  ]);
 
   const executionResult = {
     command,
@@ -590,6 +755,7 @@ async function runSalesWorkflow(supabase: any, supabaseUrl: string, serviceRoleK
     },
     campaigns_created: campaignResults.length,
     campaign_details: campaignResults,
+    marketing_orchestration: marketingRes,
     deployment: deployRes,
   };
 
