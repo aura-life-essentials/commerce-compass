@@ -78,7 +78,7 @@ export default function Auth() {
           setError(error.message);
         }
       } else {
-        navigate('/');
+        navigate('/command-center');
       }
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
