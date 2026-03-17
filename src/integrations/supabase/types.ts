@@ -971,6 +971,63 @@ export type Database = {
           },
         ]
       }
+      lead_contacts: {
+        Row: {
+          assigned_owner_user_id: string | null
+          budget_range: string | null
+          company_name: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          last_contacted_at: string | null
+          message: string | null
+          metadata: Json
+          phone: string | null
+          project_type: string | null
+          source: string
+          status: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          assigned_owner_user_id?: string | null
+          budget_range?: string | null
+          company_name?: string | null
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          last_contacted_at?: string | null
+          message?: string | null
+          metadata?: Json
+          phone?: string | null
+          project_type?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          assigned_owner_user_id?: string | null
+          budget_range?: string | null
+          company_name?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          last_contacted_at?: string | null
+          message?: string | null
+          metadata?: Json
+          phone?: string | null
+          project_type?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       marketing_campaigns: {
         Row: {
           ai_generated_content: Json | null
