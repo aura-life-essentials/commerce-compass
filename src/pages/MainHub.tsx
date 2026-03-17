@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import {
   ArrowRight,
   Bot,
-  Brain,
   Globe2,
   Layers3,
   LineChart,
@@ -22,6 +21,7 @@ import { ShopifyCartDrawer } from "@/components/store/ShopifyCartDrawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AuraOmegaLogo } from "@/components/branding/AuraOmegaLogo";
 import { getOfferSummary, parseApps, generateOffers } from "@/lib/appMonetization";
 
 const platformApps = parseApps(`CEO Brain | AI Agents | Runs executive orchestration across growth, pricing, and offers | 299
@@ -65,8 +65,8 @@ const offerPillars = [
 
 export default function MainHub() {
   useSEOHead({
-    title: "Global Enterprise Sales Hub | CEO Brain",
-    description: "Sell physical products, flagship tools, agent systems, and enterprise offers from one polished global commerce hub.",
+    title: "Aura Omega Enterprise Sales Hub",
+    description: "Aura Omega unifies products, agent systems, subscriptions, and enterprise offers into one polished global sales hub.",
   });
 
   const { data: products, isLoading: productsLoading } = useShopifyProducts(8);
@@ -83,14 +83,8 @@ export default function MainHub() {
       <div className="relative z-10">
         <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
           <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-4 md:px-6">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-[0_0_30px_hsl(var(--primary)/0.35)]">
-                <Brain className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold tracking-[0.24em] text-primary uppercase">CEO Brain</p>
-                <p className="text-sm text-muted-foreground">Global Enterprise Sales Hub</p>
-              </div>
+            <Link to="/" className="min-w-0">
+              <AuraOmegaLogo subtitle="Global Enterprise Sales Hub" className="max-w-[15rem]" />
             </Link>
 
             <div className="flex items-center gap-2 md:gap-3">
@@ -110,13 +104,20 @@ export default function MainHub() {
             <div className="grid items-end gap-8 lg:grid-cols-[1.15fr_0.85fr]">
               <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
                 <Badge className="border-primary/30 bg-primary/10 text-primary">Unified commerce + enterprise operating layer</Badge>
-                <div className="space-y-4">
-                  <h1 className="max-w-4xl text-5xl font-semibold tracking-tight md:text-7xl">
-                    The global sales system for every store, tool, and flagship offer you sell.
-                  </h1>
-                  <p className="max-w-2xl text-lg text-muted-foreground md:text-xl">
-                    This app now becomes the main commercial surface: products, subscriptions, agent systems, enterprise services, and live store intelligence in one polished revenue engine.
-                  </p>
+                <div className="space-y-5">
+                  <AuraOmegaLogo
+                    variant="hero"
+                    subtitle="Global enterprise sales hub"
+                    className="max-w-full"
+                  />
+                  <div className="space-y-4">
+                    <h1 className="max-w-4xl text-5xl font-semibold tracking-tight md:text-7xl">
+                      The global sales system for every store, tool, and flagship offer you sell.
+                    </h1>
+                    <p className="max-w-2xl text-lg text-muted-foreground md:text-xl">
+                      Aura Omega turns this app into the main commercial surface: products, subscriptions, agent systems, enterprise services, and live store intelligence in one polished revenue engine.
+                    </p>
+                  </div>
                 </div>
 
                 <div className="flex flex-wrap gap-3">

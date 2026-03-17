@@ -2,7 +2,6 @@ import {
   Activity,
   Blocks,
   Bot,
-  Brain,
   Compass,
   Globe,
   Layers3,
@@ -15,6 +14,7 @@ import {
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
+import { AuraOmegaLogo } from "@/components/branding/AuraOmegaLogo";
 import {
   Sidebar,
   SidebarContent,
@@ -54,16 +54,12 @@ export function ApexSidebar() {
   return (
     <Sidebar collapsible="icon" variant="floating" className="border-r-0">
       <SidebarHeader className="border-b border-sidebar-border/60 p-4">
-        <div className="flex items-center gap-3 rounded-2xl border border-sidebar-border/70 bg-sidebar-accent/70 p-3 shadow-sm">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/15 text-primary shadow-[0_0_24px_hsl(var(--primary)/0.25)]">
-            <Brain className="h-5 w-5" />
-          </div>
-          {!collapsed && (
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-sidebar-foreground">Apex OS</p>
-              <p className="truncate text-xs text-sidebar-foreground/70">Universal Web3 interface</p>
-            </div>
-          )}
+        <div className="rounded-2xl border border-sidebar-border/70 bg-sidebar-accent/70 p-3 shadow-sm">
+          <AuraOmegaLogo
+            variant={collapsed ? "compact" : "default"}
+            subtitle={collapsed ? undefined : "Universal Web3 interface"}
+            priority="muted"
+          />
         </div>
       </SidebarHeader>
 
