@@ -34,6 +34,7 @@ import MarketingBlitz from "./pages/MarketingBlitz";
 import Web3LaunchCenter from "./pages/Web3LaunchCenter";
 import AppMonetizer from "./pages/AppMonetizer";
 import MainHub from "./pages/MainHub";
+import LeadVault from "./pages/LeadVault";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,6 +54,14 @@ const AppContent = () => {
             <Index />
           </ProtectedRoute>
         } 
+      />
+      <Route
+        path="/command-center/leads"
+        element={
+          <ProtectedRoute requireSuperAdmin>
+            <LeadVault />
+          </ProtectedRoute>
+        }
       />
       
       {/* Public welcome/landing pages */}
