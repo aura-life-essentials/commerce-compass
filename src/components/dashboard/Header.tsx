@@ -36,15 +36,15 @@ export const Header = () => {
   const getRoleBadge = () => {
     if (isSuperAdmin) {
       return (
-        <div className="flex items-center gap-1 text-xs text-amber-400">
+        <div className="flex items-center gap-1 text-xs text-primary">
           <Crown className="w-3 h-3" />
           <span>Super Admin</span>
         </div>
       );
     }
-    if (role === 'admin') {
+    if (role === "admin") {
       return (
-        <div className="flex items-center gap-1 text-xs text-purple-400">
+        <div className="flex items-center gap-1 text-xs text-primary">
           <Shield className="w-3 h-3" />
           <span>Admin</span>
         </div>
@@ -56,27 +56,27 @@ export const Header = () => {
   return (
     <header className="glass-subtle sticky top-0 z-50 border-b border-border/50">
       <div className="container mx-auto px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <AuraOmegaLogo subtitle="Revenue Command Center" />
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <AuraOmegaLogo subtitle="Revenue Command Center" className="min-w-0" />
             <div className="status-active status-dot hidden sm:block" />
           </div>
 
           <div className="flex items-center gap-2">
             <Link to="/war-room">
-              <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300 hover:bg-red-500/10">
+              <Button variant="ghost" size="sm" className="text-primary hover:text-foreground hover:bg-primary/10">
                 <Shield className="w-4 h-4 mr-2" />
                 War Room
               </Button>
             </Link>
             <Link to="/bot-swarm">
-              <Button variant="ghost" size="sm" className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10">
+              <Button variant="ghost" size="sm" className="text-primary hover:text-foreground hover:bg-primary/10">
                 <Bot className="w-4 h-4 mr-2" />
                 Bot Swarm
               </Button>
             </Link>
             <Link to="/casino">
-              <Button variant="ghost" size="sm" className="text-amber-400 hover:text-amber-300 hover:bg-amber-500/10">
+              <Button variant="ghost" size="sm" className="text-primary hover:text-foreground hover:bg-primary/10">
                 <Sparkles className="w-4 h-4 mr-2" />
                 Casino Launch
               </Button>
@@ -114,28 +114,24 @@ export const Header = () => {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-10 w-10 border-2 border-primary/20">
-                    <AvatarFallback className="bg-gradient-to-br from-purple-600 to-pink-600 text-white font-medium">
+                    <AvatarFallback className="bg-primary text-primary-foreground font-medium">
                       {getInitials(user?.email)}
                     </AvatarFallback>
                   </Avatar>
-                  {isSuperAdmin && (
-                    <Crown className="absolute -top-1 -right-1 w-4 h-4 text-amber-400" />
-                  )}
+                  {isSuperAdmin && <Crown className="absolute -top-1 -right-1 w-4 h-4 text-primary" />}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-64 bg-slate-900 border-slate-800" align="end">
+              <DropdownMenuContent className="w-64 bg-card border-border" align="end">
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium text-white truncate">
-                      {user?.email}
-                    </p>
+                    <p className="text-sm font-medium text-foreground truncate">{user?.email}</p>
                     {getRoleBadge()}
                   </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-slate-800" />
-                <DropdownMenuItem 
+                <DropdownMenuSeparator className="bg-border" />
+                <DropdownMenuItem
                   onClick={handleSignOut}
-                  className="text-red-400 focus:text-red-400 focus:bg-red-900/20 cursor-pointer"
+                  className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign out
