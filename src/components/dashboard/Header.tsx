@@ -1,4 +1,4 @@
-import { Brain, Bell, Settings, Command, LogOut, Shield, Crown, CreditCard, Globe, Sparkles, Bot, Layers3 } from "lucide-react";
+import { Bell, Settings, Command, LogOut, Shield, Crown, CreditCard, Globe, Sparkles, Bot, Layers3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { AuraOmegaLogo } from "@/components/branding/AuraOmegaLogo";
 
 export const Header = () => {
   const { user, role, isSuperAdmin, signOut } = useAuthContext();
@@ -35,15 +36,15 @@ export const Header = () => {
   const getRoleBadge = () => {
     if (isSuperAdmin) {
       return (
-        <div className="flex items-center gap-1 text-xs text-amber-400">
+        <div className="flex items-center gap-1 text-xs text-primary">
           <Crown className="w-3 h-3" />
           <span>Super Admin</span>
         </div>
       );
     }
-    if (role === 'admin') {
+    if (role === "admin") {
       return (
-        <div className="flex items-center gap-1 text-xs text-purple-400">
+        <div className="flex items-center gap-1 text-xs text-primary">
           <Shield className="w-3 h-3" />
           <span>Admin</span>
         </div>
@@ -55,35 +56,27 @@ export const Header = () => {
   return (
     <header className="glass-subtle sticky top-0 z-50 border-b border-border/50">
       <div className="container mx-auto px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center glow-primary">
-                <Brain className="w-5 h-5 text-white" />
-              </div>
-              <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-background status-active" />
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold tracking-tight">CEO Brain</h1>
-              <p className="text-xs text-muted-foreground">Revenue Command Center</p>
-            </div>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <AuraOmegaLogo subtitle="Revenue Command Center" className="min-w-0" />
+            <div className="status-active status-dot hidden sm:block" />
           </div>
 
           <div className="flex items-center gap-2">
             <Link to="/war-room">
-              <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300 hover:bg-red-500/10">
+              <Button variant="ghost" size="sm" className="text-primary hover:text-foreground hover:bg-primary/10">
                 <Shield className="w-4 h-4 mr-2" />
                 War Room
               </Button>
             </Link>
             <Link to="/bot-swarm">
-              <Button variant="ghost" size="sm" className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10">
+              <Button variant="ghost" size="sm" className="text-primary hover:text-foreground hover:bg-primary/10">
                 <Bot className="w-4 h-4 mr-2" />
                 Bot Swarm
               </Button>
             </Link>
             <Link to="/casino">
-              <Button variant="ghost" size="sm" className="text-amber-400 hover:text-amber-300 hover:bg-amber-500/10">
+              <Button variant="ghost" size="sm" className="text-primary hover:text-foreground hover:bg-primary/10">
                 <Sparkles className="w-4 h-4 mr-2" />
                 Casino Launch
               </Button>
@@ -111,39 +104,34 @@ export const Header = () => {
             </Button>
             <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground relative">
               <Bell className="w-4 h-4" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full" />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full" />
             </Button>
             <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
               <Settings className="w-4 h-4" />
             </Button>
 
-            {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-10 w-10 border-2 border-primary/20">
-                    <AvatarFallback className="bg-gradient-to-br from-purple-600 to-pink-600 text-white font-medium">
+                    <AvatarFallback className="bg-primary text-primary-foreground font-medium">
                       {getInitials(user?.email)}
                     </AvatarFallback>
                   </Avatar>
-                  {isSuperAdmin && (
-                    <Crown className="absolute -top-1 -right-1 w-4 h-4 text-amber-400" />
-                  )}
+                  {isSuperAdmin && <Crown className="absolute -top-1 -right-1 w-4 h-4 text-primary" />}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-64 bg-slate-900 border-slate-800" align="end">
+              <DropdownMenuContent className="w-64 bg-card border-border" align="end">
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium text-white truncate">
-                      {user?.email}
-                    </p>
+                    <p className="text-sm font-medium text-foreground truncate">{user?.email}</p>
                     {getRoleBadge()}
                   </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-slate-800" />
-                <DropdownMenuItem 
+                <DropdownMenuSeparator className="bg-border" />
+                <DropdownMenuItem
                   onClick={handleSignOut}
-                  className="text-red-400 focus:text-red-400 focus:bg-red-900/20 cursor-pointer"
+                  className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign out
