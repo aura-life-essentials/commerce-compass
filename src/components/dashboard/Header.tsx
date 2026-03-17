@@ -1,4 +1,4 @@
-import { Bell, Settings, Command, LogOut, Shield, Crown, CreditCard, Globe, Sparkles, Bot, Layers3 } from "lucide-react";
+import { Bell, Settings, Command, LogOut, Shield, Crown, CreditCard, Globe, Sparkles, Bot, Layers3, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
@@ -63,6 +63,14 @@ export const Header = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            {isSuperAdmin ? (
+              <Link to="/command-center/leads">
+                <Button variant="ghost" size="sm" className="text-primary hover:text-foreground hover:bg-primary/10">
+                  <Users className="w-4 h-4 mr-2" />
+                  Lead Vault
+                </Button>
+              </Link>
+            ) : null}
             <Link to="/war-room">
               <Button variant="ghost" size="sm" className="text-primary hover:text-foreground hover:bg-primary/10">
                 <Shield className="w-4 h-4 mr-2" />
