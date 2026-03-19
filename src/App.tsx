@@ -33,6 +33,8 @@ import BotSwarm from "./pages/BotSwarm";
 import MarketingBlitz from "./pages/MarketingBlitz";
 import Web3LaunchCenter from "./pages/Web3LaunchCenter";
 import AppMonetizer from "./pages/AppMonetizer";
+import AppStore from "./pages/AppStore";
+import ConnectivityDashboard from "./pages/ConnectivityDashboard";
 import MainHub from "./pages/MainHub";
 import LeadVault from "./pages/LeadVault";
 import NotFound from "./pages/NotFound";
