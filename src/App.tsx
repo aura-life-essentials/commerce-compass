@@ -33,6 +33,8 @@ import BotSwarm from "./pages/BotSwarm";
 import MarketingBlitz from "./pages/MarketingBlitz";
 import Web3LaunchCenter from "./pages/Web3LaunchCenter";
 import AppMonetizer from "./pages/AppMonetizer";
+import AppStore from "./pages/AppStore";
+import ConnectivityDashboard from "./pages/ConnectivityDashboard";
 import MainHub from "./pages/MainHub";
 import LeadVault from "./pages/LeadVault";
 import NotFound from "./pages/NotFound";
@@ -146,6 +148,16 @@ const AppContent = () => {
       <Route path="/app-monetizer" element={
         <ProtectedRoute requireAdmin>
           <AppMonetizer />
+        </ProtectedRoute>
+      } />
+
+      {/* Public App Store */}
+      <Route path="/apps" element={<AppStore />} />
+
+      {/* Connectivity Dashboard - super admin only */}
+      <Route path="/connectivity" element={
+        <ProtectedRoute requireSuperAdmin>
+          <ConnectivityDashboard />
         </ProtectedRoute>
       } />
       
