@@ -150,6 +150,16 @@ const AppContent = () => {
           <AppMonetizer />
         </ProtectedRoute>
       } />
+
+      {/* Public App Store */}
+      <Route path="/apps" element={<AppStore />} />
+
+      {/* Connectivity Dashboard - super admin only */}
+      <Route path="/connectivity" element={
+        <ProtectedRoute requireSuperAdmin>
+          <ConnectivityDashboard />
+        </ProtectedRoute>
+      } />
       
       {/* Legal pages */}
       <Route path="/privacy" element={<PrivacyPolicy />} />
