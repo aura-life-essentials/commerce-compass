@@ -35,6 +35,7 @@ import Web3LaunchCenter from "./pages/Web3LaunchCenter";
 import AppMonetizer from "./pages/AppMonetizer";
 import AppStore from "./pages/AppStore";
 import ConnectivityDashboard from "./pages/ConnectivityDashboard";
+import SystemHealth from "./pages/SystemHealth";
 import MainHub from "./pages/MainHub";
 import LeadVault from "./pages/LeadVault";
 import NotFound from "./pages/NotFound";
@@ -158,6 +159,13 @@ const AppContent = () => {
       <Route path="/connectivity" element={
         <ProtectedRoute requireSuperAdmin>
           <ConnectivityDashboard />
+        </ProtectedRoute>
+      } />
+      
+      {/* System Health - canonical architecture view */}
+      <Route path="/system-health" element={
+        <ProtectedRoute requireSuperAdmin>
+          <SystemHealth />
         </ProtectedRoute>
       } />
       
