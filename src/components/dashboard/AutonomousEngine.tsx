@@ -127,9 +127,9 @@ export const AutonomousEngine = () => {
       )}
 
       <div className="mt-6 p-4 rounded-lg bg-gradient-to-r from-primary/10 to-cyan-500/10 border border-primary/20">
-        <p className="text-sm font-medium mb-1">🧠 Self-Thinking AI Network Active</p>
+        <p className="text-sm font-medium mb-1">🧠 Agent Execution Engine</p>
         <p className="text-xs text-muted-foreground">
-          Firecrawl scraping viral content • Perplexity analyzing markets • ElevenLabs generating voiceovers • Stripe processing payments
+          Agents execute via backend functions only. Click any agent above to trigger a real execution cycle recorded in the database.
         </p>
       </div>
     </div>
