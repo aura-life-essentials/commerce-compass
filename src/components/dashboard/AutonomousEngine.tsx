@@ -76,7 +76,7 @@ export const AutonomousEngine = () => {
           </div>
           <div>
             <h3 className="font-semibold text-lg">Autonomous AI Engine</h3>
-            <p className="text-sm text-muted-foreground">Self-thinking agents • Global sales • 300% growth</p>
+            <p className="text-sm text-muted-foreground">Backend-triggered agents • Real execution logs</p>
           </div>
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
