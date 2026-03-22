@@ -86,7 +86,7 @@ export const useCeoBrain = () => {
         revenue: totalRevenue,
         orders: totalOrders,
         products: productsRes.count || 0,
-        activeAgents: 6,
+        activeAgents: agentBrains?.filter(a => a.is_active).length || 0,
         conversionRate: avgConversion * 100,
         avgOrderValue: avgAOV,
       } as CEOMetrics;

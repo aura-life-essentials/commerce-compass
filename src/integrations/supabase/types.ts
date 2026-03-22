@@ -209,6 +209,53 @@ export type Database = {
           },
         ]
       }
+      agent_runs: {
+        Row: {
+          agent_name: string
+          completed_at: string | null
+          error_message: string | null
+          id: string
+          input_payload: Json | null
+          output_payload: Json | null
+          started_at: string
+          status: string
+          store_id: string | null
+          trigger_source: string
+        }
+        Insert: {
+          agent_name: string
+          completed_at?: string | null
+          error_message?: string | null
+          id?: string
+          input_payload?: Json | null
+          output_payload?: Json | null
+          started_at?: string
+          status?: string
+          store_id?: string | null
+          trigger_source: string
+        }
+        Update: {
+          agent_name?: string
+          completed_at?: string | null
+          error_message?: string | null
+          id?: string
+          input_payload?: Json | null
+          output_payload?: Json | null
+          started_at?: string
+          status?: string
+          store_id?: string | null
+          trigger_source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_runs_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_teams: {
         Row: {
           campaigns_run: number | null
@@ -349,6 +396,33 @@ export type Database = {
           session_id?: string | null
           user_agent?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      audit_events: {
+        Row: {
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          event_type: string
+          id: string
+          payload: Json | null
+        }
+        Insert: {
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          event_type: string
+          id?: string
+          payload?: Json | null
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          event_type?: string
+          id?: string
+          payload?: Json | null
         }
         Relationships: []
       }
@@ -828,6 +902,63 @@ export type Database = {
         }
         Relationships: []
       }
+      fulfillment_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          order_id: string | null
+          outbound_payload: Json | null
+          provider: string
+          response_payload: Json | null
+          started_at: string | null
+          status: string
+          store_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          order_id?: string | null
+          outbound_payload?: Json | null
+          provider?: string
+          response_payload?: Json | null
+          started_at?: string | null
+          status?: string
+          store_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          order_id?: string | null
+          outbound_payload?: Json | null
+          provider?: string
+          response_payload?: Json | null
+          started_at?: string | null
+          status?: string
+          store_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fulfillment_jobs_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fulfillment_jobs_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       global_markets: {
         Row: {
           country_code: string
@@ -912,6 +1043,30 @@ export type Database = {
         }
         Relationships: []
       }
+      health_checks: {
+        Row: {
+          checked_at: string
+          details: Json | null
+          id: string
+          status: string
+          subsystem: string
+        }
+        Insert: {
+          checked_at?: string
+          details?: Json | null
+          id?: string
+          status: string
+          subsystem: string
+        }
+        Update: {
+          checked_at?: string
+          details?: Json | null
+          id?: string
+          status?: string
+          subsystem?: string
+        }
+        Relationships: []
+      }
       industry_roadmaps: {
         Row: {
           assigned_agents: string[] | null
@@ -967,6 +1122,53 @@ export type Database = {
             columns: ["subscription_id"]
             isOneToOne: false
             referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integrations: {
+        Row: {
+          config_summary: Json | null
+          created_at: string
+          error_message: string | null
+          external_account_id: string | null
+          id: string
+          last_verified_at: string | null
+          status: string
+          store_id: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          config_summary?: Json | null
+          created_at?: string
+          error_message?: string | null
+          external_account_id?: string | null
+          id?: string
+          last_verified_at?: string | null
+          status?: string
+          store_id?: string | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          config_summary?: Json | null
+          created_at?: string
+          error_message?: string | null
+          external_account_id?: string | null
+          id?: string
+          last_verified_at?: string | null
+          status?: string
+          store_id?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integrations_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
             referencedColumns: ["id"]
           },
         ]
@@ -2583,6 +2785,48 @@ export type Database = {
           staking_fees_usd?: number | null
           total_eth?: number | null
           total_usd?: number | null
+        }
+        Relationships: []
+      }
+      webhook_events: {
+        Row: {
+          delivery_status: string
+          external_event_id: string | null
+          id: string
+          payload: Json | null
+          processed_at: string | null
+          processing_notes: string | null
+          provider: string
+          received_at: string
+          response_code: number | null
+          signature_valid: boolean | null
+          topic: string
+        }
+        Insert: {
+          delivery_status?: string
+          external_event_id?: string | null
+          id?: string
+          payload?: Json | null
+          processed_at?: string | null
+          processing_notes?: string | null
+          provider: string
+          received_at?: string
+          response_code?: number | null
+          signature_valid?: boolean | null
+          topic: string
+        }
+        Update: {
+          delivery_status?: string
+          external_event_id?: string | null
+          id?: string
+          payload?: Json | null
+          processed_at?: string | null
+          processing_notes?: string | null
+          provider?: string
+          received_at?: string
+          response_code?: number | null
+          signature_valid?: boolean | null
+          topic?: string
         }
         Relationships: []
       }

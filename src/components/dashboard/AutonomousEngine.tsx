@@ -76,12 +76,18 @@ export const AutonomousEngine = () => {
           </div>
           <div>
             <h3 className="font-semibold text-lg">Autonomous AI Engine</h3>
-            <p className="text-sm text-muted-foreground">Self-thinking agents • Global sales • 300% growth</p>
+            <p className="text-sm text-muted-foreground">Backend-triggered agents • Real execution logs</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-sm text-emerald-400 font-medium">All Systems Active</span>
+        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${
+          agents.filter(a => a.is_active).length > 0 
+            ? "bg-emerald-500/10 border-emerald-500/30" 
+            : "bg-amber-500/10 border-amber-500/30"
+        }`}>
+          <div className={`w-2 h-2 rounded-full ${agents.filter(a => a.is_active).length > 0 ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
+          <span className={`text-sm font-medium ${agents.filter(a => a.is_active).length > 0 ? "text-emerald-400" : "text-amber-400"}`}>
+            {agents.filter(a => a.is_active).length}/{agents.length} Active
+          </span>
         </div>
       </div>
 
@@ -121,9 +127,9 @@ export const AutonomousEngine = () => {
       )}
 
       <div className="mt-6 p-4 rounded-lg bg-gradient-to-r from-primary/10 to-cyan-500/10 border border-primary/20">
-        <p className="text-sm font-medium mb-1">🧠 Self-Thinking AI Network Active</p>
+        <p className="text-sm font-medium mb-1">🧠 Agent Execution Engine</p>
         <p className="text-xs text-muted-foreground">
-          Firecrawl scraping viral content • Perplexity analyzing markets • ElevenLabs generating voiceovers • Stripe processing payments
+          Agents execute via backend functions only. Click any agent above to trigger a real execution cycle recorded in the database.
         </p>
       </div>
     </div>
