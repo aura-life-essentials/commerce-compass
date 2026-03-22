@@ -79,9 +79,15 @@ export const AutonomousEngine = () => {
             <p className="text-sm text-muted-foreground">Backend-triggered agents • Real execution logs</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-sm text-emerald-400 font-medium">All Systems Active</span>
+        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${
+          agents.filter(a => a.is_active).length > 0 
+            ? "bg-emerald-500/10 border-emerald-500/30" 
+            : "bg-amber-500/10 border-amber-500/30"
+        }`}>
+          <div className={`w-2 h-2 rounded-full ${agents.filter(a => a.is_active).length > 0 ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
+          <span className={`text-sm font-medium ${agents.filter(a => a.is_active).length > 0 ? "text-emerald-400" : "text-amber-400"}`}>
+            {agents.filter(a => a.is_active).length}/{agents.length} Active
+          </span>
         </div>
       </div>
 
