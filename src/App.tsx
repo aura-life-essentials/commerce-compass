@@ -162,6 +162,13 @@ const AppContent = () => {
         </ProtectedRoute>
       } />
       
+      {/* System Health - canonical architecture view */}
+      <Route path="/system-health" element={
+        <ProtectedRoute requireSuperAdmin>
+          <SystemHealth />
+        </ProtectedRoute>
+      } />
+      
       {/* Legal pages */}
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsOfService />} />
