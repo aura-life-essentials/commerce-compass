@@ -119,14 +119,14 @@ const SystemHealth = () => {
   const { data: tableCounts } = useQuery({
     queryKey: ["table-counts-admin"],
     queryFn: async () => {
-      const tables = [
+      const results: Record<string, number> = {};
+      const tableNames = [
         "stores", "products", "orders", "stripe_transactions", "subscriptions",
         "agent_brains", "agent_logs", "ai_decisions", "webhook_events",
         "agent_runs", "health_checks", "fulfillment_jobs", "integrations",
         "lead_contacts", "content_pipeline", "organic_campaigns"
-      ];
-      const results: Record<string, number> = {};
-      for (const table of tables) {
+      ] as const;
+      for (const table of tableNames) {
         const { count } = await supabase.from(table).select("*", { count: "exact", head: true });
         results[table] = count || 0;
       }
