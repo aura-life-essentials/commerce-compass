@@ -101,7 +101,6 @@ async function structureProductData(apiKey: string, rawResearch: string) {
   log("Structuring product data with AI");
 
   const data = await callAI(
-    apiKey,
     [
       {
         role: "system",
