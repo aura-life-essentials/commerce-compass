@@ -77,8 +77,8 @@ async function searchFirecrawl(apiKey: string, query: string) {
 }
 
 async function summarizeWithLovable(query: string, brands: string[], signals: FirecrawlSearchResult[]) {
-  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-  if (!LOVABLE_API_KEY) {
+  const XAI_API_KEY = Deno.env.get("XAI_API_KEY");
+  if (!XAI_API_KEY) throw new Error("XAI_API_KEY not configured");
     throw new Error("LOVABLE_API_KEY is not configured");
   }
 
