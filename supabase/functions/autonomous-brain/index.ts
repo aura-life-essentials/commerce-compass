@@ -118,14 +118,15 @@ async function thinkAndDecide(agentBrain: any, context: any) {
     systemPrompt = systemPrompts[agentBrain.agent_type] || systemPrompts.profit_reaper;
   }
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  if (!XAI_API_KEY) throw new Error("XAI_API_KEY not configured");
+  const response = await fetch(XAI_CHAT_URL, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      Authorization: `Bearer ${XAI_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
+      model: "grok-3-mini-fast",
       messages: [
         { role: "system", content: systemPrompt },
         {

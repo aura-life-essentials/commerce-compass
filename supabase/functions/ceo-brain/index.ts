@@ -9,7 +9,7 @@ const corsHeaders = {
 // xAI endpoints
 const XAI_RESPONSES_URL = "https://api.x.ai/v1/responses";
 const XAI_CHAT_URL = "https://api.x.ai/v1/chat/completions";
-const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+// All AI routed through xAI — zero external credit dependency
 
 // Grok 4.1 Fast models
 const GROK_REASONING = "grok-4-1-fast-reasoning";
