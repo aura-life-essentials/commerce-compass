@@ -21,8 +21,8 @@ export const SUBSCRIPTION_TIERS: TierConfig[] = [
     name: 'Starter',
     description: 'Web3 Foundations',
     price: 19,
-    priceId: 'price_1Stl4YFjshJghowT3i4IhC4K',
-    productId: 'prod_TrU2Dwgxf2cjuN',
+    priceId: 'price_1TDxIdFpvr5YnJS7Ffxv1mLK',
+    productId: 'prod_UCM0gN7s21PcXz',
     billingCycle: 'weekly',
     color: 'from-slate-500 to-slate-600',
     features: [
