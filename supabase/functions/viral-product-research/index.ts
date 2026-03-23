@@ -38,18 +38,18 @@ async function requireAuthenticatedUser(req: Request) {
   return data.claims.sub;
 }
 
-async function callAI(apiKey: string, messages: Array<{ role: string; content: string }>, tools?: any[], tool_choice?: any) {
-  const body: any = {
-    model: "google/gemini-3-flash-preview",
-    messages,
-  };
+async function callAI(messages: Array<{ role: string; content: string }>, tools?: any[], tool_choice?: any) {
+  const XAI_API_KEY = Deno.env.get("XAI_API_KEY");
+  if (!XAI_API_KEY) throw new Error("XAI_API_KEY not configured");
+
+  const body: any = { model: "grok-3-mini-fast", messages };
   if (tools) body.tools = tools;
   if (tool_choice) body.tool_choice = tool_choice;
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const response = await fetch("https://api.x.ai/v1/chat/completions", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${XAI_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
