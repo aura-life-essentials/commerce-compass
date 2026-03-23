@@ -28,6 +28,13 @@ async function requireAuthenticatedUser(req: Request) {
   }
 
   const token = authHeader.replace("Bearer ", "");
+
+  // Allow service-role key for internal edge-function-to-edge-function calls
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (serviceRoleKey && token === serviceRoleKey) {
+    return "service-role";
+  }
+
   const authClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     global: { headers: { Authorization: authHeader } },
   });
