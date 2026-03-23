@@ -155,14 +155,15 @@ export const ShopifyCommandCenter = () => {
         toast.error(`❌ ${data?.error || "Command failed"}`);
       }
     } catch (err: any) {
-      setResults(prev => [{
+      const errResult: CommandResult = {
         id: resultId,
         command: label || action,
         action,
-        status: "error",
+        status: "error" as const,
         data: { error: err.message },
         timestamp: new Date(),
-      }, ...prev].slice(0, 20));
+      };
+      setResults(prev => [errResult, ...prev].slice(0, 20));
       toast.error(err.message);
     } finally {
       setIsLoading(false);
