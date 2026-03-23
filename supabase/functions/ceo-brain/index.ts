@@ -296,69 +296,109 @@ async function gatherBusinessMetrics(supabase: any): Promise<BusinessMetrics> {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// xAI Responses API with Built-in Tools
-// Uses /v1/responses for web_search, x_search, code_interpreter
+// Primary AI: Lovable AI Gateway (with tool calling)
+// Fallback: xAI Responses API (if credits available)
 // ═══════════════════════════════════════════════════════════════
 async function callWithTools(
   input: Array<{ role: string; content: string }>,
   tools: any[],
-  model: string = GROK_REASONING,
+  model: string = PRIMARY_REASONING,
   temperature = 0.7
 ): Promise<{ content: string; citations: any[]; tool_calls: any[] }> {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   const XAI_API_KEY = Deno.env.get("XAI_API_KEY");
-  if (!XAI_API_KEY) throw new Error("XAI_API_KEY required for tool-enabled calls");
 
-  console.log(`[CEO Brain] Calling Responses API with ${tools.length} tools, model: ${model}`);
+  const xaiBuiltinTypes = ["web_search", "x_search", "code_interpreter"];
+  const functionTools = tools.filter(t => !xaiBuiltinTypes.includes(t.type));
+  const hasXaiBuiltins = tools.some(t => xaiBuiltinTypes.includes(t.type));
 
-  const response = await fetch(XAI_RESPONSES_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${XAI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model,
-      input,
-      tools,
-      temperature,
-      stream: false,
-    }),
-  });
+  // ── Lovable AI primary ──
+  if (LOVABLE_API_KEY) {
+    try {
+      console.log(`[CEO Brain] Lovable AI → ${model}, ${functionTools.length} tools`);
+      const openaiTools = functionTools.map(t => ({
+        type: "function" as const,
+        function: { name: t.name, description: t.description, parameters: t.parameters }
+      }));
+      const body: any = { model, messages: input, temperature, stream: false };
+      if (openaiTools.length > 0) body.tools = openaiTools;
 
-  if (!response.ok) {
-    const errText = await response.text();
-    console.error(`[CEO Brain] Responses API error (${response.status}):`, errText.slice(0, 500));
-    throw new Error(`xAI Responses API error [${response.status}]: ${errText.slice(0, 300)}`);
-  }
-
-  const data = await response.json();
-  console.log("[CEO Brain] Responses API result keys:", Object.keys(data));
-
-  // Extract content, citations, and tool calls from the response
-  let content = "";
-  const citations: any[] = [];
-  const toolCalls: any[] = [];
-
-  if (data.output) {
-    for (const item of data.output) {
-      if (item.type === "message" && item.content) {
-        for (const block of item.content) {
-          if (block.type === "output_text") content += block.text;
-        }
+      const response = await fetch(LOVABLE_AI_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${LOVABLE_API_KEY}` },
+        body: JSON.stringify(body),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const message = data.choices?.[0]?.message;
+        const content = message?.content || "";
+        const toolCalls = (message?.tool_calls || []).map((tc: any) => ({
+          name: tc.function?.name, arguments: tc.function?.arguments, id: tc.id,
+        }));
+        console.log(`[CEO Brain] Lovable AI OK: ${content.length} chars, ${toolCalls.length} tool calls`);
+        return { content, citations: [], tool_calls: toolCalls };
       }
-      if (item.type === "tool_call") {
-        toolCalls.push({ name: item.name, arguments: item.arguments, id: item.call_id });
-      }
+      console.warn(`[CEO Brain] Lovable AI ${response.status}`);
+    } catch (e) {
+      console.warn("[CEO Brain] Lovable AI error:", e);
     }
   }
 
-  if (data.citations) citations.push(...data.citations);
+  // ── xAI Responses fallback ──
+  if (XAI_API_KEY && hasXaiBuiltins) {
+    try {
+      const xaiModel = model.startsWith("google/") || model.startsWith("openai/") ? GROK_REASONING : model;
+      const response = await fetch(XAI_RESPONSES_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${XAI_API_KEY}` },
+        body: JSON.stringify({ model: xaiModel, input, tools, temperature, stream: false }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        let content = "";
+        const citations: any[] = [];
+        const toolCalls: any[] = [];
+        if (data.output) {
+          for (const item of data.output) {
+            if (item.type === "message" && item.content) {
+              for (const block of item.content) {
+                if (block.type === "output_text") content += block.text;
+              }
+            }
+            if (item.type === "tool_call") {
+              toolCalls.push({ name: item.name, arguments: item.arguments, id: item.call_id });
+            }
+          }
+        }
+        if (data.citations) citations.push(...data.citations);
+        return { content, citations, tool_calls: toolCalls };
+      }
+    } catch (e) {
+      console.warn("[CEO Brain] xAI fallback error:", e);
+    }
+  }
 
-  return { content, citations, tool_calls: toolCalls };
+  // ── Last resort: xAI Chat ──
+  if (XAI_API_KEY) {
+    try {
+      const xaiModel = model.startsWith("google/") || model.startsWith("openai/") ? GROK_NON_REASONING : model;
+      const response = await fetch(XAI_CHAT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${XAI_API_KEY}` },
+        body: JSON.stringify({ model: xaiModel, messages: input, temperature, max_tokens: 4000, stream: false }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return { content: data.choices?.[0]?.message?.content || "", citations: [], tool_calls: [] };
+      }
+    } catch {}
+  }
+
+  throw new Error("All AI engines failed. Check LOVABLE_API_KEY and XAI_API_KEY.");
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Fallback: Chat Completions (no built-in tools, Lovable AI)
+// Chat fallback: Lovable AI primary, xAI secondary
 // ═══════════════════════════════════════════════════════════════
 async function callChatFallback(
   messages: Array<{ role: string; content: string }>,
@@ -366,23 +406,42 @@ async function callChatFallback(
   temperature = 0.7,
   maxTokens = 4000
 ): Promise<string> {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   const XAI_API_KEY = Deno.env.get("XAI_API_KEY");
-  if (!XAI_API_KEY) throw new Error("XAI_API_KEY not configured — no external AI credits needed, just your own key.");
 
-  const model = mode === "reasoning" ? GROK_REASONING : GROK_NON_REASONING;
-  const response = await fetch(XAI_CHAT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${XAI_API_KEY}` },
-    body: JSON.stringify({ model, messages, temperature, max_tokens: maxTokens, stream: false }),
-  });
+  if (LOVABLE_API_KEY) {
+    const model = mode === "reasoning" ? PRIMARY_REASONING : PRIMARY_MODEL;
+    try {
+      const response = await fetch(LOVABLE_AI_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${LOVABLE_API_KEY}` },
+        body: JSON.stringify({ model, messages, temperature, max_tokens: maxTokens, stream: false }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data.choices?.[0]?.message?.content || "";
+      }
+    } catch (e) {
+      console.warn("[CEO Brain] Lovable AI chat error:", e);
+    }
+  }
 
-  if (!response.ok) {
-    const errText = await response.text();
+  if (XAI_API_KEY) {
+    const model = mode === "reasoning" ? GROK_REASONING : GROK_NON_REASONING;
+    const response = await fetch(XAI_CHAT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${XAI_API_KEY}` },
+      body: JSON.stringify({ model, messages, temperature, max_tokens: maxTokens, stream: false }),
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return data.choices?.[0]?.message?.content || "";
+    }
+    const errText = await response.text().catch(() => "");
     throw new Error(`xAI Chat failed [${response.status}]: ${errText}`);
   }
 
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content || "";
+  throw new Error("No AI engine available.");
 }
 
 // ═══════════════════════════════════════════════════════════════
