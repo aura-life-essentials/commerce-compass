@@ -25,8 +25,8 @@ export const APP_PRODUCTS: AppProduct[] = [
     tagline: 'Strategic AI Command Center',
     description: 'Runs strategic decisions and agent orchestration. Your AI-powered executive brain that coordinates all business operations.',
     price: 725,
-    priceId: '', // Set after Stripe setup
-    productId: '',
+    priceId: 'price_1TDxIrFpvr5YnJS7F1k7ma8H',
+    productId: 'prod_UCM0NuUi0RXxp0',
     category: 'ai-agents',
     icon: 'Brain',
     color: 'from-violet-500 to-purple-600',
