@@ -116,8 +116,8 @@ export const SUBSCRIPTION_TIERS: TierConfig[] = [
     name: 'Elite',
     description: 'Industry Revolution Partner',
     price: 2500,
-    priceId: 'price_1Stl4eFjshJghowTi9wtrBlf',
-    productId: 'prod_TrU2qnvsXhD6bF',
+    priceId: 'price_1TDxIiFpvr5YnJS7hLnYb6I1',
+    productId: 'prod_UCM0wOtx8wLSLq',
     billingCycle: 'yearly',
     color: 'from-yellow-400 via-amber-500 to-red-500',
     features: [
