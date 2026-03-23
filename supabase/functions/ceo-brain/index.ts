@@ -1172,6 +1172,51 @@ Be aggressive. Think like a CEO who wants 10x growth.` }
           });
         }
 
+        // ── Shopify Admin commands routed to shopify-admin function ──
+        if (
+          normalized.includes("shopify") ||
+          normalized.includes("product") ||
+          normalized.includes("inventory") ||
+          normalized.includes("discount") ||
+          normalized.includes("price") && (normalized.includes("raise") || normalized.includes("lower") || normalized.includes("change") || normalized.includes("adjust"))
+        ) {
+          let shopifyAction: any = null;
+
+          if (normalized.includes("status") || normalized.includes("report") || normalized.includes("overview")) {
+            shopifyAction = { action: "status_report" };
+          } else if (normalized.match(/list.*product|show.*product|all.*product/)) {
+            shopifyAction = { action: "list_products", limit: 50 };
+          } else if (normalized.match(/list.*order|show.*order|recent.*order/)) {
+            shopifyAction = { action: "list_orders", status: "any", limit: 20 };
+          } else if (normalized.match(/(?:raise|increase|up).*(?:price|prices).*(\d+)%/)) {
+            const match = normalized.match(/(\d+)%/);
+            shopifyAction = { action: "bulk_price_adjust", adjustment_type: "percentage_increase", value: parseFloat(match![1]) };
+          } else if (normalized.match(/(?:lower|decrease|drop|reduce|discount).*(?:price|prices).*(\d+)%/)) {
+            const match = normalized.match(/(\d+)%/);
+            shopifyAction = { action: "bulk_price_adjust", adjustment_type: "percentage_decrease", value: parseFloat(match![1]) };
+          }
+
+          if (shopifyAction) {
+            const shopifyResult = await invokeEdgeFunction(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, "shopify-admin", shopifyAction);
+
+            await supabase.from("agent_logs").insert({
+              agent_name: "CEO Brain",
+              agent_role: "Shopify Command",
+              action: `Shopify: ${shopifyAction.action} — ${command}`,
+              status: shopifyResult.success ? "completed" : "error",
+              details: { command, shopify_action: shopifyAction, result: shopifyResult.data },
+              error_message: shopifyResult.success ? null : shopifyResult.error,
+            });
+
+            return new Response(JSON.stringify({
+              success: shopifyResult.success,
+              mode: "shopify_command",
+              shopify_action: shopifyAction.action,
+              execution: shopifyResult.data,
+            }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          }
+        }
+
         if (normalized.includes("sell now") || normalized.includes("run live sales") || normalized.includes("deploy all")) {
           const execution = await runSalesWorkflow(supabase, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, command);
           return new Response(JSON.stringify({
