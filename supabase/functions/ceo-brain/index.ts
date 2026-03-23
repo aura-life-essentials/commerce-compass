@@ -312,10 +312,15 @@ async function callWithTools(
   const functionTools = tools.filter(t => !xaiBuiltinTypes.includes(t.type));
   const hasXaiBuiltins = tools.some(t => xaiBuiltinTypes.includes(t.type));
 
+  // Map Grok models to Lovable AI equivalents
+  const lovableModel = model.startsWith("grok-") 
+    ? (model.includes("reasoning") ? PRIMARY_REASONING : PRIMARY_MODEL)
+    : model;
+
   // ── Lovable AI primary ──
   if (LOVABLE_API_KEY) {
     try {
-      console.log(`[CEO Brain] Lovable AI → ${model}, ${functionTools.length} tools`);
+      console.log(`[CEO Brain] Lovable AI → ${lovableModel}, ${functionTools.length} tools`);
       const openaiTools = functionTools.map(t => ({
         type: "function" as const,
         function: { name: t.name, description: t.description, parameters: t.parameters }
