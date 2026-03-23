@@ -8,6 +8,7 @@ import { SwarmTeams } from "@/components/dashboard/SwarmTeams";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { VoiceControlPanel } from "@/components/dashboard/VoiceControlPanel";
 import { RevenueControlPlane } from "@/components/dashboard/RevenueControlPlane";
+import { ShopifyCommandCenter } from "@/components/dashboard/ShopifyCommandCenter";
 import { useAgentLogs } from "@/hooks/useAgentLogs";
 import { useSalesControlPlane } from "@/hooks/useSalesControlPlane";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -109,6 +110,10 @@ const WarRoom = () => {
 
           <div className="mb-8">
             <VoiceControlPanel />
+          </div>
+
+          <div className="mb-8">
+            <ShopifyCommandCenter />
           </div>
 
           <div className="mb-8">
