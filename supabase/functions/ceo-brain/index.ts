@@ -13,8 +13,8 @@ const XAI_RESPONSES_URL = "https://api.x.ai/v1/responses";
 const XAI_CHAT_URL = "https://api.x.ai/v1/chat/completions";
 
 // Models
-const PRIMARY_MODEL = "google/gemini-2.5-flash"; // Lovable AI default
-const PRIMARY_REASONING = "google/gemini-2.5-pro"; // Lovable AI reasoning
+const PRIMARY_MODEL = "google/gemini-2.5-flash-lite"; // Cheapest, fastest
+const PRIMARY_REASONING = "google/gemini-2.5-flash"; // Balanced cost/quality
 const GROK_REASONING = "grok-4-1-fast-reasoning";
 const GROK_NON_REASONING = "grok-4-1-fast-non-reasoning";
 
