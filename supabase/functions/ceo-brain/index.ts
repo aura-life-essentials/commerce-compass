@@ -1113,7 +1113,7 @@ Be aggressive. Think like a CEO who wants 10x growth.` }
         }
 
         if (normalized.includes("sell now") || normalized.includes("run live sales") || normalized.includes("deploy all")) {
-          const execution = await runSalesWorkflow(supabase, supabaseUrl, supabaseKey, command);
+          const execution = await runSalesWorkflow(supabase, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, command);
           return new Response(JSON.stringify({
             success: true,
             mode: "sales_workflow",
