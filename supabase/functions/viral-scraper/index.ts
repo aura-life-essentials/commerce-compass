@@ -6,7 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+const XAI_API_KEY = Deno.env.get("XAI_API_KEY");
+const XAI_CHAT_URL = "https://api.x.ai/v1/chat/completions";
 const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -20,16 +21,16 @@ const logStep = (step: string, details?: unknown) => {
 async function searchViralContent(query: string, platform: string) {
   logStep("Searching viral content", { query, platform });
 
-  if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+  if (!XAI_API_KEY) throw new Error("XAI_API_KEY is not configured");
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const response = await fetch(XAI_CHAT_URL, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      Authorization: `Bearer ${XAI_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "google/gemini-3-flash-preview",
+      model: "grok-3-mini-fast",
       messages: [
         {
           role: "system",
@@ -85,16 +86,16 @@ async function scrapeAndAnalyze(url: string) {
 async function analyzeViralPatterns(content: string) {
   logStep("Analyzing viral patterns");
 
-  if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+  if (!XAI_API_KEY) throw new Error("XAI_API_KEY is not configured");
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const response = await fetch(XAI_CHAT_URL, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      Authorization: `Bearer ${XAI_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "google/gemini-3-flash-preview",
+      model: "grok-3-mini-fast",
       messages: [
         { 
           role: "system", 

@@ -9,7 +9,7 @@ const corsHeaders = {
 // xAI endpoints
 const XAI_RESPONSES_URL = "https://api.x.ai/v1/responses";
 const XAI_CHAT_URL = "https://api.x.ai/v1/chat/completions";
-const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+// All AI routed through xAI — zero external credit dependency
 
 // Grok 4.1 Fast models
 const GROK_REASONING = "grok-4-1-fast-reasoning";
@@ -364,39 +364,18 @@ async function callChatFallback(
   maxTokens = 4000
 ): Promise<string> {
   const XAI_API_KEY = Deno.env.get("XAI_API_KEY");
-  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  if (!XAI_API_KEY) throw new Error("XAI_API_KEY not configured — no external AI credits needed, just your own key.");
 
-  if (XAI_API_KEY) {
-    const model = mode === "reasoning" ? GROK_REASONING : GROK_NON_REASONING;
-    try {
-      const response = await fetch(XAI_CHAT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${XAI_API_KEY}` },
-        body: JSON.stringify({ model, messages, temperature, max_tokens: maxTokens, stream: false }),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        const content = data.choices?.[0]?.message?.content;
-        if (content) return content;
-      }
-    } catch (err) {
-      console.warn("[CEO Brain] Chat Completions fallback failed:", err);
-    }
-  }
-
-  if (!LOVABLE_API_KEY) throw new Error("No AI provider available.");
-
-  const response = await fetch(LOVABLE_AI_URL, {
+  const model = mode === "reasoning" ? GROK_REASONING : GROK_NON_REASONING;
+  const response = await fetch(XAI_CHAT_URL, {
     method: "POST",
-    headers: { "Authorization": `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages, temperature, max_tokens: maxTokens }),
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${XAI_API_KEY}` },
+    body: JSON.stringify({ model, messages, temperature, max_tokens: maxTokens, stream: false }),
   });
 
   if (!response.ok) {
     const errText = await response.text();
-    if (response.status === 429) throw new Error("Rate limit exceeded.");
-    if (response.status === 402) throw new Error("AI credits exhausted.");
-    throw new Error(`AI request failed: ${response.status}`);
+    throw new Error(`xAI Chat failed [${response.status}]: ${errText}`);
   }
 
   const data = await response.json();

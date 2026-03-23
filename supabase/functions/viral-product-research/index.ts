@@ -38,18 +38,18 @@ async function requireAuthenticatedUser(req: Request) {
   return data.claims.sub;
 }
 
-async function callAI(apiKey: string, messages: Array<{ role: string; content: string }>, tools?: any[], tool_choice?: any) {
-  const body: any = {
-    model: "google/gemini-3-flash-preview",
-    messages,
-  };
+async function callAI(messages: Array<{ role: string; content: string }>, tools?: any[], tool_choice?: any) {
+  const XAI_API_KEY = Deno.env.get("XAI_API_KEY");
+  if (!XAI_API_KEY) throw new Error("XAI_API_KEY not configured");
+
+  const body: any = { model: "grok-3-mini-fast", messages };
   if (tools) body.tools = tools;
   if (tool_choice) body.tool_choice = tool_choice;
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const response = await fetch("https://api.x.ai/v1/chat/completions", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${XAI_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
@@ -67,7 +67,7 @@ async function researchViralProducts(apiKey: string, niches: string[]) {
   log("Researching viral products", { niches });
 
   const nicheList = niches.join(", ");
-  const data = await callAI(apiKey, [
+  const data = await callAI([
     {
       role: "system",
       content: "You are a viral product research expert with deep knowledge of TikTok, Instagram Reels, and YouTube Shorts trends. Provide detailed, actionable product research."
@@ -101,7 +101,6 @@ async function structureProductData(apiKey: string, rawResearch: string) {
   log("Structuring product data with AI");
 
   const data = await callAI(
-    apiKey,
     [
       {
         role: "system",
@@ -196,7 +195,7 @@ Return JSON with this schema:
 async function generateVideoScript(apiKey: string, product: any) {
   log("Generating video script for", { product: product.name });
 
-  const data = await callAI(apiKey, [
+  const data = await callAI([
     {
       role: "system",
       content: `You are a viral video scriptwriter for TrendVault, a cutting-edge e-commerce brand. 
