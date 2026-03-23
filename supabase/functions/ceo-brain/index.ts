@@ -800,8 +800,21 @@ async function runSalesWorkflow(supabase: any, supabaseUrl: string, serviceRoleK
   }));
 
   if (raceAgents.length) {
-    await supabase.from("sales_race_agents").insert(raceAgents);
-    await supabase.from("sales_race_events").insert(
+    // Insert agents in smaller batches to avoid trigger overhead
+    const BATCH_SIZE = 10;
+    let insertedCount = 0;
+    for (let i = 0; i < raceAgents.length; i += BATCH_SIZE) {
+      const batch = raceAgents.slice(i, i + BATCH_SIZE);
+      const { error: insertErr } = await supabase.from("sales_race_agents").insert(batch);
+      if (insertErr) {
+        console.error(`[CEO Brain] Agent batch ${i}-${i + batch.length} insert error:`, insertErr.message);
+      } else {
+        insertedCount += batch.length;
+      }
+    }
+    console.log(`[CEO Brain] Enrolled ${insertedCount}/${raceAgents.length} agents into sales race`);
+
+    const { error: eventsErr } = await supabase.from("sales_race_events").insert(
       raceAgents.slice(0, 12).map((agent: any, index: number) => ({
         sales_race_id: salesRace.id,
         agent_brain_id: agent.agent_brain_id,
@@ -815,6 +828,7 @@ async function runSalesWorkflow(supabase: any, supabaseUrl: string, serviceRoleK
         },
       }))
     );
+    if (eventsErr) console.error("[CEO Brain] Events insert error:", eventsErr.message);
   }
 
   const { data: existingCampaigns } = await supabase
