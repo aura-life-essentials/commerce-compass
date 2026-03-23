@@ -14,8 +14,8 @@ function logStep(step: string, data?: any) {
 }
 
 async function shopifyRequest(endpoint: string, method = "GET", body?: any) {
-  const token = Deno.env.get("SHOPIFY_DEV_APP_TOKEN");
-  if (!token) throw new Error("SHOPIFY_DEV_APP_TOKEN not configured");
+  const token = Deno.env.get("SHOPIFY_ACCESS_TOKEN") || Deno.env.get("SHOPIFY_DEV_APP_TOKEN");
+  if (!token) throw new Error("SHOPIFY_ACCESS_TOKEN not configured");
 
   const url = `${ADMIN_API_URL}${endpoint}`;
   logStep(`${method} ${endpoint}`);
