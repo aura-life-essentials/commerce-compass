@@ -21,16 +21,16 @@ const logStep = (step: string, details?: unknown) => {
 async function searchViralContent(query: string, platform: string) {
   logStep("Searching viral content", { query, platform });
 
-  if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+  if (!XAI_API_KEY) throw new Error("XAI_API_KEY is not configured");
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const response = await fetch(XAI_CHAT_URL, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      Authorization: `Bearer ${XAI_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "google/gemini-3-flash-preview",
+      model: "grok-3-mini-fast",
       messages: [
         {
           role: "system",
