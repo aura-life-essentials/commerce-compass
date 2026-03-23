@@ -67,7 +67,7 @@ async function researchViralProducts(apiKey: string, niches: string[]) {
   log("Researching viral products", { niches });
 
   const nicheList = niches.join(", ");
-  const data = await callAI(apiKey, [
+  const data = await callAI([
     {
       role: "system",
       content: "You are a viral product research expert with deep knowledge of TikTok, Instagram Reels, and YouTube Shorts trends. Provide detailed, actionable product research."
@@ -196,7 +196,7 @@ Return JSON with this schema:
 async function generateVideoScript(apiKey: string, product: any) {
   log("Generating video script for", { product: product.name });
 
-  const data = await callAI(apiKey, [
+  const data = await callAI([
     {
       role: "system",
       content: `You are a viral video scriptwriter for TrendVault, a cutting-edge e-commerce brand. 
