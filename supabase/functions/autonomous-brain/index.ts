@@ -120,21 +120,12 @@ async function thinkAndDecide(agentBrain: any, context: any) {
     systemPrompt = systemPrompts[agentBrain.agent_type] || systemPrompts.profit_reaper;
   }
 
-  if (!XAI_API_KEY) throw new Error("XAI_API_KEY not configured");
-  const response = await fetch(XAI_CHAT_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${XAI_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "grok-3-mini-fast",
-      messages: [
-        { role: "system", content: systemPrompt },
-        {
-          role: "user",
-          content: `Current State: ${JSON.stringify(agentBrain.current_state)}
-          
+  const aiMessages = [
+    { role: "system", content: systemPrompt },
+    {
+      role: "user",
+      content: `Current State: ${JSON.stringify(agentBrain.current_state)}
+      
 Context Data: ${JSON.stringify(context)}
 
 Based on this information, what is your next decision? Think step by step, then output a JSON object with:
@@ -143,21 +134,46 @@ Based on this information, what is your next decision? Think step by step, then 
 - expected_impact: estimated revenue impact
 - confidence: 0-1 confidence score
 - next_steps: array of follow-up actions`,
-        },
-      ],
-      temperature: 0.7,
-    }),
-  });
+    },
+  ];
 
-  if (!response.ok) {
-    const status = response.status;
-    if (status === 429) throw new Error("Rate limited - too many requests");
-    if (status === 402) throw new Error("Payment required - add credits");
-    throw new Error(`AI request failed: ${status}`);
+  let content = "";
+
+  // Try Lovable AI first
+  if (LOVABLE_API_KEY) {
+    try {
+      const response = await fetch(LOVABLE_AI_URL, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "google/gemini-2.5-flash-lite", messages: aiMessages, temperature: 0.7, stream: false }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        content = data.choices?.[0]?.message?.content || "";
+      }
+    } catch (e) {
+      logStep("Lovable AI error, trying xAI", { error: String(e) });
+    }
   }
 
-  const data = await response.json();
-  const content = data.choices?.[0]?.message?.content || "";
+  // Fallback to xAI
+  if (!content && XAI_API_KEY) {
+    const response = await fetch(XAI_CHAT_URL, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${XAI_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "grok-3-mini-fast", messages: aiMessages, temperature: 0.7 }),
+    });
+    if (!response.ok) {
+      const status = response.status;
+      if (status === 429) throw new Error("Rate limited");
+      if (status === 402) throw new Error("Payment required");
+      throw new Error(`AI request failed: ${status}`);
+    }
+    const data = await response.json();
+    content = data.choices?.[0]?.message?.content || "";
+  }
+
+  if (!content) throw new Error("All AI engines failed");
 
   const jsonMatch = content.match(/\{[\s\S]*\}/);
   let decision: any = {};
