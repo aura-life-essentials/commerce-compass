@@ -6,12 +6,15 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// xAI endpoints
+// Primary: Lovable AI Gateway (pre-provisioned, no extra cost)
+const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+// Fallback: xAI direct (only if XAI_API_KEY has credits)
 const XAI_RESPONSES_URL = "https://api.x.ai/v1/responses";
 const XAI_CHAT_URL = "https://api.x.ai/v1/chat/completions";
-// All AI routed through xAI — zero external credit dependency
 
-// Grok 4.1 Fast models
+// Models
+const PRIMARY_MODEL = "google/gemini-2.5-flash"; // Lovable AI default
+const PRIMARY_REASONING = "google/gemini-2.5-pro"; // Lovable AI reasoning
 const GROK_REASONING = "grok-4-1-fast-reasoning";
 const GROK_NON_REASONING = "grok-4-1-fast-non-reasoning";
 
