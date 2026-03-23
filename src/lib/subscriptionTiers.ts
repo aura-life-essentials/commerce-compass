@@ -42,8 +42,8 @@ export const SUBSCRIPTION_TIERS: TierConfig[] = [
     name: 'Growth',
     description: 'Web3 Website Builder',
     price: 49,
-    priceId: 'price_1Stl4ZFjshJghowTKyWA6Ii9',
-    productId: 'prod_TrU2rb5JU0jnPA',
+    priceId: 'price_1TDxIeFpvr5YnJS73fmOxPG7',
+    productId: 'prod_UCM0uAHgcy0T78',
     billingCycle: 'monthly',
     color: 'from-blue-500 to-cyan-500',
     features: [
