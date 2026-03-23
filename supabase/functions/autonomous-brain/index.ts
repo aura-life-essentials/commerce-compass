@@ -7,7 +7,9 @@ const corsHeaders = {
 };
 
 const XAI_API_KEY = Deno.env.get("XAI_API_KEY");
+const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 const XAI_CHAT_URL = "https://api.x.ai/v1/chat/completions";
+const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -118,21 +120,12 @@ async function thinkAndDecide(agentBrain: any, context: any) {
     systemPrompt = systemPrompts[agentBrain.agent_type] || systemPrompts.profit_reaper;
   }
 
-  if (!XAI_API_KEY) throw new Error("XAI_API_KEY not configured");
-  const response = await fetch(XAI_CHAT_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${XAI_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "grok-3-mini-fast",
-      messages: [
-        { role: "system", content: systemPrompt },
-        {
-          role: "user",
-          content: `Current State: ${JSON.stringify(agentBrain.current_state)}
-          
+  const aiMessages = [
+    { role: "system", content: systemPrompt },
+    {
+      role: "user",
+      content: `Current State: ${JSON.stringify(agentBrain.current_state)}
+      
 Context Data: ${JSON.stringify(context)}
 
 Based on this information, what is your next decision? Think step by step, then output a JSON object with:
@@ -141,21 +134,65 @@ Based on this information, what is your next decision? Think step by step, then 
 - expected_impact: estimated revenue impact
 - confidence: 0-1 confidence score
 - next_steps: array of follow-up actions`,
-        },
-      ],
-      temperature: 0.7,
-    }),
-  });
+    },
+  ];
 
-  if (!response.ok) {
-    const status = response.status;
-    if (status === 429) throw new Error("Rate limited - too many requests");
-    if (status === 402) throw new Error("Payment required - add credits");
-    throw new Error(`AI request failed: ${status}`);
+  let content = "";
+
+  // Try Lovable AI first
+  if (LOVABLE_API_KEY) {
+    try {
+      logStep("Trying Lovable AI", { model: "google/gemini-2.5-flash-lite" });
+      const response = await fetch(LOVABLE_AI_URL, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "google/gemini-2.5-flash-lite", messages: aiMessages, temperature: 0.7, stream: false }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        content = data.choices?.[0]?.message?.content || "";
+        logStep("Lovable AI success", { chars: content.length });
+      } else {
+        logStep("Lovable AI failed", { status: response.status });
+      }
+    } catch (e) {
+      logStep("Lovable AI error", { error: String(e) });
+    }
   }
 
-  const data = await response.json();
-  const content = data.choices?.[0]?.message?.content || "";
+  // Fallback to xAI
+  if (!content && XAI_API_KEY) {
+    try {
+      logStep("Trying xAI fallback");
+      const response = await fetch(XAI_CHAT_URL, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${XAI_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "grok-3-mini-fast", messages: aiMessages, temperature: 0.7 }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        content = data.choices?.[0]?.message?.content || "";
+      } else {
+        logStep("xAI failed", { status: response.status });
+      }
+    } catch (e) {
+      logStep("xAI error", { error: String(e) });
+    }
+  }
+
+  // Deterministic fallback — no AI credits needed
+  if (!content) {
+    logStep("Using deterministic engine (no AI credits available)");
+    const role = agentBrain.agent_role || "analyst";
+    const deterministicActions: Record<string, any> = {
+      team_lead: { action: "coordinate_sales_push", reasoning: "Deploy all team members to active product listings", expected_impact: "$200-500 revenue boost", confidence: 0.75, next_steps: ["assign_products", "set_targets", "monitor_conversions"] },
+      content_creator: { action: "generate_viral_hooks", reasoning: "Create platform-native content for top products", expected_impact: "10K+ impressions", confidence: 0.7, next_steps: ["tiktok_script", "instagram_reel", "youtube_short"] },
+      marketer: { action: "launch_organic_campaign", reasoning: "Push products across all social channels with zero ad spend", expected_impact: "500+ organic reach", confidence: 0.72, next_steps: ["post_schedule", "hashtag_strategy", "engagement_loop"] },
+      closer: { action: "follow_up_leads", reasoning: "Re-engage warm leads and abandoned carts", expected_impact: "$100-300 recovered revenue", confidence: 0.68, next_steps: ["email_sequence", "checkout_optimization", "urgency_triggers"] },
+      analyst: { action: "analyze_conversion_funnel", reasoning: "Identify drop-off points and optimize checkout flow", expected_impact: "5-15% conversion lift", confidence: 0.8, next_steps: ["funnel_audit", "ab_test_plan", "kpi_dashboard"] },
+    };
+    return deterministicActions[role] || deterministicActions.analyst;
+  }
 
   const jsonMatch = content.match(/\{[\s\S]*\}/);
   let decision: any = {};
