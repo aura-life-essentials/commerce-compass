@@ -235,11 +235,13 @@ serve(async (req) => {
 
       // Full Status Report
       case "status_report": {
-        const [shop, products, orders, collections] = await Promise.all([
-          getShopInfo(),
-          listProducts(250),
-          listOrders("any", 10),
-          listCollections(),
+        const shopPromise = getShopInfo();
+        const productsPromise = listProducts(250);
+        const collectionsPromise = listCollections();
+        const ordersPromise = listOrders("any", 10).catch(() => ({ orders: [] }));
+
+        const [shop, products, collections, orders] = await Promise.all([
+          shopPromise, productsPromise, collectionsPromise, ordersPromise,
         ]);
         result = {
           shop: shop.shop,
