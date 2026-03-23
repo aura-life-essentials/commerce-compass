@@ -996,7 +996,7 @@ serve(async (req) => {
 
     const validActions = [
       "think", "think_fast", "quick_ops", "get_state", "execute_decision",
-      "autonomous_loop", "research", "research_x", "full_intelligence", "command", "sales_run"
+      "autonomous_loop", "research", "research_x", "full_intelligence", "command", "sales_run", "shopify"
     ];
     if (action && !validActions.includes(action)) {
       return new Response(JSON.stringify({ error: "Invalid action" }), {

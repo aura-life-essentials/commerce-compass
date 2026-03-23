@@ -113,6 +113,10 @@ const WarRoom = () => {
           </div>
 
           <div className="mb-8">
+            <ShopifyCommandCenter />
+          </div>
+
+          <div className="mb-8">
             <RevenueControlPlane />
           </div>
 
