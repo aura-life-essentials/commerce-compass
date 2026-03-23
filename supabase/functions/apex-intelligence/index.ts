@@ -79,8 +79,6 @@ async function searchFirecrawl(apiKey: string, query: string) {
 async function summarizeWithLovable(query: string, brands: string[], signals: FirecrawlSearchResult[]) {
   const XAI_API_KEY = Deno.env.get("XAI_API_KEY");
   if (!XAI_API_KEY) throw new Error("XAI_API_KEY not configured");
-    throw new Error("LOVABLE_API_KEY is not configured");
-  }
 
   const compactSignals = signals.slice(0, 8).map((signal) => ({
     title: sanitizeText(signal.title, 120),
@@ -89,14 +87,14 @@ async function summarizeWithLovable(query: string, brands: string[], signals: Fi
     markdown: sanitizeText(signal.markdown, 1200),
   }));
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const response = await fetch("https://api.x.ai/v1/chat/completions", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      Authorization: `Bearer ${XAI_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "google/gemini-3-flash-preview",
+      model: "grok-3-mini-fast",
       messages: [
         {
           role: "system",
