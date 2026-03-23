@@ -1133,7 +1133,7 @@ Be aggressive. Think like a CEO who wants 10x growth.` }
           normalized.includes("swarm") ||
           normalized.includes("team")
         ) {
-          const orchestration = await runMarketingCommand(supabase, supabaseUrl, supabaseKey, command, metrics!);
+          const orchestration = await runMarketingCommand(supabase, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, command, metrics!);
           if (orchestration) {
             return new Response(JSON.stringify({ success: true, mode: "marketing_command", execution: orchestration }), {
               headers: { ...corsHeaders, "Content-Type": "application/json" },
