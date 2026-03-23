@@ -325,7 +325,7 @@ async function callWithTools(
         type: "function" as const,
         function: { name: t.name, description: t.description, parameters: t.parameters }
       }));
-      const body: any = { model, messages: input, temperature, stream: false };
+      const body: any = { model: lovableModel, messages: input, temperature, stream: false };
       if (openaiTools.length > 0) body.tools = openaiTools;
 
       const response = await fetch(LOVABLE_AI_URL, {
