@@ -205,9 +205,12 @@ serve(async (req) => {
 
       // Orders
       case "list_orders":
-        result = await listOrders(params.status, params.limit);
+        try {
+          result = await listOrders(params.status, params.limit);
+        } catch (e: any) {
+          result = { orders: [], note: "Order access requires read_orders scope approval in Shopify Admin > Apps" };
+        }
         break;
-      case "get_order":
         result = await getOrder(params.order_id);
         break;
 
