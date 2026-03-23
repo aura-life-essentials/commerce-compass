@@ -125,94 +125,84 @@ Always respond with a JSON object containing:
 const BUSINESS_TOOLS = [
   {
     type: "function" as const,
-    function: {
-      name: "adjust_pricing",
-      description: "Adjust product pricing based on market analysis. Use after researching competitor prices.",
-      parameters: {
-        type: "object",
-        properties: {
-          product_ids: { type: "array", items: { type: "string" }, description: "Product IDs to adjust" },
-          adjustment_type: { type: "string", enum: ["percentage_increase", "percentage_decrease", "set_price"], description: "Type of price adjustment" },
-          value: { type: "number", description: "Adjustment value (percentage or absolute price)" },
-          reasoning: { type: "string", description: "Market-based reasoning for the change" }
-        },
-        required: ["product_ids", "adjustment_type", "value", "reasoning"],
-        additionalProperties: false
-      }
+    name: "adjust_pricing",
+    description: "Adjust product pricing based on market analysis. Use after researching competitor prices.",
+    parameters: {
+      type: "object",
+      properties: {
+        product_ids: { type: "array", items: { type: "string" }, description: "Product IDs to adjust" },
+        adjustment_type: { type: "string", enum: ["percentage_increase", "percentage_decrease", "set_price"], description: "Type of price adjustment" },
+        value: { type: "number", description: "Adjustment value (percentage or absolute price)" },
+        reasoning: { type: "string", description: "Market-based reasoning for the change" }
+      },
+      required: ["product_ids", "adjustment_type", "value", "reasoning"],
+      additionalProperties: false
     }
   },
   {
     type: "function" as const,
-    function: {
-      name: "launch_campaign",
-      description: "Launch a new marketing campaign across channels. Use X search insights to inform strategy.",
-      parameters: {
-        type: "object",
-        properties: {
-          campaign_name: { type: "string", description: "Name of the campaign" },
-          channel: { type: "string", enum: ["tiktok", "instagram", "facebook", "google", "email", "x_twitter"], description: "Marketing channel" },
-          budget: { type: "number", description: "Campaign budget in USD" },
-          target_countries: { type: "array", items: { type: "string" }, description: "Target country codes" },
-          content_strategy: { type: "string", description: "Content approach based on research" }
-        },
-        required: ["campaign_name", "channel", "content_strategy"],
-        additionalProperties: false
-      }
+    name: "launch_campaign",
+    description: "Launch a new marketing campaign across channels. Use X search insights to inform strategy.",
+    parameters: {
+      type: "object",
+      properties: {
+        campaign_name: { type: "string", description: "Name of the campaign" },
+        channel: { type: "string", enum: ["tiktok", "instagram", "facebook", "google", "email", "x_twitter"], description: "Marketing channel" },
+        budget: { type: "number", description: "Campaign budget in USD" },
+        target_countries: { type: "array", items: { type: "string" }, description: "Target country codes" },
+        content_strategy: { type: "string", description: "Content approach based on research" }
+      },
+      required: ["campaign_name", "channel", "content_strategy"],
+      additionalProperties: false
     }
   },
   {
     type: "function" as const,
-    function: {
-      name: "deploy_agent",
-      description: "Deploy a specialized AI agent for a specific business task.",
-      parameters: {
-        type: "object",
-        properties: {
-          agent_name: { type: "string", description: "Name of the agent to deploy" },
-          agent_type: { type: "string", enum: ["sales", "marketing", "analytics", "support", "scraper", "negotiator"], description: "Agent specialization" },
-          task: { type: "string", description: "Specific task for the agent" },
-          priority: { type: "string", enum: ["urgent", "high", "medium", "low"] }
-        },
-        required: ["agent_name", "agent_type", "task"],
-        additionalProperties: false
-      }
+    name: "deploy_agent",
+    description: "Deploy a specialized AI agent for a specific business task.",
+    parameters: {
+      type: "object",
+      properties: {
+        agent_name: { type: "string", description: "Name of the agent to deploy" },
+        agent_type: { type: "string", enum: ["sales", "marketing", "analytics", "support", "scraper", "negotiator"], description: "Agent specialization" },
+        task: { type: "string", description: "Specific task for the agent" },
+        priority: { type: "string", enum: ["urgent", "high", "medium", "low"] }
+      },
+      required: ["agent_name", "agent_type", "task"],
+      additionalProperties: false
     }
   },
   {
     type: "function" as const,
-    function: {
-      name: "analyze_competitor",
-      description: "Log a competitor analysis finding for strategic planning.",
-      parameters: {
-        type: "object",
-        properties: {
-          competitor_name: { type: "string" },
-          competitor_url: { type: "string" },
-          findings: { type: "string", description: "Key competitive intelligence" },
-          threat_level: { type: "string", enum: ["low", "medium", "high", "critical"] },
-          recommended_response: { type: "string" }
-        },
-        required: ["competitor_name", "findings", "threat_level"],
-        additionalProperties: false
-      }
+    name: "analyze_competitor",
+    description: "Log a competitor analysis finding for strategic planning.",
+    parameters: {
+      type: "object",
+      properties: {
+        competitor_name: { type: "string" },
+        competitor_url: { type: "string" },
+        findings: { type: "string", description: "Key competitive intelligence" },
+        threat_level: { type: "string", enum: ["low", "medium", "high", "critical"] },
+        recommended_response: { type: "string" }
+      },
+      required: ["competitor_name", "findings", "threat_level"],
+      additionalProperties: false
     }
   },
   {
     type: "function" as const,
-    function: {
-      name: "update_inventory_strategy",
-      description: "Update inventory and sourcing strategy based on market trends.",
-      parameters: {
-        type: "object",
-        properties: {
-          action: { type: "string", enum: ["restock", "discontinue", "source_new", "bundle"], description: "Inventory action" },
-          product_category: { type: "string" },
-          details: { type: "string", description: "Specific inventory changes" },
-          urgency: { type: "string", enum: ["immediate", "this_week", "this_month"] }
-        },
-        required: ["action", "product_category", "details"],
-        additionalProperties: false
-      }
+    name: "update_inventory_strategy",
+    description: "Update inventory and sourcing strategy based on market trends.",
+    parameters: {
+      type: "object",
+      properties: {
+        action: { type: "string", enum: ["restock", "discontinue", "source_new", "bundle"], description: "Inventory action" },
+        product_category: { type: "string" },
+        details: { type: "string", description: "Specific inventory changes" },
+        urgency: { type: "string", enum: ["immediate", "this_week", "this_month"] }
+      },
+      required: ["action", "product_category", "details"],
+      additionalProperties: false
     }
   }
 ];
@@ -810,8 +800,21 @@ async function runSalesWorkflow(supabase: any, supabaseUrl: string, serviceRoleK
   }));
 
   if (raceAgents.length) {
-    await supabase.from("sales_race_agents").insert(raceAgents);
-    await supabase.from("sales_race_events").insert(
+    // Insert agents in smaller batches to avoid trigger overhead
+    const BATCH_SIZE = 10;
+    let insertedCount = 0;
+    for (let i = 0; i < raceAgents.length; i += BATCH_SIZE) {
+      const batch = raceAgents.slice(i, i + BATCH_SIZE);
+      const { error: insertErr } = await supabase.from("sales_race_agents").insert(batch);
+      if (insertErr) {
+        console.error(`[CEO Brain] Agent batch ${i}-${i + batch.length} insert error:`, insertErr.message);
+      } else {
+        insertedCount += batch.length;
+      }
+    }
+    console.log(`[CEO Brain] Enrolled ${insertedCount}/${raceAgents.length} agents into sales race`);
+
+    const { error: eventsErr } = await supabase.from("sales_race_events").insert(
       raceAgents.slice(0, 12).map((agent: any, index: number) => ({
         sales_race_id: salesRace.id,
         agent_brain_id: agent.agent_brain_id,
@@ -825,6 +828,7 @@ async function runSalesWorkflow(supabase: any, supabaseUrl: string, serviceRoleK
         },
       }))
     );
+    if (eventsErr) console.error("[CEO Brain] Events insert error:", eventsErr.message);
   }
 
   const { data: existingCampaigns } = await supabase
@@ -1123,7 +1127,7 @@ Be aggressive. Think like a CEO who wants 10x growth.` }
         }
 
         if (normalized.includes("sell now") || normalized.includes("run live sales") || normalized.includes("deploy all")) {
-          const execution = await runSalesWorkflow(supabase, supabaseUrl, supabaseKey, command);
+          const execution = await runSalesWorkflow(supabase, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, command);
           return new Response(JSON.stringify({
             success: true,
             mode: "sales_workflow",
@@ -1143,7 +1147,7 @@ Be aggressive. Think like a CEO who wants 10x growth.` }
           normalized.includes("swarm") ||
           normalized.includes("team")
         ) {
-          const orchestration = await runMarketingCommand(supabase, supabaseUrl, supabaseKey, command, metrics!);
+          const orchestration = await runMarketingCommand(supabase, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, command, metrics!);
           if (orchestration) {
             return new Response(JSON.stringify({ success: true, mode: "marketing_command", execution: orchestration }), {
               headers: { ...corsHeaders, "Content-Type": "application/json" },

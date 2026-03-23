@@ -27,6 +27,12 @@ async function requireAdminUser(req: Request) {
   }
 
   const token = authHeader.replace("Bearer ", "");
+
+  // Allow service-role key for internal edge-function-to-edge-function calls
+  if (token === SUPABASE_SERVICE_ROLE_KEY) {
+    return { userId: "service-role" };
+  }
+
   const authClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     global: { headers: { Authorization: authHeader } },
   });
