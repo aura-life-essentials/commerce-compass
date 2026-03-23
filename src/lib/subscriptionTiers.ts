@@ -91,8 +91,8 @@ export const SUBSCRIPTION_TIERS: TierConfig[] = [
     name: 'Enterprise',
     description: 'Full Web3 Suite',
     price: 499,
-    priceId: 'price_1Stl4cFjshJghowT1hoDm80I',
-    productId: 'prod_TrU2hIYvHzhXp7',
+    priceId: 'price_1TDxIhFpvr5YnJS7zHvAFQRo',
+    productId: 'prod_UCM0lFVcb6UdSl',
     billingCycle: 'monthly',
     color: 'from-amber-500 to-orange-500',
     features: [
