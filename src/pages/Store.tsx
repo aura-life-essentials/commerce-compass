@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Zap, Sparkles, TrendingUp, Package, Search, Filter, ArrowUp } from "lucide-react";
 import { useSEOHead } from "@/hooks/useSEOHead";
@@ -31,12 +31,11 @@ const Store = () => {
   const addItem = useCartStore(state => state.addItem);
   const [showBackToTop, setShowBackToTop] = useState(false);
 
-  // Handle scroll for back-to-top button
-  if (typeof window !== 'undefined') {
-    window.addEventListener('scroll', () => {
-      setShowBackToTop(window.scrollY > 600);
-    });
-  }
+  useEffect(() => {
+    const handleScroll = () => setShowBackToTop(window.scrollY > 600);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleAddBundleProduct = async (product: any) => {
     if (!product) return;
