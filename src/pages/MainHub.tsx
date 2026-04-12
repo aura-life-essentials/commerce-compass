@@ -332,6 +332,46 @@ export default function MainHub() {
               </Card>
             </div>
           </section>
+
+          {/* Footer */}
+          <footer className="border-t border-border/60 bg-card/30 backdrop-blur-xl">
+            <div className="container mx-auto px-4 py-10 md:px-6">
+              <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="space-y-3">
+                  <AuraOmegaLogo className="max-w-[10rem]" />
+                  <p className="text-sm text-muted-foreground">
+                    The unified commerce and enterprise operating layer.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <h4 className="font-medium text-foreground">Products</h4>
+                  <nav className="flex flex-col gap-2 text-sm text-muted-foreground">
+                    <Link to="/store" className="hover:text-foreground transition-colors">Store</Link>
+                    <Link to="/apps" className="hover:text-foreground transition-colors">App Marketplace</Link>
+                    <Link to="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
+                  </nav>
+                </div>
+                <div className="space-y-3">
+                  <h4 className="font-medium text-foreground">Company</h4>
+                  <nav className="flex flex-col gap-2 text-sm text-muted-foreground">
+                    <Link to="/about" className="hover:text-foreground transition-colors">About</Link>
+                    <Link to="/contact" className="hover:text-foreground transition-colors">Contact</Link>
+                  </nav>
+                </div>
+                <div className="space-y-3">
+                  <h4 className="font-medium text-foreground">Legal</h4>
+                  <nav className="flex flex-col gap-2 text-sm text-muted-foreground">
+                    <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+                    <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
+                    <Link to="/refunds" className="hover:text-foreground transition-colors">Refund Policy</Link>
+                  </nav>
+                </div>
+              </div>
+              <div className="mt-8 border-t border-border/40 pt-6 text-center text-xs text-muted-foreground">
+                © {new Date().getFullYear()} Aura Omega. All rights reserved.
+              </div>
+            </div>
+          </footer>
         </main>
       </div>
     </div>
