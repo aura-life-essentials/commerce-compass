@@ -346,6 +346,24 @@ serve(async (req) => {
         break;
       }
 
+      case "invoice.payment_failed": {
+        const invoice = event.data.object as Stripe.Invoice;
+        await upsertStripeTransaction({
+          stripePaymentId: typeof invoice.payment_intent === "string" ? invoice.payment_intent : invoice.payment_intent?.id ?? null,
+          stripeCustomerId: normalizeStripeValue(invoice.customer),
+          amount: invoice.amount_due / 100,
+          currency: invoice.currency,
+          status: "failed",
+          customerEmail: invoice.customer_email,
+          metadata: {
+            invoice_id: invoice.id,
+            subscription_id: typeof invoice.subscription === "string" ? invoice.subscription : invoice.subscription?.id ?? null,
+            failure_reason: "invoice_payment_failed",
+          },
+        });
+        break;
+      }
+
       default:
         logStep("Unhandled event type", { type: event.type });
     }
