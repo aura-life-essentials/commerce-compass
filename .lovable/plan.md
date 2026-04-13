@@ -1,53 +1,43 @@
 
 
-# Audit Results: Critical Failures Found
+# Branding Text Update — Visual Only, No Functional Changes
 
-## What I Discovered
+## What Changes
+Update all branding text across the app to reflect the new wording. Zero logic or functionality changes — only visible text strings.
 
-### 1. Subscription Tiers (Pricing Page) -- BROKEN
-All 5 Stripe product/price IDs in `subscriptionTiers.ts` are **invalid**. They don't exist in your Stripe account:
-- `prod_TrU2Dwgxf2cjuN` (Starter) -- does not exist
-- `price_1Stl4YFjshJghowT3i4IhC4K` -- does not exist
-- Same for Growth, Pro, Enterprise, Elite
+### New Branding Copy
+- **Powered by**: "The Grok Father 9.0 aka GROK 9"
+- **Creator credit**: "Made by Ryan Puddy ~ WEB 3 ARCHITECT"
+- **Copyright**: "© 2024 Aura Lift Essentials. All rights reserved."
 
-**Result**: Clicking "Get Started" on any tier will fail at Stripe checkout.
+### Files to Edit
 
-### 2. App Store Products (/apps) -- BROKEN
-All 6 app products in `appProducts.ts` have **empty** `priceId` and `productId` fields (`priceId: ''`). The UI shows "Coming Soon" toast instead of checking out.
+1. **`src/components/branding/AuraOmegaLogo.tsx`**
+   - Add two new lines below the subtitle: "Powered by The Grok Father 9.0 aka GROK 9" and "Made by Ryan Puddy ~ WEB 3 ARCHITECT"
+   - These show in `default` and `hero` variants (not `compact`)
 
-### 3. Shareable Links (What Your Associate Would See)
-- **App Store**: `https://ceo-brain-orchestra.lovable.app/apps` -- public, browsable, but checkout fails
-- **Pricing Page**: `https://ceo-brain-orchestra.lovable.app/pricing` -- public, browsable, but checkout fails
-- **Subscription Management**: `https://ceo-brain-orchestra.lovable.app/subscription` -- accessible but shows no active plan
+2. **`src/pages/MainHub.tsx`** (footer, line 371)
+   - Change `© {year} Aura Omega. All rights reserved.` → `© 2024 Aura Lift Essentials. All rights reserved.`
+   - Add "Powered by The Grok Father 9.0 aka GROK 9 | Made by Ryan Puddy ~ WEB 3 ARCHITECT" below copyright
 
-**Bottom line**: The storefronts look professional, but zero purchases can complete.
+3. **`src/components/dashboard/HeroBanner.tsx`** (line 76)
+   - Change "powered by AI agents" → "Powered by The Grok Father 9.0 aka GROK 9"
 
----
+4. **`src/pages/Metaverse.tsx`** (line 99, 103)
+   - Change `© 2026 ProfitReaper Global` → `© 2024 Aura Lift Essentials`
+   - Change "Powered by AI Agents" → "Powered by The Grok Father 9.0"
 
-## Fix Plan
+5. **`src/pages/CasinoLaunch.tsx`** (line 519)
+   - Change `© 2025 Ultra Casino...` → `© 2024 Aura Lift Essentials. All rights reserved.`
 
-### Step 1: Create Real Stripe Products for the 5 Subscription Tiers
-Using the Stripe tools, create 5 products with recurring prices matching the tiers:
-- Starter ($19/week), Growth ($49/month), Pro ($199/month), Enterprise ($499/month), Elite ($2,500/year)
+6. **Email edge functions** (3 files — send-subscription-email, send-welcome-email, send-trial-reminder)
+   - Change `© 2024 Profit Reaper` → `© 2024 Aura Lift Essentials`
 
-### Step 2: Create Real Stripe Products for the 6 App Store Products
-Create 6 products with monthly recurring prices:
-- CEO Brain Pro ($725/mo), Autonomous Sales Network Pro ($1,200/mo), 200-Agent Network ($3,600/mo), Checkout Engine ($360/mo), Web3 Engine ($600/mo), Content Factory ($430/mo)
+7. **`src/pages/Auth.tsx`** (line 242)
+   - Keep placeholder "Ryan Puddy" as-is (already correct)
 
-### Step 3: Wire Real Stripe IDs into the Codebase
-- Update `src/lib/subscriptionTiers.ts` with the real `priceId` and `productId` for all 5 tiers
-- Update `src/lib/appProducts.ts` with the real `priceId` and `productId` for all 6 apps
-
-### Step 4: Verify End-to-End Flow
-After wiring, provide shareable links for your associate to test:
-- `https://ceo-brain-orchestra.lovable.app/apps` (App Store)
-- `https://ceo-brain-orchestra.lovable.app/pricing` (Subscription Tiers)
-
-Each will open a real Stripe Checkout with 5-day free trial, billing address collection, and promo code support.
-
-### Technical Details
-- All checkout sessions route through the existing `create-subscription-checkout` edge function which is already production-ready (trial, promo codes, ToS consent)
-- The `check-subscription` edge function already verifies active subscriptions by email lookup in Stripe
-- The `customer-portal` edge function already enables self-service subscription management
-- No database changes required -- the `subscriptions` table is populated by the existing `stripe-webhook` handler
+### What Does NOT Change
+- No routes, logic, database, Stripe, or component structure changes
+- No imports or exports modified
+- All functionality remains identical
 
