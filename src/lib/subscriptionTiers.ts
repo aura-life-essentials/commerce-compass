@@ -1,141 +1,72 @@
 // Subscription tier configuration with Stripe price IDs
-export type SubscriptionTier = 'starter' | 'growth' | 'pro' | 'enterprise' | 'elite';
+export type SubscriptionTier = 'core' | 'pro' | 'enterprise';
 
 export interface TierConfig {
   id: SubscriptionTier;
   name: string;
   description: string;
-  price: number;
+  price: number | null;
   priceId: string;
   productId: string;
-  billingCycle: 'weekly' | 'monthly' | 'yearly';
+  billingCycle: 'monthly' | 'custom';
   features: string[];
-  nftBenefits: string[];
   color: string;
   popular?: boolean;
 }
 
 export const SUBSCRIPTION_TIERS: TierConfig[] = [
   {
-    id: 'starter',
-    name: 'Starter',
-    description: 'Web3 Foundations',
-    price: 19,
-    priceId: 'price_1TDxIdFpvr5YnJS7Ffxv1mLK',
-    productId: 'prod_UCM0gN7s21PcXz',
-    billingCycle: 'weekly',
-    color: 'from-slate-500 to-slate-600',
-    features: [
-      'Web3 basics education',
-      'Industry roadmap consultation',
-      'Community Discord access',
-      'Weekly strategy calls',
-      'Basic AI assistant',
-    ],
-    nftBenefits: [
-      'Bronze member badge NFT',
-      'Community voting rights',
-    ],
-  },
-  {
-    id: 'growth',
-    name: 'Growth',
-    description: 'Web3 Website Builder',
-    price: 49,
-    priceId: 'price_1TDxIeFpvr5YnJS73fmOxPG7',
-    productId: 'prod_UCM0uAHgcy0T78',
+    id: 'core',
+    name: 'Core',
+    description: 'Essential AI sales automation',
+    price: 97,
+    priceId: 'price_1TLtK0Fpvr5YnJS74uUhKJAU',
+    productId: 'prod_UKYQtaG6E6rZHM',
     billingCycle: 'monthly',
     color: 'from-blue-500 to-cyan-500',
     features: [
-      'Everything in Starter',
-      'Custom Web3 website creation',
-      'Wallet integration setup',
-      'NFT display galleries',
-      'Priority email support',
-      'Monthly strategy sessions',
-    ],
-    nftBenefits: [
-      'Silver member badge NFT',
-      'Early access to features',
-      '5% marketplace fee discount',
+      'Lead Qualifier Agent — scores and qualifies inbound leads',
+      'Nurture Agent — automated personalized follow-up sequences',
+      'Basic revenue analytics dashboard',
+      'Email support',
+      'Up to 500 leads/month',
     ],
   },
   {
     id: 'pro',
     name: 'Pro',
-    description: 'NFT & DAO Package',
-    price: 199,
-    priceId: 'price_1TDxIgFpvr5YnJS7dCWALR8s',
-    productId: 'prod_UCM0TnPVKoKxYH',
+    description: 'Full autonomous revenue system',
+    price: 297,
+    priceId: 'price_1TLtK2Fpvr5YnJS743sxV1Cj',
+    productId: 'prod_UKYQb6WviGa1xn',
     billingCycle: 'monthly',
     color: 'from-purple-500 to-pink-500',
     popular: true,
     features: [
-      'Everything in Growth',
-      'Full NFT collection launch',
-      'Smart contract deployment',
-      'DAO governance setup',
-      'Token creation & distribution',
-      '24/7 AI agent support',
-      'Custom roadmap creation',
-    ],
-    nftBenefits: [
-      'Gold member badge NFT',
-      '10% revenue share rights',
-      'Exclusive metaverse access',
-      'Priority listing on all platforms',
+      'All 5 AI Agents — Qualifier, Nurture, Closer, Onboarding, Orchestrator',
+      'Advanced workflow automation',
+      'Full command center dashboard',
+      'Priority support',
+      'Unlimited leads',
+      'Agent activity logs and analytics',
     ],
   },
   {
     id: 'enterprise',
     name: 'Enterprise',
-    description: 'Full Web3 Suite',
-    price: 499,
-    priceId: 'price_1TDxIhFpvr5YnJS7zHvAFQRo',
-    productId: 'prod_UCM0lFVcb6UdSl',
-    billingCycle: 'monthly',
+    description: 'Custom-built for your operation',
+    price: null,
+    priceId: '',
+    productId: '',
+    billingCycle: 'custom',
     color: 'from-amber-500 to-orange-500',
     features: [
       'Everything in Pro',
-      'Complete Web3 infrastructure',
-      'Crypto payment integration',
-      'Multi-chain deployment',
-      'Custom AI agents for your business',
+      'Dedicated onboarding and setup',
+      'Custom agent configurations',
+      'White-glove integration support',
+      'Custom API access',
       'Dedicated account manager',
-      'White-label solutions',
-    ],
-    nftBenefits: [
-      'Platinum member badge NFT',
-      '15% revenue share rights',
-      'Private metaverse office',
-      'Zero marketplace fees',
-    ],
-  },
-  {
-    id: 'elite',
-    name: 'Elite',
-    description: 'Industry Revolution Partner',
-    price: 2500,
-    priceId: 'price_1TDxIiFpvr5YnJS7hLnYb6I1',
-    productId: 'prod_UCM0wOtx8wLSLq',
-    billingCycle: 'yearly',
-    color: 'from-yellow-400 via-amber-500 to-red-500',
-    features: [
-      'Everything in Enterprise',
-      'Data-driven industry roadmaps',
-      'Guaranteed revenue increase strategies',
-      'Full ecosystem buildout',
-      'White-glove concierge service',
-      'Quarterly in-person strategy sessions',
-      'Equity partnership options',
-      'First access to new features',
-    ],
-    nftBenefits: [
-      'Diamond member badge NFT',
-      '25% revenue share rights',
-      'DAO board seat',
-      'Personal AI agent army',
-      'Lifetime platform access',
     ],
   },
 ];

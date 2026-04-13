@@ -5,21 +5,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { useCartSync } from "@/hooks/useCartSync";
 import Index from "./pages/Index";
-import Store from "./pages/Store";
-import ProductDetail from "./pages/ProductDetail";
-import ShopifyProductDetail from "./pages/ShopifyProductDetail";
 import Auth from "./pages/Auth";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
-import OrderHistory from "./pages/OrderHistory";
-import Wishlist from "./pages/Wishlist";
-import Metaverse from "./pages/Metaverse";
 import Pricing from "./pages/Pricing";
 import Landing from "./pages/Landing";
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
-import CasinoLaunch from "./pages/CasinoLaunch";
-import IndustryRoadmaps from "./pages/IndustryRoadmaps";
 import SubscriptionManagement from "./pages/SubscriptionManagement";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
@@ -31,9 +22,6 @@ import Contact from "./pages/Contact";
 import WarRoom from "./pages/WarRoom";
 import BotSwarm from "./pages/BotSwarm";
 import MarketingBlitz from "./pages/MarketingBlitz";
-import Web3LaunchCenter from "./pages/Web3LaunchCenter";
-import AppMonetizer from "./pages/AppMonetizer";
-import AppStore from "./pages/AppStore";
 import ConnectivityDashboard from "./pages/ConnectivityDashboard";
 import SystemHealth from "./pages/SystemHealth";
 import MainHub from "./pages/MainHub";
@@ -43,7 +31,6 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  useCartSync();
   return (
     <Routes>
       {/* Public main hub */}
@@ -71,31 +58,12 @@ const AppContent = () => {
       <Route path="/welcome" element={<Welcome />} />
       <Route path="/about" element={<Landing />} />
       
-      {/* Public store routes */}
-      <Route path="/store" element={<Store />} />
-      <Route path="/product/:handle" element={<ShopifyProductDetail />} />
-      <Route path="/product-legacy/:productId" element={<ProductDetail />} />
-      <Route path="/orders" element={<OrderHistory />} />
-      <Route path="/wishlist" element={<Wishlist />} />
+      {/* Checkout */}
       <Route path="/checkout-success" element={<CheckoutSuccess />} />
-      <Route 
-        path="/metaverse" 
-        element={
-          <ProtectedRoute>
-            <Metaverse />
-          </ProtectedRoute>
-        } 
-      />
       
       {/* Public pricing page */}
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/subscription-success" element={<SubscriptionSuccess />} />
-      
-      {/* Casino Launch page */}
-      <Route path="/casino" element={<CasinoLaunch />} />
-      
-      {/* Industry Roadmaps page */}
-      <Route path="/industry-roadmaps" element={<IndustryRoadmaps />} />
       
       {/* Subscription Management */}
       <Route path="/subscription" element={<SubscriptionManagement />} />
@@ -137,23 +105,6 @@ const AppContent = () => {
           <MarketingBlitz />
         </ProtectedRoute>
       } />
-      
-      {/* Web3 Launch Center */}
-      <Route path="/web3-launch" element={
-        <ProtectedRoute requireAdmin>
-          <Web3LaunchCenter />
-        </ProtectedRoute>
-      } />
-
-      {/* App Monetizer */}
-      <Route path="/app-monetizer" element={
-        <ProtectedRoute requireAdmin>
-          <AppMonetizer />
-        </ProtectedRoute>
-      } />
-
-      {/* Public App Store */}
-      <Route path="/apps" element={<AppStore />} />
 
       {/* Connectivity Dashboard - super admin only */}
       <Route path="/connectivity" element={
