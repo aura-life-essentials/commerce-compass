@@ -416,6 +416,7 @@ async function callChatFallback(
 ): Promise<string> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   const XAI_API_KEY = Deno.env.get("XAI_API_KEY");
+  const OPENAI_KEY = Deno.env.get("OPENAI_MASTER_API_KEY") || Deno.env.get("OPENAI_API_KEY");
 
   if (LOVABLE_API_KEY) {
     const model = mode === "reasoning" ? PRIMARY_REASONING : PRIMARY_MODEL;
@@ -436,17 +437,38 @@ async function callChatFallback(
 
   if (XAI_API_KEY) {
     const model = mode === "reasoning" ? GROK_REASONING : GROK_NON_REASONING;
-    const response = await fetch(XAI_CHAT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${XAI_API_KEY}` },
-      body: JSON.stringify({ model, messages, temperature, max_tokens: maxTokens, stream: false }),
-    });
-    if (response.ok) {
-      const data = await response.json();
-      return data.choices?.[0]?.message?.content || "";
+    try {
+      const response = await fetch(XAI_CHAT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${XAI_API_KEY}` },
+        body: JSON.stringify({ model, messages, temperature, max_tokens: maxTokens, stream: false }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data.choices?.[0]?.message?.content || "";
+      }
+    } catch (e) {
+      console.warn("[CEO Brain] xAI chat error:", e);
     }
-    const errText = await response.text().catch(() => "");
-    throw new Error(`xAI Chat failed [${response.status}]: ${errText}`);
+  }
+
+  // OpenAI Master fallback
+  if (OPENAI_KEY) {
+    try {
+      const response = await fetch(OPENAI_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${OPENAI_KEY}` },
+        body: JSON.stringify({ model: OPENAI_MODEL, messages, temperature, max_tokens: maxTokens }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data.choices?.[0]?.message?.content || "";
+      }
+      const errText = await response.text().catch(() => "");
+      throw new Error(`OpenAI failed [${response.status}]: ${errText}`);
+    } catch (e) {
+      console.warn("[CEO Brain] OpenAI fallback error:", e);
+    }
   }
 
   throw new Error("No AI engine available.");
