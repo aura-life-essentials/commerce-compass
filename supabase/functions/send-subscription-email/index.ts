@@ -50,42 +50,42 @@ serve(async (req) => {
         icon: "🚀",
         headline: "Your Subscription is Active!",
         message: `Congratulations! Your <strong>${tier}</strong> plan is now active. All premium features are unlocked and ready for you.`,
-        cta: { text: "Go to Dashboard", url: "https://profitreaper.com/dashboard" }
+        cta: { text: "Go to Dashboard", url: "https://auraomega.com/dashboard" }
       },
       upgraded: {
         subject: `⬆️ Upgrade Complete! Welcome to ${tier}`,
         icon: "⬆️",
         headline: "Upgrade Successful!",
         message: `You've upgraded to <strong>${tier}</strong>! Enjoy your new features and increased limits immediately.`,
-        cta: { text: "Explore New Features", url: "https://profitreaper.com/dashboard" }
+        cta: { text: "Explore New Features", url: "https://auraomega.com/dashboard" }
       },
       downgraded: {
         subject: `Plan Changed to ${tier}`,
         icon: "📋",
         headline: "Plan Updated",
         message: `Your plan has been changed to <strong>${tier}</strong>. Changes will take effect at the end of your current billing period.`,
-        cta: { text: "View Plan Details", url: "https://profitreaper.com/subscription" }
+        cta: { text: "View Plan Details", url: "https://auraomega.com/subscription" }
       },
       cancelled: {
         subject: "We're sorry to see you go 😢",
         icon: "👋",
         headline: "Subscription Cancelled",
         message: `Your <strong>${tier}</strong> subscription has been cancelled. You'll continue to have access until the end of your billing period.`,
-        cta: { text: "Reactivate Anytime", url: "https://profitreaper.com/pricing" }
+        cta: { text: "Reactivate Anytime", url: "https://auraomega.com/pricing" }
       },
       renewed: {
         subject: `✅ Your ${tier} subscription has been renewed`,
         icon: "✅",
         headline: "Subscription Renewed",
         message: `Your <strong>${tier}</strong> subscription has been successfully renewed${amount ? ` for $${(amount / 100).toFixed(2)}` : ""}.`,
-        cta: { text: "View Receipt", url: "https://profitreaper.com/subscription" }
+        cta: { text: "View Receipt", url: "https://auraomega.com/subscription" }
       },
       payment_failed: {
         subject: "⚠️ Action Required: Payment Failed",
         icon: "⚠️",
         headline: "Payment Failed",
         message: "We couldn't process your payment. Please update your payment method to avoid service interruption.",
-        cta: { text: "Update Payment Method", url: "https://profitreaper.com/subscription" }
+        cta: { text: "Update Payment Method", url: "https://auraomega.com/subscription" }
       }
     };
 
@@ -93,7 +93,7 @@ serve(async (req) => {
     const billingInfo = nextBillingDate ? `<p style="color: #888; font-size: 14px;">Next billing date: ${new Date(nextBillingDate).toLocaleDateString()}</p>` : "";
 
     const { data, error } = await resend.emails.send({
-      from: "Profit Reaper <noreply@profitreaper.com>",
+      from: "Aura Lift Essentials <noreply@auraomega.com>",
       to: [email],
       subject: template.subject,
       html: `
@@ -123,12 +123,12 @@ serve(async (req) => {
                 ` : ""}
                 
                 <p style="color: #888; font-size: 14px;">Questions? Just reply to this email and we'll help you out.</p>
-                <p style="color: #888;">— The Profit Reaper Team</p>
+                <p style="color: #888;">— The Aura Lift Essentials Team</p>
               </div>
             </div>
             
             <div style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
-              <p>© 2024 Profit Reaper. All rights reserved.</p>
+              <p>© 2024 Aura Lift Essentials. All rights reserved.</p>
             </div>
           </div>
         </body>

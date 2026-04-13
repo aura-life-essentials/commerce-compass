@@ -46,10 +46,10 @@ serve(async (req) => {
       ? `${urgency} Your trial ends today!`
       : daysRemaining === 1 
         ? `${urgency} Only 1 day left on your trial`
-        : `${urgency} ${daysRemaining} days left on your Profit Reaper trial`;
+        : `${urgency} ${daysRemaining} days left on your Aura Lift Essentials trial`;
 
     const { data, error } = await resend.emails.send({
-      from: "Profit Reaper <noreply@profitreaper.com>",
+      from: "Aura Lift Essentials <noreply@auraomega.com>",
       to: [email],
       subject,
       html: `
@@ -88,7 +88,7 @@ serve(async (req) => {
                 </div>
                 
                 <div style="text-align: center; margin: 30px 0;">
-                  <a href="https://profitreaper.com/pricing" style="display: inline-block; background: linear-gradient(135deg, #00ff88, #00d4ff); color: #000; font-weight: bold; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-size: 16px;">Continue Your Plan →</a>
+                  <a href="https://auraomega.com/pricing" style="display: inline-block; background: linear-gradient(135deg, #00ff88, #00d4ff); color: #000; font-weight: bold; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-size: 16px;">Continue Your Plan →</a>
                 </div>
                 
                 <p style="color: #888; font-size: 14px;">Your card will be charged automatically when the trial ends. Cancel anytime from your dashboard if you prefer not to continue.</p>
@@ -96,7 +96,7 @@ serve(async (req) => {
             </div>
             
             <div style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
-              <p>© 2024 Profit Reaper. All rights reserved.</p>
+              <p>© 2024 Aura Lift Essentials. All rights reserved.</p>
             </div>
           </div>
         </body>
