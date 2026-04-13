@@ -11,12 +11,15 @@ const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 // Fallback: xAI direct (only if XAI_API_KEY has credits)
 const XAI_RESPONSES_URL = "https://api.x.ai/v1/responses";
 const XAI_CHAT_URL = "https://api.x.ai/v1/chat/completions";
+// OpenAI Direct (Master key)
+const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 
 // Models
 const PRIMARY_MODEL = "google/gemini-2.5-flash-lite"; // Cheapest, fastest
 const PRIMARY_REASONING = "google/gemini-2.5-flash"; // Balanced cost/quality
 const GROK_REASONING = "grok-4-1-fast-reasoning";
 const GROK_NON_REASONING = "grok-4-1-fast-non-reasoning";
+const OPENAI_MODEL = "gpt-4o";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -413,6 +416,7 @@ async function callChatFallback(
 ): Promise<string> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   const XAI_API_KEY = Deno.env.get("XAI_API_KEY");
+  const OPENAI_KEY = Deno.env.get("OPENAI_MASTER_API_KEY") || Deno.env.get("OPENAI_API_KEY");
 
   if (LOVABLE_API_KEY) {
     const model = mode === "reasoning" ? PRIMARY_REASONING : PRIMARY_MODEL;
@@ -433,17 +437,38 @@ async function callChatFallback(
 
   if (XAI_API_KEY) {
     const model = mode === "reasoning" ? GROK_REASONING : GROK_NON_REASONING;
-    const response = await fetch(XAI_CHAT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${XAI_API_KEY}` },
-      body: JSON.stringify({ model, messages, temperature, max_tokens: maxTokens, stream: false }),
-    });
-    if (response.ok) {
-      const data = await response.json();
-      return data.choices?.[0]?.message?.content || "";
+    try {
+      const response = await fetch(XAI_CHAT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${XAI_API_KEY}` },
+        body: JSON.stringify({ model, messages, temperature, max_tokens: maxTokens, stream: false }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data.choices?.[0]?.message?.content || "";
+      }
+    } catch (e) {
+      console.warn("[CEO Brain] xAI chat error:", e);
     }
-    const errText = await response.text().catch(() => "");
-    throw new Error(`xAI Chat failed [${response.status}]: ${errText}`);
+  }
+
+  // OpenAI Master fallback
+  if (OPENAI_KEY) {
+    try {
+      const response = await fetch(OPENAI_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${OPENAI_KEY}` },
+        body: JSON.stringify({ model: OPENAI_MODEL, messages, temperature, max_tokens: maxTokens }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data.choices?.[0]?.message?.content || "";
+      }
+      const errText = await response.text().catch(() => "");
+      throw new Error(`OpenAI failed [${response.status}]: ${errText}`);
+    } catch (e) {
+      console.warn("[CEO Brain] OpenAI fallback error:", e);
+    }
   }
 
   throw new Error("No AI engine available.");
@@ -996,7 +1021,7 @@ serve(async (req) => {
 
     const validActions = [
       "think", "think_fast", "quick_ops", "get_state", "execute_decision",
-      "autonomous_loop", "research", "research_x", "full_intelligence", "command", "sales_run", "shopify"
+      "autonomous_loop", "research", "research_x", "full_intelligence", "command", "sales_run", "shopify", "consensus"
     ];
     if (action && !validActions.includes(action)) {
       return new Response(JSON.stringify({ error: "Invalid action" }), {
@@ -1379,6 +1404,22 @@ ${i === 0 ? "Use ALL tools: search web for trends, search X for viral content, r
         return new Response(JSON.stringify({ success: true, cycles_completed: cycles, results }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
+      }
+
+      // ── Multi-AI Consensus: OpenAI + Grok + Gemini debate ──
+      case "consensus": {
+        console.log("[CEO Brain] Multi-AI Consensus Mode: OpenAI + Grok + Gemini");
+        const consensusResult = await invokeEdgeFunction(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, "ai-consensus", {
+          action: "consensus",
+          focusArea: focusArea || "maximize revenue and optimize operations",
+        });
+
+        return new Response(JSON.stringify({
+          success: consensusResult.success,
+          mode: "multi_ai_consensus",
+          engines: ["openai_master", "xai_grok_ceo", "lovable_gemini"],
+          ...consensusResult.data,
+        }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
       default: {
