@@ -367,8 +367,9 @@ export default function MainHub() {
                   </nav>
                 </div>
               </div>
-              <div className="mt-8 border-t border-border/40 pt-6 text-center text-xs text-muted-foreground">
-                © {new Date().getFullYear()} Aura Omega. All rights reserved.
+              <div className="mt-8 border-t border-border/40 pt-6 text-center text-xs text-muted-foreground space-y-1">
+                <p>© 2024 Aura Lift Essentials. All rights reserved.</p>
+                <p className="text-muted-foreground/50">Powered by The Grok Father 9.0 aka GROK 9 | Made by Ryan Puddy ~ WEB 3 ARCHITECT</p>
               </div>
             </div>
           </footer>

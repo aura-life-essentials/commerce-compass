@@ -73,8 +73,8 @@ export const HeroBanner = ({ onSeedData, hasData }: HeroBannerProps) => {
           </h1>
 
           <p className="text-lg text-muted-foreground mb-6 max-w-lg">
-            Unified commerce orchestration powered by AI agents. 
-            Real-time Shopify, Stripe, and agent telemetry.
+            Unified commerce orchestration Powered by The Grok Father 9.0 aka GROK 9. 
+            Real-time Stripe and agent telemetry.
           </p>
 
           {/* Real Stats Row */}
