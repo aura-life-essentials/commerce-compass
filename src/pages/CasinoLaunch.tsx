@@ -516,7 +516,7 @@ export default function CasinoLaunch() {
         {/* Footer */}
         <footer className="border-t border-border py-8 px-6">
           <div className="max-w-6xl mx-auto text-center text-sm text-muted-foreground">
-            <p>© 2025 Ultra Casino - A Web3 Industry Integrations Global Agency Project</p>
+            <p>© 2024 Aura Lift Essentials. All rights reserved.</p>
             <p className="mt-2">Smart contracts pending audit. Investment involves risk. DYOR.</p>
           </div>
         </footer>

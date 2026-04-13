@@ -47,9 +47,9 @@ serve(async (req) => {
       : "";
 
     const { data, error } = await resend.emails.send({
-      from: "Profit Reaper <noreply@profitreaper.com>",
+      from: "Aura Lift Essentials <noreply@auraomega.com>",
       to: [email],
-      subject: `Welcome to Profit Reaper${tier ? ` - ${tierName} Plan` : ""}! 🚀`,
+      subject: `Welcome to Aura Lift Essentials${tier ? ` - ${tierName} Plan` : ""}! 🚀`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -61,7 +61,7 @@ serve(async (req) => {
           <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
             <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 16px; padding: 40px; border: 1px solid #333;">
               <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: #00ff88; font-size: 28px; margin: 0;">Welcome to Profit Reaper</h1>
+                <h1 style="color: #00ff88; font-size: 28px; margin: 0;">Welcome to Aura Lift Essentials</h1>
                 <p style="color: #888; font-size: 16px; margin-top: 10px;">Your AI-Powered Commerce Empire Starts Now</p>
               </div>
               
@@ -85,20 +85,20 @@ serve(async (req) => {
                 <p>Ready to start generating revenue on autopilot?</p>
                 
                 <div style="text-align: center; margin: 30px 0;">
-                  <a href="https://profitreaper.com/dashboard" style="display: inline-block; background: linear-gradient(135deg, #00ff88, #00d4ff); color: #000; font-weight: bold; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-size: 16px;">Launch Your Dashboard →</a>
+                  <a href="https://auraomega.com/dashboard" style="display: inline-block; background: linear-gradient(135deg, #00ff88, #00d4ff); color: #000; font-weight: bold; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-size: 16px;">Launch Your Dashboard →</a>
                 </div>
                 
                 <p style="color: #888; font-size: 14px;">If you have any questions, just reply to this email. We're here to help you succeed.</p>
                 
-                <p style="color: #888;">— The Profit Reaper Team</p>
+                <p style="color: #888;">— The Aura Lift Essentials Team</p>
               </div>
             </div>
             
             <div style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
-              <p>© 2024 Profit Reaper. All rights reserved.</p>
+              <p>© 2024 Aura Lift Essentials. All rights reserved.</p>
               <p>
-                <a href="https://profitreaper.com/unsubscribe" style="color: #888;">Unsubscribe</a> | 
-                <a href="https://profitreaper.com/privacy" style="color: #888;">Privacy Policy</a>
+                <a href="https://auraomega.com/unsubscribe" style="color: #888;">Unsubscribe</a> | 
+                <a href="https://auraomega.com/privacy" style="color: #888;">Privacy Policy</a>
               </p>
             </div>
           </div>

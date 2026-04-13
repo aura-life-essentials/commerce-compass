@@ -55,6 +55,12 @@ export function AuraOmegaLogo({
               {subtitle}
             </p>
           ) : null}
+          <p className={cn("text-muted-foreground/70 italic", hero ? "mt-2 text-xs md:text-sm" : "mt-1 text-[10px]")}>
+            Powered by The Grok Father 9.0 aka GROK 9
+          </p>
+          <p className={cn("text-muted-foreground/50", hero ? "mt-0.5 text-[10px] md:text-xs" : "mt-0.5 text-[9px]")}>
+            Made by Ryan Puddy ~ WEB 3 ARCHITECT
+          </p>
         </div>
       )}
     </div>
