@@ -11,12 +11,15 @@ const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 // Fallback: xAI direct (only if XAI_API_KEY has credits)
 const XAI_RESPONSES_URL = "https://api.x.ai/v1/responses";
 const XAI_CHAT_URL = "https://api.x.ai/v1/chat/completions";
+// OpenAI Direct (Master key)
+const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 
 // Models
 const PRIMARY_MODEL = "google/gemini-2.5-flash-lite"; // Cheapest, fastest
 const PRIMARY_REASONING = "google/gemini-2.5-flash"; // Balanced cost/quality
 const GROK_REASONING = "grok-4-1-fast-reasoning";
 const GROK_NON_REASONING = "grok-4-1-fast-non-reasoning";
+const OPENAI_MODEL = "gpt-4o";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
