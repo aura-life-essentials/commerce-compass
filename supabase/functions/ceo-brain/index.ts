@@ -1406,6 +1406,22 @@ ${i === 0 ? "Use ALL tools: search web for trends, search X for viral content, r
         });
       }
 
+      // ── Multi-AI Consensus: OpenAI + Grok + Gemini debate ──
+      case "consensus": {
+        console.log("[CEO Brain] Multi-AI Consensus Mode: OpenAI + Grok + Gemini");
+        const consensusResult = await invokeEdgeFunction(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, "ai-consensus", {
+          action: "consensus",
+          focusArea: focusArea || "maximize revenue and optimize operations",
+        });
+
+        return new Response(JSON.stringify({
+          success: consensusResult.success,
+          mode: "multi_ai_consensus",
+          engines: ["openai_master", "xai_grok_ceo", "lovable_gemini"],
+          ...consensusResult.data,
+        }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
       default: {
         // Default: full intelligence cycle
         console.log("[CEO Brain] Default: full intelligence cycle");
