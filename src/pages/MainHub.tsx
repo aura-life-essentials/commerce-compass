@@ -1,76 +1,51 @@
 import { motion } from "framer-motion";
-import {
-  ArrowRight,
-  Bot,
-  Globe2,
-  Layers3,
-  LineChart,
-  Package,
-  Rocket,
-  ShieldCheck,
-  ShoppingBag,
-  Sparkles,
-  Store,
-} from "lucide-react";
+import { ArrowRight, Bot, Brain, Handshake, Mail, UserCheck, Workflow } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useSEOHead } from "@/hooks/useSEOHead";
-import { useShopifyProducts } from "@/hooks/useShopifyProducts";
-import { useStores } from "@/hooks/useStores";
-import { ShopifyProductCard } from "@/components/store/ShopifyProductCard";
-import { ShopifyCartDrawer } from "@/components/store/ShopifyCartDrawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AuraOmegaLogo } from "@/components/branding/AuraOmegaLogo";
-import { getOfferSummary, parseApps, generateOffers } from "@/lib/appMonetization";
 
-const platformApps = parseApps(`CEO Brain | AI Agents | Runs executive orchestration across growth, pricing, and offers | 299
-Autonomous Sales Network | AI Agents | Activates specialized sales teams across research, content, and closing | 499
-200-Agent Autonomous Sales Network | AI Agents | Deploys 40 teams of 5 for enterprise sales execution | 1499
-Checkout Conversion Engine | E-commerce | Lifts checkout conversion and average order value | 149
-Content Factory | Media / Content | Produces campaigns, creative, scripts, and assets at speed | 179
-Web3 Launch Engine | Web3 | Launches token, NFT, and community-ready growth systems | 249`);
-
-const monetizationSummary = getOfferSummary(generateOffers(platformApps, "enterprise"));
-
-const capabilityCards = [
+const agents = [
   {
-    icon: Globe2,
-    title: "Global revenue command",
-    description: "Run product sales, subscription offers, and enterprise deal surfaces from one commercial front door.",
+    icon: UserCheck,
+    name: "Lead Qualifier",
+    description: "Scores and qualifies every inbound lead with AI analysis — so you only talk to buyers who are ready.",
   },
   {
-    icon: Store,
-    title: "Store sync visibility",
-    description: "Surface connected store infrastructure here as the main commerce layer with room for broader aggregation.",
+    icon: Mail,
+    name: "Nurture Agent",
+    description: "Sends personalized follow-up sequences that keep leads warm and moving toward a decision.",
   },
   {
-    icon: Bot,
-    title: "Autonomous sales execution",
-    description: "Position the CEO Brain and agent swarm as premium operating systems that move from insight into action.",
+    icon: Handshake,
+    name: "Closer Agent",
+    description: "Handles objections, crafts persuasive responses, and nudges prospects toward checkout.",
   },
   {
-    icon: ShieldCheck,
-    title: "Enterprise-ready packaging",
-    description: "Present tools, bundles, subscriptions, and physical products with stronger trust and higher-ticket framing.",
+    icon: Workflow,
+    name: "Onboarding Agent",
+    description: "Creates tailored welcome and setup sequences the moment a customer pays — no manual work.",
+  },
+  {
+    icon: Brain,
+    name: "Orchestrator",
+    description: "Routes every incoming task to the right agent automatically. The brain behind the operation.",
   },
 ];
 
-const offerPillars = [
-  "Physical product catalog",
-  "Autonomous sales systems",
-  "Operator bundles & suites",
-  "High-ticket enterprise offers",
+const tiers = [
+  { name: "Core", price: "$97", period: "/mo", features: ["Lead Qualifier + Nurture Agent", "Basic analytics", "500 leads/mo"], cta: "Get Started", link: "/pricing" },
+  { name: "Pro", price: "$297", period: "/mo", features: ["All 5 AI Agents", "Full dashboard", "Unlimited leads"], cta: "Go Pro", link: "/pricing", popular: true },
+  { name: "Enterprise", price: "Custom", period: "", features: ["Dedicated setup", "Custom integrations", "Account manager"], cta: "Contact Us", link: "/contact" },
 ];
 
 export default function MainHub() {
   useSEOHead({
-    title: "Aura Omega Enterprise Sales Hub",
-    description: "Aura Omega unifies products, agent systems, subscriptions, and enterprise offers into one polished global sales hub.",
+    title: "AuraOmega — Autonomous Revenue Operating System",
+    description: "5 AI agents that qualify, nurture, close, and onboard your customers — while you sleep. Powered by The Grok Father 9.0.",
   });
-
-  const { data: products, isLoading: productsLoading } = useShopifyProducts(8);
-  const { data: stores } = useStores();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -81,136 +56,75 @@ export default function MainHub() {
       </div>
 
       <div className="relative z-10">
+        {/* Header */}
         <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
           <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-4 md:px-6">
             <Link to="/" className="min-w-0">
-              <AuraOmegaLogo subtitle="Global Enterprise Sales Hub" className="max-w-[15rem]" />
+              <AuraOmegaLogo className="max-w-[15rem]" />
             </Link>
-
             <div className="flex items-center gap-2 md:gap-3">
+              <Link to="/pricing">
+                <Button variant="ghost">Pricing</Button>
+              </Link>
               <Link to="/auth">
-                <Button variant="ghost">Admin login</Button>
+                <Button variant="outline">Get Started</Button>
               </Link>
-              <Link to="/command-center">
-                <Button variant="outline">Command center</Button>
-              </Link>
-              <ShopifyCartDrawer />
             </div>
           </div>
         </header>
 
         <main>
-          <section className="container mx-auto px-4 pb-16 pt-10 md:px-6 md:pb-24 md:pt-16">
-            <div className="grid items-end gap-8 lg:grid-cols-[1.15fr_0.85fr]">
-              <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-                <Badge className="border-primary/30 bg-primary/10 text-primary">Unified commerce + enterprise operating layer</Badge>
-                <div className="space-y-5">
-                  <AuraOmegaLogo
-                    variant="hero"
-                    subtitle="Global enterprise sales hub"
-                    className="max-w-full"
-                  />
-                  <div className="space-y-4">
-                    <h1 className="max-w-4xl text-5xl font-semibold tracking-tight md:text-7xl">
-                      The global sales system for every store, tool, and flagship offer you sell.
-                    </h1>
-                    <p className="max-w-2xl text-lg text-muted-foreground md:text-xl">
-                      Aura Omega turns this app into the main commercial surface: products, subscriptions, agent systems, enterprise services, and live store intelligence in one polished revenue engine.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-3">
-                  <Link to="/store">
-                    <Button size="lg" className="gap-2">
-                      Shop products <ShoppingBag className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                  <Link to="/pricing">
-                    <Button size="lg" variant="outline" className="gap-2">
-                      Explore offers <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
-
-                <div className="flex flex-wrap gap-2 pt-2">
-                  {offerPillars.map((pillar) => (
-                    <Badge key={pillar} variant="outline" className="border-border/80 bg-card/40 px-3 py-1 text-muted-foreground">
-                      {pillar}
-                    </Badge>
-                  ))}
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.08 }}
-                className="grid gap-4 sm:grid-cols-2"
-              >
-                <Card className="border-primary/20 bg-card/70 backdrop-blur-xl sm:col-span-2">
-                  <CardHeader>
-                    <CardDescription>Main revenue stack</CardDescription>
-                    <CardTitle className="text-3xl">Enterprise monetization ladder</CardTitle>
-                  </CardHeader>
-                  <CardContent className="grid gap-4 sm:grid-cols-3">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Entry offer</p>
-                      <p className="text-3xl font-semibold">${monetizationSummary.entryPrice}/mo</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Flagship suite</p>
-                      <p className="text-3xl font-semibold">${monetizationSummary.flagshipPrice}/mo</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Offer stack value</p>
-                      <p className="text-3xl font-semibold">${monetizationSummary.monthlyRevenue}/mo</p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-card/70">
-                  <CardHeader>
-                    <CardDescription>Connected stores</CardDescription>
-                    <CardTitle className="text-4xl">{stores?.length ?? 0}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-sm text-muted-foreground">
-                    Current backend store records surfaced as part of the master commerce layer.
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-card/70">
-                  <CardHeader>
-                    <CardDescription>Catalog visibility</CardDescription>
-                    <CardTitle className="text-4xl">{products?.length ?? 0}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-sm text-muted-foreground">
-                    Live storefront products feeding the main hub experience and checkout path.
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </div>
+          {/* Hero */}
+          <section className="container mx-auto px-4 pb-16 pt-12 md:px-6 md:pb-24 md:pt-20">
+            <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-4xl text-center space-y-6">
+              <Badge className="border-primary/30 bg-primary/10 text-primary">Autonomous Revenue Operating System</Badge>
+              <h1 className="text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl">
+                5 AI agents that qualify, nurture, close, and onboard your customers
+                <span className="text-primary"> — while you sleep.</span>
+              </h1>
+              <p className="mx-auto max-w-2xl text-lg text-muted-foreground md:text-xl">
+                AuraOmega deploys real AI agents powered by The Grok Father 9.0 to automate your entire sales pipeline. No fake claims. No fluff. Just revenue on autopilot.
+              </p>
+              <div className="flex flex-wrap justify-center gap-3 pt-2">
+                <Link to="/pricing">
+                  <Button size="lg" className="gap-2">
+                    See pricing <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link to="/contact">
+                  <Button size="lg" variant="outline">Talk to us</Button>
+                </Link>
+              </div>
+            </motion.div>
           </section>
 
-          <section className="container mx-auto px-4 py-8 md:px-6 md:py-12">
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {capabilityCards.map((item, index) => {
-                const Icon = item.icon;
+          {/* Agent Showcase */}
+          <section className="container mx-auto px-4 py-12 md:px-6 md:py-20">
+            <div className="mb-12 text-center space-y-3">
+              <Badge variant="outline" className="border-primary/25 text-primary">Your AI Sales Team</Badge>
+              <h2 className="text-3xl font-bold md:text-4xl">5 specialized agents. One mission: revenue.</h2>
+              <p className="mx-auto max-w-2xl text-muted-foreground">
+                Each agent handles a specific stage of your sales pipeline. They work together autonomously, logging every action for full transparency.
+              </p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+              {agents.map((agent, index) => {
+                const Icon = agent.icon;
                 return (
                   <motion.div
-                    key={item.title}
+                    key={agent.name}
                     initial={{ opacity: 0, y: 16 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.06 }}
                   >
-                    <Card className="h-full bg-card/60 backdrop-blur-xl">
+                    <Card className="h-full bg-card/60 backdrop-blur-xl border-border/60 hover:border-primary/30 transition-colors">
                       <CardHeader>
                         <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                           <Icon className="h-5 w-5" />
                         </div>
-                        <CardTitle>{item.title}</CardTitle>
-                        <CardDescription>{item.description}</CardDescription>
+                        <CardTitle className="text-lg">{agent.name}</CardTitle>
+                        <CardDescription className="text-sm">{agent.description}</CardDescription>
                       </CardHeader>
                     </Card>
                   </motion.div>
@@ -219,161 +133,110 @@ export default function MainHub() {
             </div>
           </section>
 
-          <section className="container mx-auto px-4 py-8 md:px-6 md:py-12">
-            <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <div className="space-y-2">
-                <Badge variant="outline" className="border-primary/25 text-primary">Live commerce surface</Badge>
-                <h2 className="text-3xl font-semibold md:text-4xl">Featured products from the main sales hub</h2>
-                <p className="max-w-2xl text-muted-foreground">
-                  Physical products stay side-by-side with software and enterprise offers so this app can operate as the single public storefront.
+          {/* Pricing Preview */}
+          <section className="container mx-auto px-4 py-12 md:px-6 md:py-20">
+            <div className="mb-12 text-center space-y-3">
+              <h2 className="text-3xl font-bold md:text-4xl">Simple, honest pricing</h2>
+              <p className="text-muted-foreground">No hidden fees. No NFT gimmicks. Cancel anytime.</p>
+            </div>
+            <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-3">
+              {tiers.map((tier) => (
+                <Card key={tier.name} className={`relative bg-card/60 backdrop-blur-xl ${tier.popular ? "border-primary shadow-lg shadow-primary/10" : "border-border/60"}`}>
+                  {tier.popular && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <Badge className="bg-primary text-primary-foreground">Most Popular</Badge>
+                    </div>
+                  )}
+                  <CardHeader className="text-center">
+                    <CardTitle>{tier.name}</CardTitle>
+                    <div className="pt-2">
+                      <span className="text-4xl font-bold">{tier.price}</span>
+                      <span className="text-muted-foreground">{tier.period}</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <ul className="space-y-2 text-sm">
+                      {tier.features.map((f) => (
+                        <li key={f} className="flex items-start gap-2">
+                          <Bot className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link to={tier.link} className="block">
+                      <Button className="w-full" variant={tier.popular ? "default" : "outline"}>
+                        {tier.cta}
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+
+          {/* CTA */}
+          <section className="container mx-auto px-4 py-12 md:px-6 md:py-20">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="mx-auto max-w-3xl text-center rounded-3xl bg-primary/10 border border-primary/20 p-10 md:p-14"
+            >
+              <h2 className="text-3xl font-bold mb-4">Ready to automate your revenue?</h2>
+              <p className="text-muted-foreground mb-8">
+                Start with 2 agents at $97/mo or unlock the full team at $297/mo. Enterprise needs? Let's talk.
+              </p>
+              <div className="flex flex-wrap justify-center gap-3">
+                <Link to="/pricing">
+                  <Button size="lg" className="gap-2">Get started now <ArrowRight className="h-4 w-4" /></Button>
+                </Link>
+                <Link to="/contact">
+                  <Button size="lg" variant="outline">Contact sales</Button>
+                </Link>
+              </div>
+            </motion.div>
+          </section>
+        </main>
+
+        {/* Footer */}
+        <footer className="border-t border-border/60 bg-card/30 backdrop-blur-xl">
+          <div className="container mx-auto px-4 py-10 md:px-6">
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="space-y-3">
+                <AuraOmegaLogo className="max-w-[10rem]" />
+                <p className="text-sm text-muted-foreground">
+                  Autonomous revenue operating system.
                 </p>
               </div>
-              <Link to="/store">
-                <Button variant="outline" className="gap-2">
-                  View full catalog <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-
-            {productsLoading ? (
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <Card key={index} className="h-[22rem] animate-pulse bg-card/60" />
-                ))}
+              <div className="space-y-3">
+                <h4 className="font-medium text-foreground">Product</h4>
+                <nav className="flex flex-col gap-2 text-sm text-muted-foreground">
+                  <Link to="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
+                  <Link to="/contact" className="hover:text-foreground transition-colors">Contact</Link>
+                </nav>
               </div>
-            ) : products?.length ? (
-              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-                {products.slice(0, 4).map((product) => (
-                  <ShopifyProductCard key={product.node.id} product={product} />
-                ))}
+              <div className="space-y-3">
+                <h4 className="font-medium text-foreground">Company</h4>
+                <nav className="flex flex-col gap-2 text-sm text-muted-foreground">
+                  <Link to="/about" className="hover:text-foreground transition-colors">About</Link>
+                  <Link to="/auth" className="hover:text-foreground transition-colors">Sign In</Link>
+                </nav>
               </div>
-            ) : (
-              <Card className="bg-card/60">
-                <CardContent className="flex flex-col items-center gap-3 py-16 text-center text-muted-foreground">
-                  <Package className="h-10 w-10 text-primary" />
-                  <p className="text-lg font-medium text-foreground">No synced products found yet</p>
-                  <p>Once products are available, this becomes the unified storefront for the full business stack.</p>
-                </CardContent>
-              </Card>
-            )}
-          </section>
-
-          <section className="container mx-auto px-4 py-8 md:px-6 md:py-12">
-            <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-              <Card className="border-primary/20 bg-card/70">
-                <CardHeader>
-                  <CardDescription>Flagship systems</CardDescription>
-                  <CardTitle className="text-3xl">Enterprise offers that sell the stack</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    {
-                      icon: Rocket,
-                      title: "200-Agent Autonomous Sales Network",
-                      value: "$1499/mo",
-                      description: "Forty 5-agent teams for research, content, marketing, closing, and analysis.",
-                    },
-                    {
-                      icon: LineChart,
-                      title: "Industry roadmap subscriptions",
-                      value: "$97–$9,997/mo",
-                      description: "Tiered strategic execution offers from foundation plans to partner-grade commitments.",
-                    },
-                    {
-                      icon: Layers3,
-                      title: "Revenue OS bundles",
-                      value: "Layered pricing",
-                      description: "Entry tools, bundles, suites, and optimization retainers for every buyer segment.",
-                    },
-                  ].map((offer) => {
-                    const Icon = offer.icon;
-                    return (
-                      <div key={offer.title} className="rounded-2xl border border-border/80 bg-muted/25 p-4">
-                        <div className="mb-2 flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                              <Icon className="h-4 w-4" />
-                            </div>
-                            <h3 className="font-medium">{offer.title}</h3>
-                          </div>
-                          <Badge>{offer.value}</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{offer.description}</p>
-                      </div>
-                    );
-                  })}
-                </CardContent>
-              </Card>
-
-              <Card className="overflow-hidden border-primary/20 bg-primary/10">
-                <CardContent className="p-8 md:p-10">
-                  <div className="max-w-3xl space-y-5">
-                    <Badge className="bg-primary text-primary-foreground">
-                      <Sparkles className="mr-2 h-3 w-3" /> Built to be the main one
-                    </Badge>
-                    <h2 className="text-4xl font-semibold tracking-tight md:text-5xl">
-                      One public hub. One enterprise story. One command layer behind it.
-                    </h2>
-                    <p className="text-lg text-muted-foreground">
-                      The public side sells. The protected side operates. This structure lets the app function as the master commercial surface while the command center continues running intelligence, dashboards, and execution.
-                    </p>
-                    <div className="flex flex-wrap gap-3">
-                      <Link to="/command-center">
-                        <Button className="gap-2">
-                          Open command center <ArrowRight className="h-4 w-4" />
-                        </Button>
-                      </Link>
-                      <Link to="/store">
-                        <Button variant="outline">Open storefront</Button>
-                      </Link>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </section>
-
-          {/* Footer */}
-          <footer className="border-t border-border/60 bg-card/30 backdrop-blur-xl">
-            <div className="container mx-auto px-4 py-10 md:px-6">
-              <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="space-y-3">
-                  <AuraOmegaLogo className="max-w-[10rem]" />
-                  <p className="text-sm text-muted-foreground">
-                    The unified commerce and enterprise operating layer.
-                  </p>
-                </div>
-                <div className="space-y-3">
-                  <h4 className="font-medium text-foreground">Products</h4>
-                  <nav className="flex flex-col gap-2 text-sm text-muted-foreground">
-                    <Link to="/store" className="hover:text-foreground transition-colors">Store</Link>
-                    <Link to="/apps" className="hover:text-foreground transition-colors">App Marketplace</Link>
-                    <Link to="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
-                  </nav>
-                </div>
-                <div className="space-y-3">
-                  <h4 className="font-medium text-foreground">Company</h4>
-                  <nav className="flex flex-col gap-2 text-sm text-muted-foreground">
-                    <Link to="/about" className="hover:text-foreground transition-colors">About</Link>
-                    <Link to="/contact" className="hover:text-foreground transition-colors">Contact</Link>
-                  </nav>
-                </div>
-                <div className="space-y-3">
-                  <h4 className="font-medium text-foreground">Legal</h4>
-                  <nav className="flex flex-col gap-2 text-sm text-muted-foreground">
-                    <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
-                    <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
-                    <Link to="/refunds" className="hover:text-foreground transition-colors">Refund Policy</Link>
-                  </nav>
-                </div>
-              </div>
-              <div className="mt-8 border-t border-border/40 pt-6 text-center text-xs text-muted-foreground space-y-1">
-                <p>© 2024 Aura Lift Essentials. All rights reserved.</p>
-                <p className="text-muted-foreground/50">Powered by The Grok Father 9.0 aka GROK 9 | Made by Ryan Puddy ~ WEB 3 ARCHITECT</p>
+              <div className="space-y-3">
+                <h4 className="font-medium text-foreground">Legal</h4>
+                <nav className="flex flex-col gap-2 text-sm text-muted-foreground">
+                  <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+                  <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
+                  <Link to="/refunds" className="hover:text-foreground transition-colors">Refund Policy</Link>
+                </nav>
               </div>
             </div>
-          </footer>
-        </main>
+            <div className="mt-8 border-t border-border/40 pt-6 text-center text-xs text-muted-foreground space-y-1">
+              <p>© 2024 Aura Lift Essentials. All rights reserved.</p>
+              <p className="text-muted-foreground/50">Powered by The Grok Father 9.0 aka GROK 9 | Made by Ryan Puddy ~ WEB 3 ARCHITECT</p>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );

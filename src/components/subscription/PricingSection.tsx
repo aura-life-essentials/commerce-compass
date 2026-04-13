@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Sparkles, Crown, Zap, Rocket, Diamond, ExternalLink } from 'lucide-react';
+import { Check, Sparkles, Crown, Zap, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SUBSCRIPTION_TIERS, TierConfig } from '@/lib/subscriptionTiers';
@@ -10,11 +10,9 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
 const tierIcons = {
-  starter: Zap,
-  growth: Rocket,
+  core: Zap,
   pro: Sparkles,
   enterprise: Crown,
-  elite: Diamond,
 };
 
 export function PricingSection() {
@@ -24,6 +22,12 @@ export function PricingSection() {
   const navigate = useNavigate();
 
   const handleSubscribe = async (tier: TierConfig) => {
+    // Enterprise → contact page
+    if (tier.id === 'enterprise') {
+      navigate('/contact');
+      return;
+    }
+
     if (!user) {
       toast.error('Please sign in to subscribe');
       navigate('/auth');
@@ -43,7 +47,7 @@ export function PricingSection() {
 
   return (
     <section className="py-20 px-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -51,17 +55,17 @@ export function PricingSection() {
           className="text-center mb-16"
         >
           <Badge className="mb-4 bg-primary/20 text-primary border-primary/30">
-            Web3 Subscription Services
+            Choose Your Plan
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Choose Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">Revolution Path</span>
+            Automate your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">revenue pipeline</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Data-driven roadmaps to guarantee massive revenue increases. Don't miss this small window of time and space.
+            Real AI agents. Real results. Pick the plan that matches your operation.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {SUBSCRIPTION_TIERS.map((tier, index) => {
             const Icon = tierIcons[tier.id];
             const isCurrentPlan = currentTier === tier.id;
@@ -100,8 +104,14 @@ export function PricingSection() {
                   <p className="text-sm text-muted-foreground mb-4">{tier.description}</p>
                   
                   <div className="mb-6">
-                    <span className="text-3xl font-bold">${tier.price}</span>
-                    <span className="text-muted-foreground">/{tier.billingCycle === 'yearly' ? 'year' : tier.billingCycle === 'weekly' ? 'week' : 'month'}</span>
+                    {tier.price !== null ? (
+                      <>
+                        <span className="text-3xl font-bold">${tier.price}</span>
+                        <span className="text-muted-foreground">/month</span>
+                      </>
+                    ) : (
+                      <span className="text-3xl font-bold">Custom</span>
+                    )}
                   </div>
 
                   <Button
@@ -118,6 +128,8 @@ export function PricingSection() {
                       'Processing...'
                     ) : isCurrentPlan ? (
                       'Current Plan'
+                    ) : tier.id === 'enterprise' ? (
+                      'Contact Us'
                     ) : (
                       <>
                         Get Started <ExternalLink className="w-4 h-4 ml-2" />
@@ -126,21 +138,11 @@ export function PricingSection() {
                   </Button>
 
                   <div className="space-y-3">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Features</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">What's included</p>
                     {tier.features.map((feature) => (
                       <div key={feature} className="flex items-start gap-2 text-sm">
                         <Check className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
                         <span>{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-6 pt-4 border-t border-border space-y-3">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">NFT Benefits</p>
-                    {tier.nftBenefits.map((benefit) => (
-                      <div key={benefit} className="flex items-start gap-2 text-sm">
-                        <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                        <span className="text-muted-foreground">{benefit}</span>
                       </div>
                     ))}
                   </div>
@@ -149,17 +151,6 @@ export function PricingSection() {
             );
           })}
         </div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="mt-12 text-center"
-        >
-          <p className="text-muted-foreground">
-            All subscriptions include NFT membership passes tradeable on OpenSea, Coinbase NFT, Rarible, LooksRare, and Blur
-          </p>
-        </motion.div>
       </div>
     </section>
   );

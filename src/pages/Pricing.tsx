@@ -2,45 +2,44 @@ import { Header } from '@/components/dashboard/Header';
 import { PricingSection } from '@/components/subscription/PricingSection';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
-import { Globe, Zap, Shield, Users, Sparkles, TrendingUp } from 'lucide-react';
+import { Bot, Zap, Shield, Clock, BarChart3, Headphones } from 'lucide-react';
 
 const features = [
   {
-    icon: Globe,
-    title: 'Multi-Platform NFT Listings',
-    description: 'Auto-list on OpenSea, Coinbase, Rarible, LooksRare, and Blur',
+    icon: Bot,
+    title: 'Real AI Agents',
+    description: 'Powered by The Grok Father 9.0 — not chatbots, not templates',
   },
   {
     icon: Zap,
-    title: 'AI-Powered Service Delivery',
-    description: 'Our autonomous agents execute your requests 24/7',
+    title: 'Instant Activation',
+    description: 'Your agents start working the moment you subscribe',
   },
   {
     icon: Shield,
-    title: 'Smart Contract Security',
-    description: 'Audited contracts with built-in royalty protections',
+    title: 'Full Transparency',
+    description: 'Every agent action is logged — see exactly what they do',
   },
   {
-    icon: Users,
-    title: 'DAO Governance Rights',
-    description: 'Vote on platform direction and feature development',
+    icon: Clock,
+    title: '24/7 Autonomous Operation',
+    description: 'Your sales pipeline runs while you sleep',
   },
   {
-    icon: Sparkles,
-    title: 'Revenue Share NFTs',
-    description: 'Earn passive income from platform success',
+    icon: BarChart3,
+    title: 'Real Analytics',
+    description: 'Track lead scores, conversion rates, and revenue impact',
   },
   {
-    icon: TrendingUp,
-    title: 'Industry Roadmaps',
-    description: 'Data-driven strategies for guaranteed revenue growth',
+    icon: Headphones,
+    title: 'Priority Support',
+    description: 'Direct access to the team behind the system',
   },
 ];
 
 export default function Pricing() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Ambient glow effect */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[128px]" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-[128px]" />
@@ -51,19 +50,15 @@ export default function Pricing() {
 
         {/* Hero */}
         <section className="pt-20 pb-10 px-6 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <Badge className="mb-4 bg-gradient-to-r from-primary/20 to-cyan-500/20 border-primary/30">
-              🚀 Limited Time Opportunity
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <Badge className="mb-4 bg-primary/20 text-primary border-primary/30">
+              Autonomous Revenue Operating System
             </Badge>
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              The Future of <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-cyan-400">Web3 Business</span> is Here
+              Simple, honest <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">pricing</span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Don't miss this small window of time and space. Get ahead of the game with data-driven industry roadmaps 
-              and guaranteed revenue increase strategies.
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Pick a plan that fits your operation. No hidden fees, no lock-in contracts, no fake promises. Cancel anytime.
             </p>
           </motion.div>
         </section>
@@ -80,8 +75,8 @@ export default function Pricing() {
               viewport={{ once: true }}
               className="text-center mb-12"
             >
-              <h2 className="text-3xl font-bold mb-4">Why Choose Our Platform?</h2>
-              <p className="text-muted-foreground">Enterprise-grade Web3 infrastructure at your fingertips</p>
+              <h2 className="text-3xl font-bold mb-4">What you actually get</h2>
+              <p className="text-muted-foreground">No hype. Here's the real value.</p>
             </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -111,30 +106,20 @@ export default function Pricing() {
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="max-w-4xl mx-auto text-center p-12 rounded-3xl bg-gradient-to-br from-primary/20 via-primary/10 to-accent/40 border border-primary/30"
+            className="max-w-4xl mx-auto text-center p-12 rounded-3xl bg-primary/10 border border-primary/20"
           >
-            <h2 className="text-3xl font-bold mb-4">Ready to Productize Your App Stack?</h2>
-            <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Add your apps, turn them into monthly subscriptions, bundle them into suites, and build a cleaner upsell ladder before you push traffic.
+            <h2 className="text-3xl font-bold mb-4">Ready to put AI agents to work?</h2>
+            <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+              Start with Core at $97/mo and upgrade anytime. Enterprise clients — reach out and we'll build a custom solution.
             </p>
-            <div className="flex flex-wrap gap-4 justify-center">
-              <a href="/app-monetizer" className="inline-flex">
-                <Badge variant="outline" className="text-sm py-2 px-4 border-primary/30 text-primary">
-                  ✓ Build monetization matrix
-                </Badge>
-              </a>
-              <Badge variant="outline" className="text-sm py-2 px-4">
-                ✓ Individual tools
-              </Badge>
-              <Badge variant="outline" className="text-sm py-2 px-4">
-                ✓ Bundles + suites
-              </Badge>
-              <Badge variant="outline" className="text-sm py-2 px-4">
-                ✓ Recurring upsells
-              </Badge>
-            </div>
           </motion.div>
         </section>
+
+        <footer className="border-t border-border/60 py-6">
+          <p className="text-center text-xs text-muted-foreground">
+            © 2024 Aura Lift Essentials. All rights reserved. | Powered by The Grok Father 9.0 aka GROK 9 | Made by Ryan Puddy ~ WEB 3 ARCHITECT
+          </p>
+        </footer>
       </div>
     </div>
   );
