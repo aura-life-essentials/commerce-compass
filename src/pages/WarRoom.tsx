@@ -110,6 +110,10 @@ const WarRoom = () => {
           </motion.div>
 
           <div className="mb-8">
+            <RevenueLoopEngine />
+          </div>
+
+          <div className="mb-8">
             <VoiceControlPanel />
           </div>
 
