@@ -67,7 +67,7 @@ export function CRMDashboard() {
     },
   });
   const deals: any[] = [];
-  const wholesaleStats = { totalDeals: 0, totalRevenue: 0, avgDealSize: 0 };
+  const wholesaleStats = { totalDeals: 0, totalRevenue: 0, avgDealSize: 0, totalContacts: contacts?.length || 0, pipelineValue: 0, closedWonValue: 0 };
   const updateOrder = useUpdateOrderStatus();
 
   const filteredOrders = orders?.filter(
