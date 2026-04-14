@@ -17,11 +17,8 @@ import {
   useOrderStats,
   useUpdateOrderStatus,
 } from "@/hooks/useOrders";
-import {
-  useBusinessContacts,
-  useWholesaleDeals,
-  useWholesaleStats,
-} from "@/hooks/useWholesale";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Users,
   DollarSign,

@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useShopifyProducts } from "@/hooks/useShopifyProducts";
+
 import heroImage from "@/assets/hero-command-center.jpg";
 
 interface HeroBannerProps {

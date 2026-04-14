@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useShopifyProducts } from "@/hooks/useShopifyProducts";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import profitReaperAvatar from "@/assets/profit-reaper-avatar.jpg";
 

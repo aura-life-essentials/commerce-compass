@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useSEOHead } from "@/hooks/useSEOHead";
-import { leadStatusOptions, type LeadStatus } from "@/lib/leadIntake";
+
 
 type LeadContact = {
   id: string;

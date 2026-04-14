@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DollarSign, ShoppingBag, Bot, Zap, Brain, Package, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useShopifyProducts } from "@/hooks/useShopifyProducts";
+
 
 interface RealStats {
   totalAgents: number;

@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { AuraOmegaLogo } from '@/components/branding/AuraOmegaLogo';
-import { leadContactSchema } from '@/lib/leadIntake';
+
 import {
   Mail, MessageSquare, Clock, MapPin, ArrowLeft, Send,
   Phone, HelpCircle, ShoppingBag, Truck, RotateCcw, ShieldCheck

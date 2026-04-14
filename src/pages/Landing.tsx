@@ -6,8 +6,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Header } from '@/components/dashboard/Header';
 import { PricingSection } from '@/components/subscription/PricingSection';
-import { Web3RoadmapHero } from '@/components/subscription/Web3RoadmapHero';
-import { useDAO } from '@/hooks/useDAO';
 import { 
   Globe, 
   Sparkles, 
