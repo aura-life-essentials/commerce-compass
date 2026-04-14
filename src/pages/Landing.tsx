@@ -121,9 +121,9 @@ export default function Landing() {
                   size="lg" 
                   variant="outline" 
                   className="text-lg px-8"
-                  onClick={() => navigate('/store')}
+                  onClick={() => navigate('/my-apps')}
                 >
-                  <Play className="w-5 h-5 mr-2" /> Browse Store
+                  <Play className="w-5 h-5 mr-2" /> My Apps
                 </Button>
               </div>
 
@@ -333,8 +333,7 @@ export default function Landing() {
               </div>
               <div className="flex flex-wrap gap-6 text-sm text-muted-foreground">
                 <Link to="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
-                <Link to="/store" className="hover:text-foreground transition-colors">Store</Link>
-                <Link to="/metaverse" className="hover:text-foreground transition-colors">Metaverse</Link>
+                <Link to="/my-apps" className="hover:text-foreground transition-colors">My Apps</Link>
                 {user && (
                   <Link to="/" className="hover:text-foreground transition-colors">Dashboard</Link>
                 )}
@@ -346,7 +345,7 @@ export default function Landing() {
                 <a href="#" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">📘 Facebook</a>
               </div>
               <p className="text-sm text-muted-foreground">
-                © {new Date().getFullYear()} TrendVault. All rights reserved.
+                © {new Date().getFullYear()} AuraOmega. All rights reserved.
               </p>
             </div>
           </div>
