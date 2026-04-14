@@ -9,6 +9,7 @@ import { MetricCard } from "@/components/dashboard/MetricCard";
 import { VoiceControlPanel } from "@/components/dashboard/VoiceControlPanel";
 import { RevenueControlPlane } from "@/components/dashboard/RevenueControlPlane";
 import { ShopifyCommandCenter } from "@/components/dashboard/ShopifyCommandCenter";
+import { RevenueLoopEngine } from "@/components/dashboard/RevenueLoopEngine";
 import { useAgentLogs } from "@/hooks/useAgentLogs";
 import { useSalesControlPlane } from "@/hooks/useSalesControlPlane";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -107,6 +108,10 @@ const WarRoom = () => {
               </div>
             </div>
           </motion.div>
+
+          <div className="mb-8">
+            <RevenueLoopEngine />
+          </div>
 
           <div className="mb-8">
             <VoiceControlPanel />
