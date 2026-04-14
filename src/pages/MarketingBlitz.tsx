@@ -131,7 +131,7 @@ const MarketingBlitz = () => {
             <Button
               size="lg"
               onClick={handleBlitzAll}
-              disabled={isGenerating || productsLoading}
+              disabled={isGenerating}
               className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold gap-2"
             >
               {isGenerating ? (

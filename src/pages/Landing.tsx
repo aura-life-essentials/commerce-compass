@@ -182,7 +182,7 @@ export default function Landing() {
                   <div className="flex justify-between text-sm text-muted-foreground mb-4">
                     <div className="flex items-center gap-1">
                       <Users className="w-4 h-4" />
-                      <span>{casinoProject?.total_backers || 0} investors</span>
+                      <span>0 investors</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Coins className="w-4 h-4" />

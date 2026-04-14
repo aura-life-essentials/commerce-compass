@@ -40,11 +40,11 @@ export default function Contact() {
     }
 
     const { error } = await supabase.from('lead_contacts').insert({
-      full_name: validation.data.fullName,
-      email: validation.data.email,
-      company_name: validation.data.companyName || null,
-      message: validation.data.message,
-      source: validation.data.source,
+      full_name: name,
+      email,
+      company_name: subject || null,
+      message: message || null,
+      source: 'contact_page',
       metadata: {
         intake_surface: 'contact_page',
       },
