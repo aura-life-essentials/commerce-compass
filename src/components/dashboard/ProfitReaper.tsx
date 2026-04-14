@@ -39,7 +39,7 @@ export const ProfitReaper = () => {
     refetchInterval: 30000,
   });
 
-  const { data: shopifyProducts } = useShopifyProducts(50);
+  const shopifyProducts: any[] = [];
 
   const realRevenue = (orderStats?.totalRevenue || 0) + (stripeStats?.totalRevenue || 0);
   const realProfit = realRevenue * 0.67;

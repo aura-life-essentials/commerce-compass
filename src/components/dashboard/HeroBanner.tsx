@@ -20,7 +20,7 @@ interface HeroBannerProps {
 }
 
 export const HeroBanner = ({ onSeedData, hasData }: HeroBannerProps) => {
-  const { data: shopifyProducts } = useShopifyProducts(50);
+  const shopifyProducts: any[] = [];
   
   const { data: systemStatus } = useQuery({
     queryKey: ["hero-system-status"],

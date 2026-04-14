@@ -59,9 +59,15 @@ export function CRMDashboard() {
 
   const { data: orders, isLoading: ordersLoading } = useAllOrders();
   const { data: orderStats } = useOrderStats();
-  const { data: contacts } = useBusinessContacts();
-  const { data: deals } = useWholesaleDeals();
-  const { data: wholesaleStats } = useWholesaleStats();
+  const { data: contacts } = useQuery({
+    queryKey: ['crm-business-contacts'],
+    queryFn: async () => {
+      const { data } = await supabase.from('business_contacts').select('*').order('created_at', { ascending: false });
+      return data || [];
+    },
+  });
+  const deals: any[] = [];
+  const wholesaleStats = { totalDeals: 0, totalRevenue: 0, avgDealSize: 0 };
   const updateOrder = useUpdateOrderStatus();
 
   const filteredOrders = orders?.filter(

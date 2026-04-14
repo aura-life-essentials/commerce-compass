@@ -44,7 +44,7 @@ export const RealMetrics = () => {
     refetchInterval: 30000,
   });
 
-  const { data: shopifyProducts } = useShopifyProducts(50);
+  const shopifyProducts: any[] = [];
 
   const metrics = [
     {
