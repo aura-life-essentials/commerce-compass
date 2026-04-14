@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useShopifyProducts } from "@/hooks/useShopifyProducts";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import profitReaperAvatar from "@/assets/profit-reaper-avatar.jpg";
 
@@ -39,7 +39,7 @@ export const ProfitReaper = () => {
     refetchInterval: 30000,
   });
 
-  const { data: shopifyProducts } = useShopifyProducts(50);
+  const shopifyProducts: any[] = [];
 
   const realRevenue = (orderStats?.totalRevenue || 0) + (stripeStats?.totalRevenue || 0);
   const realProfit = realRevenue * 0.67;

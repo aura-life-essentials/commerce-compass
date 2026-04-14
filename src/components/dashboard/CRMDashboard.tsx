@@ -17,11 +17,8 @@ import {
   useOrderStats,
   useUpdateOrderStatus,
 } from "@/hooks/useOrders";
-import {
-  useBusinessContacts,
-  useWholesaleDeals,
-  useWholesaleStats,
-} from "@/hooks/useWholesale";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Users,
   DollarSign,
@@ -62,9 +59,15 @@ export function CRMDashboard() {
 
   const { data: orders, isLoading: ordersLoading } = useAllOrders();
   const { data: orderStats } = useOrderStats();
-  const { data: contacts } = useBusinessContacts();
-  const { data: deals } = useWholesaleDeals();
-  const { data: wholesaleStats } = useWholesaleStats();
+  const { data: contacts } = useQuery({
+    queryKey: ['crm-business-contacts'],
+    queryFn: async () => {
+      const { data } = await supabase.from('business_contacts').select('*').order('created_at', { ascending: false });
+      return data || [];
+    },
+  });
+  const deals: any[] = [];
+  const wholesaleStats = { totalDeals: 0, totalRevenue: 0, avgDealSize: 0, totalContacts: contacts?.length || 0, pipelineValue: 0, closedWonValue: 0 };
   const updateOrder = useUpdateOrderStatus();
 
   const filteredOrders = orders?.filter(

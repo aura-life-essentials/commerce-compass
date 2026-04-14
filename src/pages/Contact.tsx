@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { AuraOmegaLogo } from '@/components/branding/AuraOmegaLogo';
-import { leadContactSchema } from '@/lib/leadIntake';
+
 import {
   Mail, MessageSquare, Clock, MapPin, ArrowLeft, Send,
   Phone, HelpCircle, ShoppingBag, Truck, RotateCcw, ShieldCheck
@@ -33,26 +33,18 @@ export default function Contact() {
     e.preventDefault();
     setSending(true);
 
-    const validation = leadContactSchema.safeParse({
-      fullName: name,
-      email,
-      companyName: subject,
-      message,
-      source: 'contact_page',
-    });
-
-    if (!validation.success) {
-      toast.error(validation.error.errors[0]?.message ?? 'Please check your details and try again.');
+    if (!name.trim() || !email.trim()) {
+      toast.error('Please provide your name and email.');
       setSending(false);
       return;
     }
 
     const { error } = await supabase.from('lead_contacts').insert({
-      full_name: validation.data.fullName,
-      email: validation.data.email,
-      company_name: validation.data.companyName || null,
-      message: validation.data.message,
-      source: validation.data.source,
+      full_name: name,
+      email,
+      company_name: subject || null,
+      message: message || null,
+      source: 'contact_page',
       metadata: {
         intake_surface: 'contact_page',
       },

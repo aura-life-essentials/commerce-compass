@@ -6,8 +6,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Header } from '@/components/dashboard/Header';
 import { PricingSection } from '@/components/subscription/PricingSection';
-import { Web3RoadmapHero } from '@/components/subscription/Web3RoadmapHero';
-import { useDAO } from '@/hooks/useDAO';
 import { 
   Globe, 
   Sparkles, 
@@ -72,13 +70,9 @@ const services = [
 export default function Landing() {
   const { user } = useAuthContext();
   const navigate = useNavigate();
-  const { projects } = useDAO();
-  
-  // Get casino project data
-  const casinoProject = projects.find(p => p.project_name.includes('Ultra Casino'));
-  const currentFunding = casinoProject?.current_funding_eth || 0;
-  const currentFundingUSD = currentFunding * ETH_USD_RATE;
-  const progressPercent = (currentFunding / FUNDING_GOAL_ETH) * 100;
+  const currentFunding = 0;
+  const currentFundingUSD = 0;
+  const progressPercent = 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -188,7 +182,7 @@ export default function Landing() {
                   <div className="flex justify-between text-sm text-muted-foreground mb-4">
                     <div className="flex items-center gap-1">
                       <Users className="w-4 h-4" />
-                      <span>{casinoProject?.total_backers || 0} investors</span>
+                      <span>0 investors</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Coins className="w-4 h-4" />
@@ -295,9 +289,6 @@ export default function Landing() {
             </div>
           </div>
         </section>
-
-        {/* Web3 Industry Roadmap Tiers */}
-        <Web3RoadmapHero />
 
         {/* Pricing Section */}
         <PricingSection />

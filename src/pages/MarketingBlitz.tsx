@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useShopifyProducts } from "@/hooks/useShopifyProducts";
+
 import { useOrganicCampaigns, useCampaignStats } from "@/hooks/useOrganicCampaigns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -34,7 +34,7 @@ const platformColors: Record<string, string> = {
 
 const MarketingBlitz = () => {
   const navigate = useNavigate();
-  const { data: shopifyProducts, isLoading: productsLoading } = useShopifyProducts();
+  const shopifyProducts: any[] = [];
   const { data: campaigns, isLoading: campaignsLoading, refetch: refetchCampaigns } = useOrganicCampaigns();
   const { data: stats } = useCampaignStats();
   const [isGenerating, setIsGenerating] = useState(false);
@@ -131,7 +131,7 @@ const MarketingBlitz = () => {
             <Button
               size="lg"
               onClick={handleBlitzAll}
-              disabled={isGenerating || productsLoading}
+              disabled={isGenerating}
               className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold gap-2"
             >
               {isGenerating ? (
