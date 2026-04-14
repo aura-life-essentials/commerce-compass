@@ -34,7 +34,7 @@ const platformColors: Record<string, string> = {
 
 const MarketingBlitz = () => {
   const navigate = useNavigate();
-  const { data: shopifyProducts, isLoading: productsLoading } = useShopifyProducts();
+  const shopifyProducts: any[] = [];
   const { data: campaigns, isLoading: campaignsLoading, refetch: refetchCampaigns } = useOrganicCampaigns();
   const { data: stats } = useCampaignStats();
   const [isGenerating, setIsGenerating] = useState(false);

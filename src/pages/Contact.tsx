@@ -33,16 +33,8 @@ export default function Contact() {
     e.preventDefault();
     setSending(true);
 
-    const validation = leadContactSchema.safeParse({
-      fullName: name,
-      email,
-      companyName: subject,
-      message,
-      source: 'contact_page',
-    });
-
-    if (!validation.success) {
-      toast.error(validation.error.errors[0]?.message ?? 'Please check your details and try again.');
+    if (!name.trim() || !email.trim()) {
+      toast.error('Please provide your name and email.');
       setSending(false);
       return;
     }

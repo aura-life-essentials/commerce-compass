@@ -13,6 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { useSEOHead } from "@/hooks/useSEOHead";
 
+type LeadStatus = 'new' | 'qualified' | 'contacted' | 'won' | 'archived';
+const leadStatusOptions: LeadStatus[] = ['new', 'qualified', 'contacted', 'won', 'archived'];
 
 type LeadContact = {
   id: string;
