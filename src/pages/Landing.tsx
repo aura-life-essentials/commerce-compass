@@ -46,7 +46,7 @@ const services = [
   {
     icon: TrendingUp,
     title: 'Profit Reaper',
-    description: 'Autonomous revenue optimization that finds and captures every dollar you're leaving on the table.',
+    description: "Autonomous revenue optimization that finds and captures every dollar you're leaving on the table.",
   },
   {
     icon: Shield,
