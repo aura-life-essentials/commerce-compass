@@ -78,8 +78,8 @@ const RefundPolicy = () => {
               <ol className="list-decimal list-inside space-y-3 ml-4">
                 <li>
                   <strong className="text-white">Contact Us:</strong> Email us at{" "}
-                  <a href="mailto:returns@trendvault.store" className="text-primary hover:underline">
-                    returns@trendvault.store
+                  <a href="mailto:returns@auraomega.app" className="text-primary hover:underline">
+                    returns@auraomega.app
                   </a>{" "}
                   with your order number and reason for return
                 </li>
@@ -154,8 +154,8 @@ const RefundPolicy = () => {
               </p>
               <p className="mt-4">
                 Email:{" "}
-                <a href="mailto:returns@trendvault.store" className="text-primary hover:underline">
-                  returns@trendvault.store
+                <a href="mailto:returns@auraomega.app" className="text-primary hover:underline">
+                  returns@auraomega.app
                 </a>
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
