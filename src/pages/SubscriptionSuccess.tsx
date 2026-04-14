@@ -215,9 +215,6 @@ export default function SubscriptionSuccess() {
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </Button>
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Link>
-              </Button>
               
               <Button asChild variant="outline" className="w-full">
                 <Link to="/subscription">
