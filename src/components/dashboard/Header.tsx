@@ -1,4 +1,4 @@
-import { Bell, Settings, Command, LogOut, Shield, Crown, CreditCard, Sparkles, Bot, Layers3, Users } from "lucide-react";
+import { Bell, Settings, Command, LogOut, Shield, Crown, CreditCard, Bot, Layers3, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
@@ -81,12 +81,6 @@ export const Header = () => {
               <Button variant="ghost" size="sm" className="text-primary hover:text-foreground hover:bg-primary/10">
                 <Bot className="w-4 h-4 mr-2" />
                 Bot Swarm
-              </Button>
-            </Link>
-            <Link to="/casino">
-              <Button variant="ghost" size="sm" className="text-primary hover:text-foreground hover:bg-primary/10">
-                <Sparkles className="w-4 h-4 mr-2" />
-                Casino Launch
               </Button>
             </Link>
             <Link to="/pricing">
