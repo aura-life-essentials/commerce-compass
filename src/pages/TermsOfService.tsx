@@ -26,7 +26,7 @@ const TermsOfService = () => {
             <h2 className="text-xl font-semibold text-white mb-4">1. Agreement to Terms</h2>
             <div className="text-muted-foreground space-y-4">
               <p>
-                By accessing or using TrendVault ("the Service"), you agree to be bound by these Terms
+                By accessing or using AuraOmega ("the Service"), you agree to be bound by these Terms
                 of Service. If you disagree with any part of these terms, you may not access the Service.
               </p>
             </div>
@@ -95,7 +95,7 @@ const TermsOfService = () => {
             <h2 className="text-xl font-semibold text-white mb-4">6. Intellectual Property</h2>
             <div className="text-muted-foreground space-y-4">
               <p>
-                The Service and its original content, features, and functionality are owned by TrendVault
+                The Service and its original content, features, and functionality are owned by AuraOmega
                 and are protected by international copyright, trademark, patent, trade secret, and other
                 intellectual property laws.
               </p>
@@ -109,7 +109,7 @@ const TermsOfService = () => {
             </div>
             <div className="text-muted-foreground space-y-4">
               <p>
-                To the maximum extent permitted by law, TrendVault shall not be liable for any indirect,
+                To the maximum extent permitted by law, AuraOmega shall not be liable for any indirect,
                 incidental, special, consequential, or punitive damages, including without limitation,
                 loss of profits, data, use, goodwill, or other intangible losses.
               </p>
@@ -143,8 +143,8 @@ const TermsOfService = () => {
                 If you have questions about these Terms, please contact us at:
               </p>
               <p className="mt-4">
-                <a href="mailto:legal@trendvault.store" className="text-primary hover:underline">
-                  legal@trendvault.store
+                <a href="mailto:legal@auraomega.app" className="text-primary hover:underline">
+                  legal@auraomega.app
                 </a>
               </p>
             </div>

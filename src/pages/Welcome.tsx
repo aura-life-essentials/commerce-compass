@@ -15,7 +15,7 @@ export default function Welcome() {
       <div className="absolute inset-0">
         <img
           src={welcomeHero}
-          alt="TrendVault Premium Collection"
+          alt="AuraOmega Premium Collection"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/30" />

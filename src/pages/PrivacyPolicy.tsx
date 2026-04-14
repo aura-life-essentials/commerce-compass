@@ -96,8 +96,8 @@ const PrivacyPolicy = () => {
               </ul>
               <p className="mt-4">
                 To exercise these rights, please contact us at{" "}
-                <a href="mailto:privacy@trendvault.store" className="text-primary hover:underline">
-                  privacy@trendvault.store
+                <a href="mailto:privacy@auraomega.app" className="text-primary hover:underline">
+                  privacy@auraomega.app
                 </a>
               </p>
             </div>
@@ -134,8 +134,8 @@ const PrivacyPolicy = () => {
                 If you have questions about this Privacy Policy, please contact us at:
               </p>
               <p className="mt-4">
-                <a href="mailto:privacy@trendvault.store" className="text-primary hover:underline">
-                  privacy@trendvault.store
+                <a href="mailto:privacy@auraomega.app" className="text-primary hover:underline">
+                  privacy@auraomega.app
                 </a>
               </p>
             </div>

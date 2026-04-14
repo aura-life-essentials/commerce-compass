@@ -1,4 +1,4 @@
-import { Bell, Settings, Command, LogOut, Shield, Crown, CreditCard, Globe, Sparkles, Bot, Layers3, Users } from "lucide-react";
+import { Bell, Settings, Command, LogOut, Shield, Crown, CreditCard, Sparkles, Bot, Layers3, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
@@ -95,16 +95,10 @@ export const Header = () => {
                 Pricing
               </Button>
             </Link>
-            <Link to="/app-monetizer">
+            <Link to="/my-apps">
               <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                 <Layers3 className="w-4 h-4 mr-2" />
-                Monetizer
-              </Button>
-            </Link>
-            <Link to="/metaverse">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                <Globe className="w-4 h-4 mr-2" />
-                Metaverse
+                My Apps
               </Button>
             </Link>
             <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
