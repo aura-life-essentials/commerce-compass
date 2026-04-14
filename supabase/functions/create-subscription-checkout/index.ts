@@ -62,7 +62,7 @@ serve(async (req) => {
       ],
       mode: "subscription",
       subscription_data: {
-        trial_period_days: 5,
+        trial_period_days: 3,
         metadata: {
           user_id: user.id,
           tier_id: tierId,
@@ -81,7 +81,7 @@ serve(async (req) => {
       },
       custom_text: {
         submit: {
-          message: 'Start your 5-day free trial. Your card will be charged after the trial ends.',
+          message: 'Start your 3-day free trial. Your card will be charged after the trial ends.',
         },
         terms_of_service_acceptance: {
           message: 'I agree to the [Terms of Service](https://profitreaper.com/terms)',

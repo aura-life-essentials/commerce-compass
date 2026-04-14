@@ -27,6 +27,7 @@ import SystemHealth from "./pages/SystemHealth";
 import MainHub from "./pages/MainHub";
 import LeadVault from "./pages/LeadVault";
 import NotFound from "./pages/NotFound";
+import MyApps from "./pages/MyApps";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +68,9 @@ const AppContent = () => {
       
       {/* Subscription Management */}
       <Route path="/subscription" element={<SubscriptionManagement />} />
+      
+      {/* My Apps - subscriber dashboard */}
+      <Route path="/my-apps" element={<MyApps />} />
       
       {/* Viral Engine */}
       <Route path="/viral-engine" element={

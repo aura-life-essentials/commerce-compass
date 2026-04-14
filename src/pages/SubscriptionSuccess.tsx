@@ -121,7 +121,7 @@ export default function SubscriptionSuccess() {
               className="text-muted-foreground"
             >
               {isTrial 
-                ? 'Your 5-day free trial has begun'
+                ? 'Your 3-day free trial has begun'
                 : 'Your subscription is now active'
               }
             </motion.p>
@@ -166,7 +166,7 @@ export default function SubscriptionSuccess() {
                 <div className="flex items-start gap-3">
                   <Clock className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-medium text-primary">5-Day Free Trial</h4>
+                    <h4 className="font-medium text-primary">3-Day Free Trial</h4>
                     <p className="text-sm text-muted-foreground mt-1">
                       Your card will be charged after the trial ends. Cancel anytime before then to avoid charges.
                     </p>
@@ -210,8 +210,8 @@ export default function SubscriptionSuccess() {
               className="flex flex-col gap-3"
             >
               <Button asChild className="w-full bg-gradient-to-r from-primary to-cyan-500 hover:opacity-90">
-                <Link to="/">
-                  Go to Dashboard
+                <Link to="/my-apps">
+                  Launch My Apps
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </Button>
