@@ -28,6 +28,7 @@ import MainHub from "./pages/MainHub";
 import LeadVault from "./pages/LeadVault";
 import NotFound from "./pages/NotFound";
 import MyApps from "./pages/MyApps";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
