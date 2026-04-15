@@ -28,6 +28,7 @@ import MainHub from "./pages/MainHub";
 import LeadVault from "./pages/LeadVault";
 import NotFound from "./pages/NotFound";
 import MyApps from "./pages/MyApps";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -129,8 +130,9 @@ const AppContent = () => {
       <Route path="/terms" element={<TermsOfService />} />
       <Route path="/refunds" element={<RefundPolicy />} />
       
-      {/* Auth route */}
+      {/* Auth routes */}
       <Route path="/auth" element={<Auth />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       
       <Route path="*" element={<NotFound />} />
     </Routes>
