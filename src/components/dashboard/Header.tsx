@@ -1,4 +1,4 @@
-import { Bell, Settings, Command, LogOut, Shield, Crown, CreditCard, Bot, Layers3, Users } from "lucide-react";
+import { LogOut, Shield, Crown, CreditCard, Bot, Layers3, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
@@ -57,20 +57,20 @@ export const Header = () => {
     <header className="glass-subtle sticky top-0 z-50 border-b border-border/50">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
+          <Link to="/" className="flex items-center gap-3 min-w-0">
             <AuraOmegaLogo subtitle="Revenue Command Center" className="min-w-0" />
             <div className="status-active status-dot hidden sm:block" />
-          </div>
+          </Link>
 
           <div className="flex items-center gap-2">
-            {isSuperAdmin ? (
+            {isSuperAdmin && (
               <Link to="/command-center/leads">
                 <Button variant="ghost" size="sm" className="text-primary hover:text-foreground hover:bg-primary/10">
                   <Users className="w-4 h-4 mr-2" />
                   Lead Vault
                 </Button>
               </Link>
-            ) : null}
+            )}
             <Link to="/war-room">
               <Button variant="ghost" size="sm" className="text-primary hover:text-foreground hover:bg-primary/10">
                 <Shield className="w-4 h-4 mr-2" />
@@ -95,45 +95,51 @@ export const Header = () => {
                 My Apps
               </Button>
             </Link>
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-              <Command className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground relative">
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full" />
-            </Button>
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-              <Settings className="w-4 h-4" />
-            </Button>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                  <Avatar className="h-10 w-10 border-2 border-primary/20">
-                    <AvatarFallback className="bg-primary text-primary-foreground font-medium">
-                      {getInitials(user?.email)}
-                    </AvatarFallback>
-                  </Avatar>
-                  {isSuperAdmin && <Crown className="absolute -top-1 -right-1 w-4 h-4 text-primary" />}
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <Avatar className="h-10 w-10 border-2 border-primary/20">
+                      <AvatarFallback className="bg-primary text-primary-foreground font-medium">
+                        {getInitials(user?.email)}
+                      </AvatarFallback>
+                    </Avatar>
+                    {isSuperAdmin && <Crown className="absolute -top-1 -right-1 w-4 h-4 text-primary" />}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-64 bg-card border-border" align="end">
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium text-foreground truncate">{user?.email}</p>
+                      {getRoleBadge()}
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-border" />
+                  <DropdownMenuItem
+                    onClick={() => navigate('/subscription')}
+                    className="cursor-pointer"
+                  >
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    Manage Subscription
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-border" />
+                  <DropdownMenuItem
+                    onClick={handleSignOut}
+                    className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/auth">
+                <Button size="sm" className="bg-gradient-to-r from-[hsl(220,100%,60%)] to-primary hover:opacity-90">
+                  Sign In
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-64 bg-card border-border" align="end">
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium text-foreground truncate">{user?.email}</p>
-                    {getRoleBadge()}
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-border" />
-                <DropdownMenuItem
-                  onClick={handleSignOut}
-                  className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </Link>
+            )}
           </div>
         </div>
       </div>

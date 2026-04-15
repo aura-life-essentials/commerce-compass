@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Bot, Brain, Handshake, Mail, UserCheck, Workflow, Sparkles, Zap, Shield, Star } from "lucide-react";
+import { ArrowRight, Bot, Brain, Handshake, Mail, UserCheck, Workflow, Sparkles, Zap, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useSEOHead } from "@/hooks/useSEOHead";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AuraOmegaLogo } from "@/components/branding/AuraOmegaLogo";
+import { PricingSection } from "@/components/subscription/PricingSection";
 
 const agents = [
   {
@@ -35,12 +36,6 @@ const agents = [
   },
 ];
 
-const tiers = [
-  { name: "Core", price: "$97", period: "/mo", features: ["Lead Qualifier + Nurture Agent", "Basic analytics", "500 leads/mo"], cta: "Get Started", link: "/pricing" },
-  { name: "Pro", price: "$297", period: "/mo", features: ["All 5 AI Agents", "Full dashboard", "Unlimited leads"], cta: "Go Pro", link: "/pricing", popular: true },
-  { name: "Enterprise", price: "Custom", period: "", features: ["Dedicated setup", "Custom integrations", "Account manager"], cta: "Contact Us", link: "/contact" },
-];
-
 export default function MainHub() {
   useSEOHead({
     title: "AuraOmega — Autonomous Revenue Operating System",
@@ -68,6 +63,9 @@ export default function MainHub() {
               <Link to="/pricing">
                 <Button variant="ghost" className="text-muted-foreground hover:text-foreground">Pricing</Button>
               </Link>
+              <Link to="/my-apps">
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground">My Apps</Button>
+              </Link>
               <Link to="/auth">
                 <Button className="bg-gradient-to-r from-[hsl(220,100%,60%)] to-primary hover:opacity-90">Get Started</Button>
               </Link>
@@ -90,19 +88,19 @@ export default function MainHub() {
                 AuraOmega deploys real AI agents powered by The Grok Father 9.0 to automate your entire sales pipeline. No fake claims. No fluff. Just revenue on autopilot.
               </p>
 
-              {/* Trust signals */}
+              {/* Trust signals — only verifiable facts */}
               <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground pt-1">
                 <div className="flex items-center gap-1.5">
-                  <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                  <span>4.9/5 Rating</span>
-                </div>
-                <div className="flex items-center gap-1.5">
                   <Shield className="w-4 h-4 text-primary" />
-                  <span>Enterprise Security</span>
+                  <span>Bank-Grade Encryption</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Zap className="w-4 h-4 text-[hsl(200,100%,72%)]" />
                   <span>3-Day Free Trial</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Bot className="w-4 h-4 text-primary" />
+                  <span>24/7 Autonomous Agents</span>
                 </div>
               </div>
 
@@ -154,46 +152,8 @@ export default function MainHub() {
             </div>
           </section>
 
-          {/* Pricing Preview */}
-          <section className="container mx-auto px-4 py-12 md:px-6 md:py-20">
-            <div className="mb-12 text-center space-y-3">
-              <h2 className="text-3xl font-bold md:text-4xl">Simple, <span className="text-gradient-oro">honest pricing</span></h2>
-              <p className="text-muted-foreground">No hidden fees. Cancel anytime. 3-day free trial.</p>
-            </div>
-            <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-3">
-              {tiers.map((tier) => (
-                <Card key={tier.name} className={`relative oro-card ${tier.popular ? "border-primary/40 shadow-lg shadow-primary/10" : "border-border/40"}`}>
-                  {tier.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <Badge className="bg-gradient-to-r from-[hsl(220,100%,60%)] to-primary text-primary-foreground">Most Popular</Badge>
-                    </div>
-                  )}
-                  <CardHeader className="text-center">
-                    <CardTitle>{tier.name}</CardTitle>
-                    <div className="pt-2">
-                      <span className="text-4xl font-bold text-gradient-oro">{tier.price}</span>
-                      <span className="text-muted-foreground">{tier.period}</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <ul className="space-y-2 text-sm">
-                      {tier.features.map((f) => (
-                        <li key={f} className="flex items-start gap-2">
-                          <Bot className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                          <span>{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Link to={tier.link} className="block">
-                      <Button className={`w-full ${tier.popular ? "bg-gradient-to-r from-[hsl(220,100%,60%)] to-primary hover:opacity-90" : ""}`} variant={tier.popular ? "default" : "outline"}>
-                        {tier.cta}
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
+          {/* Pricing Section — real Stripe-connected component */}
+          <PricingSection />
 
           {/* CTA */}
           <section className="container mx-auto px-4 py-12 md:px-6 md:py-20">
@@ -208,7 +168,7 @@ export default function MainHub() {
               <div className="relative z-10">
                 <h2 className="text-3xl font-bold mb-4">Ready to automate your revenue?</h2>
                 <p className="text-muted-foreground mb-8">
-                  Start with 2 agents at $97/mo or unlock the full team at $297/mo. Enterprise needs? Let's talk.
+                  Start with 2 agents at $97/mo or unlock the full team at $297/mo. 3-day free trial. Cancel anytime.
                 </p>
                 <div className="flex flex-wrap justify-center gap-3">
                   <Link to="/pricing">
@@ -237,14 +197,15 @@ export default function MainHub() {
                 <h4 className="font-medium text-foreground">Product</h4>
                 <nav className="flex flex-col gap-2 text-sm text-muted-foreground">
                   <Link to="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
+                  <Link to="/my-apps" className="hover:text-foreground transition-colors">My Apps</Link>
                   <Link to="/contact" className="hover:text-foreground transition-colors">Contact</Link>
                 </nav>
               </div>
               <div className="space-y-3">
-                <h4 className="font-medium text-foreground">Company</h4>
+                <h4 className="font-medium text-foreground">Account</h4>
                 <nav className="flex flex-col gap-2 text-sm text-muted-foreground">
-                  <Link to="/about" className="hover:text-foreground transition-colors">About</Link>
                   <Link to="/auth" className="hover:text-foreground transition-colors">Sign In</Link>
+                  <Link to="/subscription" className="hover:text-foreground transition-colors">Manage Subscription</Link>
                 </nav>
               </div>
               <div className="space-y-3">
