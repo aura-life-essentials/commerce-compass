@@ -55,7 +55,7 @@ export function useAnalytics() {
           event_type,
           event_name,
           event_data,
-          page_url: window.location.href,
+          page_url: getSafeUrl(),
           referrer: document.referrer,
           session_id: getSessionId(),
         },
