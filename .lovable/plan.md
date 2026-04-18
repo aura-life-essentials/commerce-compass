@@ -1,113 +1,89 @@
 
 
-# Complete Honest Rebuild + Branding — AuraOmega
+## Audit Findings
 
-Branding is already applied (Grok Father 9.0, Ryan Puddy, Aura Lift Essentials). This plan covers everything else from the approved rebuild that hasn't been done yet.
+After reviewing the codebase, here's what I found needs attention for true production polish:
 
----
+### Critical Issues
+1. **`AuthContext.tsx` exists but isn't wired into `App.tsx`** — `useAuth` is being called in multiple components separately, causing duplicate Supabase auth listeners and unnecessary re-renders.
+2. **Mobile viewport (488px)** — Header navigation likely overflows on mobile. Need to verify and polish.
+3. **`supabase/functions/agent-orchestrator/index.ts`** has an unsafe `supabase` reference in the catch block (declared inside `try` scope risk — actually it's outside, but error logging swallows failures silently).
+4. **`/command-center` route** — User is currently viewing this; need to verify it loads cleanly with no console errors and renders the CEO dashboard properly.
+5. **Dead/legacy tables** still in DB: `dao_*`, `nft_*`, `metaverse_*`, `crypto_transactions` — these conflict with the "AuraOmega Revenue OS" focus and the Zero-Fake policy. They should be hidden from UI (not dropped — keeps history) and any UI references purged.
+6. **`bun.lock` was edited** — indicates dependency drift; verify nothing broke.
 
-## Phase 1: Create Stripe Products
+### Polish Opportunities
+- **Glow consistency** — Some components use raw Tailwind shadows instead of `.glow-oro` / `.oro-card` utility classes.
+- **Loading states** — Several hooks (`useRevenueMetrics`, `useStores`) likely show flashes of empty state before data loads. Add skeleton shimmers with Oro Omega tint.
+- **Header on mobile** — Convert nav to a slide-out sheet for screens < 768px.
+- **Page transitions** — Add subtle fade-in animations on route change for cinematic feel.
+- **Aurora background** — Apply the `.animate-aurora` class to the main `<body>` or root layout for ambient depth on every page.
 
-Create 2 new Stripe products with real prices:
-- **Core** — $97/month
-- **Pro** — $297/month
-- Enterprise is contact-only (no Stripe product needed)
+## Plan
 
-## Phase 2: Rewrite `subscriptionTiers.ts`
+### Step 1 — Wire AuthContext properly
+Wrap `<App>` in `<AuthProvider>` inside `src/App.tsx` and refactor `ProtectedRoute`, `Header`, `MainHub`, `Auth`, `MyApps`, `SubscriptionManagement` to use `useAuthContext()` instead of calling `useAuth()` directly. Eliminates duplicate listeners.
 
-Replace all 5 fake Web3 tiers with 3 honest tiers:
+### Step 2 — Audit & test the live preview
+- Read console logs and network requests for `/command-center`
+- Verify `check-subscription`, `ceo-brain`, and dashboard hooks return clean responses
+- Run security linter to catch any new RLS gaps
 
-| Tier | Price | Billing | Features |
-|------|-------|---------|----------|
-| Core | $97/mo | Monthly | Lead Qualifier Agent, Nurture Agent, basic analytics, email support |
-| Pro | $297/mo | Monthly | All 5 agents, advanced workflows, priority support, full dashboard |
-| Enterprise | Custom | Contact | Dedicated setup, custom integrations, white-glove onboarding |
+### Step 3 — Mobile-first Header polish
+Refactor `src/components/dashboard/Header.tsx`:
+- Desktop: keep current horizontal nav
+- Mobile (<768px): hamburger triggering a `Sheet` with the same links + auth actions
+- Sticky top with backdrop blur, Oro Omega border glow
 
-- Remove `nftBenefits` field entirely from the type
-- Remove all Web3/NFT/DAO copy
-- Enterprise tier has no `priceId` — routes to `/contact`
+### Step 4 — Cinematic ambient background
+Add a fixed-position aurora layer in `src/App.tsx` (behind all routes):
+```tsx
+<div className="fixed inset-0 -z-10 animate-aurora opacity-40 pointer-events-none" 
+     style={{background: 'var(--gradient-oro)'}} />
+```
 
-## Phase 3: Build 5 Agent Edge Functions
+### Step 5 — Loading states & skeletons
+Update `src/components/dashboard/CEODashboard.tsx`, `RevenueChart.tsx`, `RealMetrics.tsx`, `MyApps.tsx`:
+- Replace empty initial states with `<Skeleton>` shimmer using Oro Omega tinted `bg-primary/10`
+- Add `<LoadingSpinner>` glow variant
 
-Each calls xAI Grok API via existing `XAI_API_KEY`:
+### Step 6 — Page transitions
+Wrap `<Routes>` in a `framer-motion`-free CSS approach — add `.animate-fade-in` (already in `index.css`) to each page's root container.
 
-1. **`agent-lead-qualifier`** — Accepts lead data, returns qualification score + reasoning
-2. **`agent-nurture`** — Generates personalized follow-up message sequences
-3. **`agent-closer`** — Handles objection responses and checkout nudges
-4. **`agent-onboarding`** — Creates welcome/setup sequences post-purchase
-5. **`agent-orchestrator`** — Routes incoming tasks to the right agent
+### Step 7 — Hide legacy tables from UI
+Audit and remove any imports/references to `dao_*`, `nft_*`, `metaverse_*`, `crypto_transactions` from frontend components and replace with focused AuraOmega revenue features. (Tables stay in DB to preserve history.)
 
-All log to `agent_logs` table. All use CORS headers. All validate input.
+### Step 8 — Header glow & polish details
+- Add `.glow-oro` to active nav items
+- Replace generic shadows with `.oro-card` on dashboard cards
+- Ensure all CTAs use the gradient primary button style
 
-## Phase 4: Rewrite MainHub (Landing Page)
+### Step 9 — Final QA pass
+- Run security--run_security_scan
+- Run supabase--linter
+- Test `/`, `/command-center`, `/my-apps`, `/auth`, `/pricing`, `/reset-password` end-to-end
+- Verify Stripe checkout still launches cleanly
 
-Strip everything fake. New structure:
-- **Header**: AuraOmega logo with branding, "Get Started" + "Pricing" buttons. Remove ShopifyCartDrawer.
-- **Hero**: "5 AI agents that qualify, nurture, close, and onboard your customers — while you sleep." Remove Shopify product references, "200-Agent" claims, physical product pillars.
-- **Agent showcase**: 5 cards showing each real agent with honest descriptions
-- **Pricing preview**: 3 tiers inline (Core, Pro, Enterprise)
-- **CTA section**: Clean conversion block
-- **Footer**: Keep legal links, update branding (already done)
+### Files to be modified
+- `src/App.tsx` — wrap in AuthProvider, add aurora background, page transitions
+- `src/components/ProtectedRoute.tsx` — use useAuthContext
+- `src/components/dashboard/Header.tsx` — mobile sheet nav, glow polish
+- `src/components/dashboard/CEODashboard.tsx` — skeletons, oro-card
+- `src/components/dashboard/RevenueChart.tsx` — loading state
+- `src/components/dashboard/RealMetrics.tsx` — loading state
+- `src/pages/MyApps.tsx` — useAuthContext, skeletons
+- `src/pages/Auth.tsx` — useAuthContext
+- `src/pages/MainHub.tsx` — useAuthContext, polish
+- `src/pages/SubscriptionManagement.tsx` — useAuthContext
+- `src/components/ui/LoadingSpinner.tsx` — Oro glow variant
+- Any component referencing legacy `dao_*` / `nft_*` / `metaverse_*` / `crypto_transactions` → cleaned
 
-Remove imports: `useShopifyProducts`, `useStores`, `ShopifyProductCard`, `ShopifyCartDrawer`, `appMonetization`
-
-## Phase 5: Clean App.tsx Routes
-
-**Remove these routes and imports:**
-- `/store`, `/product/:handle`, `/product-legacy/:productId` (Shopify store)
-- `/orders`, `/wishlist` (consumer e-commerce)
-- `/casino` (CasinoLaunch)
-- `/metaverse` (Metaverse)
-- `/web3-launch` (Web3LaunchCenter)
-- `/industry-roadmaps` (IndustryRoadmaps)
-- `/apps`, `/app-monetizer` (AppStore, AppMonetizer)
-- Remove `useCartSync` from AppContent
-
-**Keep:**
-- `/` (MainHub), `/command-center`, `/pricing`, `/subscription`, `/auth`
-- `/contact`, `/checkout-success`, `/subscription-success`, `/welcome`, `/about`
-- `/viral-engine`, `/content-factory`, `/war-room`, `/bot-swarm`, `/marketing-blitz`
-- `/connectivity`, `/system-health`, `/command-center/leads`
-- Legal pages, NotFound
-
-## Phase 6: Rewrite Pricing Page
-
-- Remove all NFT/DAO/Web3 copy ("Multi-Platform NFT Listings", "DAO Governance Rights", "Revenue Share NFTs", etc.)
-- Update hero: "Autonomous Revenue Operating System" — honest about what each tier includes
-- PricingSection: Show 3 tiers. Enterprise shows "Contact Us" button linking to `/contact` instead of Stripe checkout
-- Remove bottom text about "NFT membership passes tradeable on OpenSea"
-
-## Phase 7: Update Dashboard (Index.tsx)
-
-- Add `AgentStatusPanel` component showing real `agent_logs` data for the 5 named agents
-- Keep existing working panels (RealMetrics, RealTimeFeed, CEODashboard, etc.)
-- Remove MetaverseHub and Web3Dashboard imports if they reference removed functionality
-
-## Phase 8: New Component — `AgentStatusPanel.tsx`
-
-Shows the 5 agents with:
-- Name and role
-- Last activity timestamp (from `agent_logs`)
-- Tasks completed count
-- Status indicator (active/idle)
-- Real data only — falls back to "No activity yet" if no logs exist
-
----
-
-## What Gets Removed
-- All Shopify product grids and store references from MainHub
-- All NFT/DAO/Web3 claims from pricing
-- All 5 old subscription tiers (replaced with 3)
-- Routes to casino, metaverse, web3-launch, store, orders, wishlist, apps, app-monetizer, industry-roadmaps
-- "200-Agent" and fake revenue claims
-- `useCartSync` hook usage in AppContent
-
-## What Stays Untouched
-- Auth system, ProtectedRoute, AuthContext
-- Stripe webhook/checkout/subscription infrastructure
-- Database tables and RLS policies
-- xAI Gateway edge function
-- All admin dashboard panels that show real data
-- Branding (already updated)
-- Legal pages, contact page
+### Outcome
+- Single auth listener (perf win)
+- Cinematic ambient aurora across every page
+- Mobile nav that feels native
+- No flash-of-empty-state — smooth shimmer loads
+- Zero references to legacy verticals
+- Verified clean console + secure RLS
+- Production-ready polish at every touchpoint
 
