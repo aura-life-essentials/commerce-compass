@@ -96,28 +96,41 @@ export const RealMetrics = () => {
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {metrics.map((metric) => {
-          const Icon = metric.icon;
-          return (
-            <div
-              key={metric.label}
-              className="glass rounded-xl p-5 relative overflow-hidden"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <Icon className={`w-5 h-5 ${metric.color}`} />
-                <Badge
-                  variant="outline"
-                  className={metric.isReal ? "text-emerald-400 border-emerald-500/30 text-xs" : "text-amber-400 border-amber-500/30 text-xs"}
-                >
-                  {metric.isReal ? "LIVE" : "PENDING"}
-                </Badge>
+        {isLoading
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="oro-card p-5 animate-pulse">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-5 h-5 rounded bg-primary/15" />
+                  <div className="w-12 h-5 rounded-full bg-primary/10" />
+                </div>
+                <div className="h-7 w-24 rounded bg-primary/15 mb-2" />
+                <div className="h-3 w-20 rounded bg-primary/10 mb-1" />
+                <div className="h-3 w-28 rounded bg-primary/10" />
               </div>
-              <p className="text-2xl font-bold">{isLoading ? "..." : metric.value}</p>
-              <p className="text-xs text-muted-foreground mt-1">{metric.label}</p>
-              <p className="text-xs text-muted-foreground">{metric.detail}</p>
-            </div>
-          );
-        })}
+            ))
+          : metrics.map((metric) => {
+              const Icon = metric.icon;
+              return (
+                <div key={metric.label} className="oro-card p-5 relative overflow-hidden">
+                  <div className="flex items-center justify-between mb-3">
+                    <Icon className={`w-5 h-5 ${metric.color}`} />
+                    <Badge
+                      variant="outline"
+                      className={
+                        metric.isReal
+                          ? "text-emerald-400 border-emerald-500/30 text-xs"
+                          : "text-amber-400 border-amber-500/30 text-xs"
+                      }
+                    >
+                      {metric.isReal ? "LIVE" : "PENDING"}
+                    </Badge>
+                  </div>
+                  <p className="text-2xl font-bold">{metric.value}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{metric.label}</p>
+                  <p className="text-xs text-muted-foreground">{metric.detail}</p>
+                </div>
+              );
+            })}
       </div>
     </div>
   );

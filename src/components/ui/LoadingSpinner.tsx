@@ -18,7 +18,7 @@ export function LoadingSpinner({ size = 'md', className, text }: LoadingSpinnerP
     <div className={cn('flex flex-col items-center justify-center gap-3', className)}>
       <motion.div
         className={cn(
-          'rounded-full border-2 border-primary/30 border-t-primary',
+          'rounded-full border-2 border-primary/20 border-t-primary shadow-[0_0_30px_hsl(252_90%_65%/0.5)]',
           sizeClasses[size]
         )}
         animate={{ rotate: 360 }}
@@ -55,18 +55,18 @@ interface SkeletonCardProps {
 
 export function SkeletonCard({ className }: SkeletonCardProps) {
   return (
-    <div className={cn('rounded-xl bg-card/50 p-6 animate-pulse', className)}>
+    <div className={cn('oro-card p-6 animate-pulse', className)}>
       <div className="flex items-center gap-4 mb-4">
-        <div className="w-12 h-12 rounded-xl bg-muted" />
+        <div className="w-12 h-12 rounded-xl bg-primary/10" />
         <div className="flex-1">
-          <div className="h-4 w-24 bg-muted rounded mb-2" />
-          <div className="h-3 w-32 bg-muted rounded" />
+          <div className="h-4 w-24 bg-primary/10 rounded mb-2" />
+          <div className="h-3 w-32 bg-primary/10 rounded" />
         </div>
       </div>
       <div className="space-y-2">
-        <div className="h-3 w-full bg-muted rounded" />
-        <div className="h-3 w-3/4 bg-muted rounded" />
-        <div className="h-3 w-1/2 bg-muted rounded" />
+        <div className="h-3 w-full bg-primary/10 rounded" />
+        <div className="h-3 w-3/4 bg-primary/10 rounded" />
+        <div className="h-3 w-1/2 bg-primary/10 rounded" />
       </div>
     </div>
   );

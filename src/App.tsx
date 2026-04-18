@@ -34,7 +34,24 @@ const queryClient = new QueryClient();
 
 const AppContent = () => {
   return (
-    <Routes>
+    <>
+      {/* Cinematic ambient aurora — present on every route */}
+      <div
+        aria-hidden="true"
+        className="fixed inset-0 -z-10 pointer-events-none overflow-hidden"
+      >
+        <div className="absolute -top-1/3 -left-1/4 h-[40rem] w-[40rem] rounded-full bg-primary/[0.10] blur-[140px] animate-aurora" />
+        <div
+          className="absolute top-1/3 -right-1/4 h-[36rem] w-[36rem] rounded-full bg-[hsl(220,100%,60%/0.08)] blur-[160px] animate-aurora"
+          style={{ animationDelay: "-7s" }}
+        />
+        <div
+          className="absolute -bottom-1/4 left-1/4 h-[32rem] w-[32rem] rounded-full bg-[hsl(262,80%,62%/0.07)] blur-[150px] animate-aurora"
+          style={{ animationDelay: "-14s" }}
+        />
+      </div>
+      <div className="animate-fade-in">
+        <Routes>
       {/* Public main hub */}
       <Route path="/" element={<MainHub />} />
       
@@ -135,7 +152,9 @@ const AppContent = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       
       <Route path="*" element={<NotFound />} />
-    </Routes>
+        </Routes>
+      </div>
+    </>
   );
 };
 
