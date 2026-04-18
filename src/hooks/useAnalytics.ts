@@ -139,7 +139,7 @@ export const trackEvent = async (options: TrackEventOptions) => {
     await supabase.functions.invoke('track-analytics', {
       body: {
         ...options,
-        page_url: window.location.href,
+        page_url: getSafeUrl(),
         referrer: document.referrer,
         session_id: getSessionId(),
       },
