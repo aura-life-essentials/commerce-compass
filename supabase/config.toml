@@ -65,6 +65,3 @@ verify_jwt = false
 
 [functions.shopify-admin]
 verify_jwt = false
-
-[functions.shopify-admin]
-verify_jwt = false
