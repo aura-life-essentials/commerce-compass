@@ -1,7 +1,8 @@
-import { LogOut, Shield, Crown, CreditCard, Bot, Layers3, Users } from "lucide-react";
+import { useState } from "react";
+import { LogOut, Shield, Crown, CreditCard, Bot, Layers3, Users, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -11,12 +12,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { AuraOmegaLogo } from "@/components/branding/AuraOmegaLogo";
+import { cn } from "@/lib/utils";
 
 export const Header = () => {
   const { user, role, isSuperAdmin, signOut } = useAuthContext();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -53,59 +58,58 @@ export const Header = () => {
     return null;
   };
 
+  type NavItem = { to: string; label: string; icon: typeof Shield; superAdminOnly?: boolean };
+  const navItems: NavItem[] = [
+    { to: "/command-center/leads", label: "Lead Vault", icon: Users, superAdminOnly: true },
+    { to: "/war-room", label: "War Room", icon: Shield },
+    { to: "/bot-swarm", label: "Bot Swarm", icon: Bot },
+    { to: "/pricing", label: "Pricing", icon: CreditCard },
+    { to: "/my-apps", label: "My Apps", icon: Layers3 },
+  ];
+
+  const visibleItems = navItems.filter((i) => !i.superAdminOnly || isSuperAdmin);
+
+  const isActive = (to: string) => location.pathname === to || location.pathname.startsWith(to + "/");
+
   return (
-    <header className="glass-subtle sticky top-0 z-50 border-b border-border/50">
-      <div className="container mx-auto px-6 py-4">
-        <div className="flex items-center justify-between gap-4">
+    <header className="glass-subtle sticky top-0 z-50 border-b border-primary/10 shadow-[0_4px_30px_hsl(252_90%_65%/0.08)]">
+      <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
+        <div className="flex items-center justify-between gap-3">
           <Link to="/" className="flex items-center gap-3 min-w-0">
             <AuraOmegaLogo subtitle="Revenue Command Center" className="min-w-0" />
             <div className="status-active status-dot hidden sm:block" />
           </Link>
 
-          <div className="flex items-center gap-2">
-            {isSuperAdmin && (
-              <Link to="/command-center/leads">
-                <Button variant="ghost" size="sm" className="text-primary hover:text-foreground hover:bg-primary/10">
-                  <Users className="w-4 h-4 mr-2" />
-                  Lead Vault
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center gap-1">
+            {visibleItems.map(({ to, label, icon: Icon }) => (
+              <Link key={to} to={to}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "transition-all",
+                    isActive(to)
+                      ? "text-foreground bg-primary/15 glow-oro"
+                      : "text-muted-foreground hover:text-foreground hover:bg-primary/10"
+                  )}
+                >
+                  <Icon className="w-4 h-4 mr-2" />
+                  {label}
                 </Button>
               </Link>
-            )}
-            <Link to="/war-room">
-              <Button variant="ghost" size="sm" className="text-primary hover:text-foreground hover:bg-primary/10">
-                <Shield className="w-4 h-4 mr-2" />
-                War Room
-              </Button>
-            </Link>
-            <Link to="/bot-swarm">
-              <Button variant="ghost" size="sm" className="text-primary hover:text-foreground hover:bg-primary/10">
-                <Bot className="w-4 h-4 mr-2" />
-                Bot Swarm
-              </Button>
-            </Link>
-            <Link to="/pricing">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                <CreditCard className="w-4 h-4 mr-2" />
-                Pricing
-              </Button>
-            </Link>
-            <Link to="/my-apps">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                <Layers3 className="w-4 h-4 mr-2" />
-                My Apps
-              </Button>
-            </Link>
+            ))}
 
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                    <Avatar className="h-10 w-10 border-2 border-primary/20">
-                      <AvatarFallback className="bg-primary text-primary-foreground font-medium">
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full ml-1">
+                    <Avatar className="h-10 w-10 border-2 border-primary/30 shadow-[0_0_20px_hsl(252_90%_65%/0.3)]">
+                      <AvatarFallback className="bg-gradient-to-br from-primary to-[hsl(220,100%,60%)] text-primary-foreground font-medium">
                         {getInitials(user?.email)}
                       </AvatarFallback>
                     </Avatar>
-                    {isSuperAdmin && <Crown className="absolute -top-1 -right-1 w-4 h-4 text-primary" />}
+                    {isSuperAdmin && <Crown className="absolute -top-1 -right-1 w-4 h-4 text-primary drop-shadow-[0_0_6px_hsl(252_90%_65%)]" />}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-64 bg-card border-border" align="end">
@@ -116,10 +120,7 @@ export const Header = () => {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-border" />
-                  <DropdownMenuItem
-                    onClick={() => navigate('/subscription')}
-                    className="cursor-pointer"
-                  >
+                  <DropdownMenuItem onClick={() => navigate("/subscription")} className="cursor-pointer">
                     <CreditCard className="mr-2 h-4 w-4" />
                     Manage Subscription
                   </DropdownMenuItem>
@@ -135,11 +136,91 @@ export const Header = () => {
               </DropdownMenu>
             ) : (
               <Link to="/auth">
-                <Button size="sm" className="bg-gradient-to-r from-[hsl(220,100%,60%)] to-primary hover:opacity-90">
+                <Button size="sm" className="bg-gradient-to-r from-[hsl(220,100%,60%)] to-primary hover:opacity-90 glow-oro ml-1">
                   Sign In
                 </Button>
               </Link>
             )}
+          </div>
+
+          {/* Mobile: Avatar + Hamburger */}
+          <div className="flex md:hidden items-center gap-2">
+            {user && (
+              <Avatar className="h-9 w-9 border-2 border-primary/30">
+                <AvatarFallback className="bg-gradient-to-br from-primary to-[hsl(220,100%,60%)] text-primary-foreground text-xs font-medium">
+                  {getInitials(user?.email)}
+                </AvatarFallback>
+              </Avatar>
+            )}
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-foreground hover:bg-primary/10">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px] bg-card/95 backdrop-blur-xl border-l border-primary/20">
+                <SheetHeader>
+                  <SheetTitle className="text-left text-gradient-oro">AuraOmega</SheetTitle>
+                </SheetHeader>
+                <nav className="flex flex-col gap-1 mt-6">
+                  {visibleItems.map(({ to, label, icon: Icon }) => (
+                    <Link key={to} to={to} onClick={() => setMobileOpen(false)}>
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-start",
+                          isActive(to)
+                            ? "bg-primary/15 text-foreground glow-oro"
+                            : "text-muted-foreground hover:text-foreground hover:bg-primary/10"
+                        )}
+                      >
+                        <Icon className="w-4 h-4 mr-2" />
+                        {label}
+                      </Button>
+                    </Link>
+                  ))}
+                </nav>
+
+                <div className="mt-6 pt-6 border-t border-border">
+                  {user ? (
+                    <div className="space-y-3">
+                      <div className="px-3">
+                        <p className="text-sm font-medium truncate">{user.email}</p>
+                        {getRoleBadge()}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start"
+                        onClick={() => {
+                          setMobileOpen(false);
+                          navigate("/subscription");
+                        }}
+                      >
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        Manage Subscription
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => {
+                          setMobileOpen(false);
+                          handleSignOut();
+                        }}
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Sign out
+                      </Button>
+                    </div>
+                  ) : (
+                    <Link to="/auth" onClick={() => setMobileOpen(false)}>
+                      <Button className="w-full bg-gradient-to-r from-[hsl(220,100%,60%)] to-primary hover:opacity-90 glow-oro">
+                        Sign In
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
