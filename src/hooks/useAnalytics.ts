@@ -12,6 +12,19 @@ const getSessionId = () => {
   return sessionId;
 };
 
+// Strip sensitive query params (auth tokens, sessions) before logging URLs
+const SENSITIVE_PARAMS = ['__lovable_token', 'token', 'access_token', 'refresh_token', 'session', 'apikey', 'api_key'];
+const getSafeUrl = (): string => {
+  try {
+    const url = new URL(window.location.href);
+    SENSITIVE_PARAMS.forEach((p) => url.searchParams.delete(p));
+    url.hash = '';
+    return url.toString();
+  } catch {
+    return window.location.pathname;
+  }
+};
+
 type EventType = 
   | 'page_view'
   | 'user_action'
