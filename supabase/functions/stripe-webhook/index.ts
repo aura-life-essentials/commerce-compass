@@ -150,8 +150,26 @@ const upsertOrderFromCheckoutSession = async (session: Stripe.Checkout.Session) 
     return;
   }
 
-  const { error } = await supabase.from("orders").insert(payload);
+  const { data: inserted, error } = await supabase.from("orders").insert(payload).select("id").single();
   if (error) throw error;
+
+  // 🚀 Auto-dispatch to CJ Dropshipping fulfillment
+  if (inserted?.id) {
+    try {
+      const cjRes = await fetch(`${SUPABASE_URL}/functions/v1/cj-dropshipping`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        },
+        body: JSON.stringify({ action: "create_order", order_id: inserted.id }),
+      });
+      const cjJson = await cjRes.json();
+      logStep("CJ fulfillment dispatched", { order_id: inserted.id, ok: cjJson?.success });
+    } catch (cjErr) {
+      logStep("CJ fulfillment dispatch failed", { error: (cjErr as Error).message });
+    }
+  }
 };
 
 const upsertSubscriptionRecord = async (subscription: Stripe.Subscription) => {
