@@ -104,7 +104,7 @@ const upsertOrderFromCheckoutSession = async (session: Stripe.Checkout.Session) 
     throw lineItemsError;
   }
 
-  const items = lineItemsResponse.data.map((item) => ({
+  const items = lineItemsResponse.data.map((item: any) => ({
     product_id: item.price?.id ?? item.description ?? "unknown",
     title: item.description ?? (typeof item.price?.product !== "string" ? item.price?.product?.name : "Product"),
     price: item.amount_total ? item.amount_total / 100 / Math.max(item.quantity ?? 1, 1) : 0,
