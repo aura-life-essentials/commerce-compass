@@ -1489,6 +1489,13 @@ export type Database = {
             referencedRelation: "nft_memberships"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "nft_royalty_payments_nft_id_fkey"
+            columns: ["nft_id"]
+            isOneToOne: false
+            referencedRelation: "nft_memberships_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       nft_subscription_passes: {
@@ -2950,7 +2957,143 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      dao_votes_public: {
+        Row: {
+          id: string | null
+          proposal_id: string | null
+          tx_hash: string | null
+          vote_direction: string | null
+          vote_power: number | null
+          voted_at: string | null
+          voter_user_id: string | null
+          voter_wallet: string | null
+        }
+        Insert: {
+          id?: string | null
+          proposal_id?: string | null
+          tx_hash?: string | null
+          vote_direction?: string | null
+          vote_power?: number | null
+          voted_at?: string | null
+          voter_user_id?: never
+          voter_wallet?: string | null
+        }
+        Update: {
+          id?: string | null
+          proposal_id?: string | null
+          tx_hash?: string | null
+          vote_direction?: string | null
+          vote_power?: number | null
+          voted_at?: string | null
+          voter_user_id?: never
+          voter_wallet?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dao_votes_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "dao_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nft_memberships_public: {
+        Row: {
+          benefits: Json | null
+          contract_address: string | null
+          id: string | null
+          image_url: string | null
+          is_listed: boolean | null
+          list_price_eth: number | null
+          metadata_uri: string | null
+          minted_at: string | null
+          owner_user_id: string | null
+          owner_wallet: string | null
+          price_eth: number | null
+          royalty_percent: number | null
+          tier: string | null
+          token_id: string | null
+          total_royalties_earned: number | null
+        }
+        Insert: {
+          benefits?: Json | null
+          contract_address?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_listed?: boolean | null
+          list_price_eth?: number | null
+          metadata_uri?: string | null
+          minted_at?: string | null
+          owner_user_id?: never
+          owner_wallet?: string | null
+          price_eth?: number | null
+          royalty_percent?: number | null
+          tier?: string | null
+          token_id?: string | null
+          total_royalties_earned?: number | null
+        }
+        Update: {
+          benefits?: Json | null
+          contract_address?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_listed?: boolean | null
+          list_price_eth?: number | null
+          metadata_uri?: string | null
+          minted_at?: string | null
+          owner_user_id?: never
+          owner_wallet?: string | null
+          price_eth?: number | null
+          royalty_percent?: number | null
+          tier?: string | null
+          token_id?: string | null
+          total_royalties_earned?: number | null
+        }
+        Relationships: []
+      }
+      promo_codes_public: {
+        Row: {
+          applicable_tiers: string[] | null
+          code: string | null
+          current_uses: number | null
+          description: string | null
+          discount_type: string | null
+          discount_value: number | null
+          id: string | null
+          is_active: boolean | null
+          max_uses: number | null
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          applicable_tiers?: string[] | null
+          code?: string | null
+          current_uses?: number | null
+          description?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          max_uses?: number | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          applicable_tiers?: string[] | null
+          code?: string | null
+          current_uses?: number | null
+          description?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          max_uses?: number | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
