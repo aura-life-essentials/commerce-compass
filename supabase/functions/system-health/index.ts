@@ -63,7 +63,7 @@ serve(async (req) => {
         status: "connected",
         secret_key: true,
         webhook_secret: !!webhookSecret,
-        balance_available: balance.available.map(b => ({ amount: b.amount / 100, currency: b.currency })),
+        balance_available: balance.available.map((b: any) => ({ amount: b.amount / 100, currency: b.currency })),
         livemode: balance.livemode,
       };
     }

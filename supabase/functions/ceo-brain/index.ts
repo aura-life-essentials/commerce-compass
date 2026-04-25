@@ -277,7 +277,9 @@ async function gatherBusinessMetrics(supabase: any): Promise<BusinessMetrics> {
     totalOrderRevenue,
     conversions24h: traffic.filter((t: any) => ["purchase", "conversion"].includes(t.webhook_type)).length,
     trafficEvents24h: traffic.length,
-    topSources: Object.values(sourceAgg).sort((a, b) => b.revenue - a.revenue).slice(0, 5),
+    topSources: (Object.values(sourceAgg) as Array<{ source: string; events: number; revenue: number }>)
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5),
     activeCampaigns: campaigns.filter((c: any) => c.status === "active").length,
     topProducts: products.slice(0, 10).map((p: any) => ({
       id: p.id, title: p.title, price: p.price, category: p.category,
