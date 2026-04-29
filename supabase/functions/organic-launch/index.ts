@@ -345,6 +345,10 @@ serve(async (req) => {
     const body = await req.json();
     const appId: string = body?.app_id;
     const origin: string = body?.origin || "https://ceo-brain-orchestra.lovable.app";
+    const idempotencyKey: string | null =
+      typeof body?.idempotency_key === "string" && body.idempotency_key.length <= 128
+        ? body.idempotency_key
+        : req.headers.get("Idempotency-Key");
     const platforms: Platform[] = Array.isArray(body?.platforms) && body.platforms.length
       ? body.platforms.filter((p: string) => (PLATFORMS as readonly string[]).includes(p))
       : [...PLATFORMS];
@@ -360,6 +364,29 @@ serve(async (req) => {
 
     const app = KNOWN_APPS[appId];
     if (!app) throw new Error(`Unknown app_id: ${appId}`);
+
+    // Idempotency: if the same user + idempotency_key already exists, return that launch.
+    if (idempotencyKey) {
+      const { data: existing } = await admin
+        .from("organic_launches")
+        .select("id, status, posts_generated, landing_pages_generated, stripe_checkout_url")
+        .eq("user_id", userId)
+        .eq("idempotency_key", idempotencyKey)
+        .maybeSingle();
+      if (existing) {
+        return new Response(
+          JSON.stringify({
+            ok: true,
+            idempotent_replay: true,
+            launch_id: existing.id,
+            posts: existing.posts_generated,
+            landing_pages: existing.landing_pages_generated,
+            target_url: existing.stripe_checkout_url,
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+    }
 
     // ---- Per-channel consent gating ----
     // Only run on platforms the user has explicitly enabled via launch_consents.
@@ -403,12 +430,22 @@ serve(async (req) => {
         platforms: allowedPlatforms,
         stripe_price_id: app.priceId ?? null,
         stripe_checkout_url: targetUrl,
+        idempotency_key: idempotencyKey,
         metadata: { skipped_platforms: skippedPlatforms },
       })
       .select()
       .single();
 
     if (launchErr) throw launchErr;
+
+    await recordStatusChange(
+      launch.id,
+      userId,
+      null,
+      "generating",
+      `Launch initiated for ${app.name}`,
+      { platforms: allowedPlatforms, skipped: skippedPlatforms },
+    );
 
     // Audit: launch initiated
     await admin.from("ai_action_audit").insert({
@@ -500,6 +537,19 @@ serve(async (req) => {
       })
       .eq("id", launch.id);
     if (updErr) log("launch update error", { error: updErr.message });
+
+    await recordStatusChange(
+      launch.id,
+      userId,
+      "generating",
+      "ready",
+      `Generated ${postRows.length} posts + ${seoRows.length} pages`,
+      {
+        posts: postRows.length,
+        pages: seoRows.length,
+        post_errors: postResults.filter((r) => !r.ok).length,
+      },
+    );
 
     // Best-effort log
     await admin.from("agent_logs").insert({
