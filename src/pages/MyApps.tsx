@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useEntitlements } from '@/hooks/useEntitlements';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/dashboard/Header';
@@ -43,10 +44,16 @@ const PRO_TOOLS = [
 export default function MyApps() {
   const { user } = useAuthContext();
   const { isSubscribed, tier, trialActive, trialDaysRemaining, isLoading } = useSubscription();
+  const { entitledApps, hasAccess, loading: entLoading } = useEntitlements();
   const navigate = useNavigate();
   const [activeApp, setActiveApp] = useState<string | null>(null);
 
-  const tools = tier === 'pro' || tier === 'enterprise' ? PRO_TOOLS : CORE_TOOLS;
+  // Source of truth = entitlements table (granted by Stripe webhook).
+  // Fall back to subscription tier for users on legacy paths so they don't lose access.
+  const tierFallback = tier === 'pro' || tier === 'enterprise' ? PRO_TOOLS : CORE_TOOLS;
+  const tools = entitledApps.size > 0
+    ? PRO_TOOLS.filter((t) => hasAccess(t.id))
+    : tierFallback;
 
   // Not signed in
   if (!user) {
@@ -64,7 +71,7 @@ export default function MyApps() {
   }
 
   // Loading
-  if (isLoading) {
+  if (isLoading || entLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
