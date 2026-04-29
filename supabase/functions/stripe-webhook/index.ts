@@ -222,6 +222,24 @@ const upsertSubscriptionRecord = async (subscription: Stripe.Subscription) => {
   });
 
   if (error) throw error;
+
+  // Grant app entitlements so the customer instantly gets the apps they paid for.
+  try {
+    await fetch(`${SUPABASE_URL}/functions/v1/grant-app-entitlements`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+      body: JSON.stringify({
+        action: "grant_from_subscription",
+        subscription_id: subscription.id,
+      }),
+    });
+    logStep("Entitlements granted", { subscriptionId: subscription.id });
+  } catch (e) {
+    logStep("Entitlement grant failed", { error: (e as Error).message });
+  }
 };
 
 const markSubscriptionCanceled = async (subscription: Stripe.Subscription) => {
@@ -237,6 +255,23 @@ const markSubscriptionCanceled = async (subscription: Stripe.Subscription) => {
     .eq("stripe_subscription_id", subscription.id);
 
   if (error) throw error;
+
+  // Revoke entitlements
+  try {
+    await fetch(`${SUPABASE_URL}/functions/v1/grant-app-entitlements`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+      body: JSON.stringify({
+        action: "revoke_subscription",
+        subscription_id: subscription.id,
+      }),
+    });
+  } catch (e) {
+    logStep("Entitlement revoke failed", { error: (e as Error).message });
+  }
 };
 
 serve(async (req) => {
