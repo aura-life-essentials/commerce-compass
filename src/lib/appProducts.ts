@@ -12,6 +12,11 @@ export interface AppProduct {
   badge?: string;
   accent: string;
   features: string[];
+  // Detail page
+  longDescription?: string;
+  outcomes?: { metric: string; description: string }[];
+  bestFor?: string[];
+  faqs?: { q: string; a: string }[];
 }
 
 export const APP_PRODUCTS: AppProduct[] = [
