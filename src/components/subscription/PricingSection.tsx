@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Sparkles, Crown, Zap, ExternalLink } from 'lucide-react';
+import { Check, Sparkles, Crown, Zap, ExternalLink, Loader2, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SUBSCRIPTION_TIERS, TierConfig } from '@/lib/subscriptionTiers';
@@ -8,6 +8,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { formatCurrency } from '@/lib/formatCurrency';
 
 const tierIcons = {
   core: Zap,
@@ -17,8 +18,15 @@ const tierIcons = {
 
 export function PricingSection() {
   const { user } = useAuthContext();
-  const { isSubscribed, tier: currentTier, subscribe, isLoading } = useSubscription();
+  const {
+    isSubscribed,
+    tier: currentTier,
+    subscribe,
+    manageSubscription,
+    isLoading,
+  } = useSubscription();
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
+  const [portalLoading, setPortalLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubscribe = async (tier: TierConfig) => {
@@ -35,13 +43,27 @@ export function PricingSection() {
     }
 
     setLoadingTier(tier.id);
+    const t = toast.loading(`Preparing checkout for ${tier.name}…`);
     try {
       await subscribe(tier.id);
-      toast.success(`Redirecting to checkout for ${tier.name}...`);
+      toast.success(`Opening secure checkout in a new tab`, { id: t });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to start checkout');
+      toast.error(error instanceof Error ? error.message : 'Failed to start checkout', { id: t });
     } finally {
       setLoadingTier(null);
+    }
+  };
+
+  const handleManage = async () => {
+    setPortalLoading(true);
+    const t = toast.loading('Opening customer portal…');
+    try {
+      await manageSubscription();
+      toast.success('Customer portal opened', { id: t });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to open portal', { id: t });
+    } finally {
+      setPortalLoading(false);
     }
   };
 
@@ -106,7 +128,7 @@ export function PricingSection() {
                   <div className="mb-6">
                     {tier.price !== null ? (
                       <>
-                        <span className="text-3xl font-bold">${tier.price}</span>
+                        <span className="text-3xl font-bold">{formatCurrency(tier.price)}</span>
                         <span className="text-muted-foreground">/month</span>
                       </>
                     ) : (
@@ -125,7 +147,10 @@ export function PricingSection() {
                     variant={tier.popular ? 'default' : 'outline'}
                   >
                     {loadingTier === tier.id ? (
-                      'Processing...'
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Preparing checkout…
+                      </>
                     ) : isCurrentPlan ? (
                       'Current Plan'
                     ) : tier.id === 'enterprise' ? (
@@ -151,6 +176,30 @@ export function PricingSection() {
             );
           })}
         </div>
+
+        {isSubscribed && (
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <p className="text-sm text-muted-foreground">
+              Already a subscriber?
+            </p>
+            <Button
+              variant="outline"
+              onClick={handleManage}
+              disabled={portalLoading}
+              className="gap-2"
+            >
+              {portalLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" /> Opening portal…
+                </>
+              ) : (
+                <>
+                  <Settings className="w-4 h-4" /> Manage subscription
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </div>
     </section>
   );
