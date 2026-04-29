@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AuraOmegaLogo } from "@/components/branding/AuraOmegaLogo";
 import { PricingSection } from "@/components/subscription/PricingSection";
 import { AppMarketplace } from "@/components/storefront/AppMarketplace";
+import { PricingComparisonTable } from "@/components/subscription/PricingComparisonTable";
+import { ROIPanel } from "@/components/storefront/ROIPanel";
 
 const agents = [
   {
@@ -155,6 +157,12 @@ export default function MainHub() {
 
           {/* Pricing Section — real Stripe-connected component */}
           <PricingSection />
+
+          {/* ROI / no-brainer panel */}
+          <ROIPanel />
+
+          {/* Full comparison table */}
+          <PricingComparisonTable />
 
           {/* Standalone app products — real Stripe checkout */}
           <AppMarketplace />
