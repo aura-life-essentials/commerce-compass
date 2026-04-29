@@ -71,3 +71,9 @@ verify_jwt = false
 
 [functions.organic-launch]
 verify_jwt = false
+
+[functions.influencer-outreach]
+verify_jwt = false
+
+[functions.marketing-blitz]
+verify_jwt = false
