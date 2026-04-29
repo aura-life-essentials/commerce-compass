@@ -307,6 +307,48 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_action_audit: {
+        Row: {
+          action_type: string
+          agent_name: string
+          channel: string | null
+          created_at: string
+          id: string
+          payload: Json
+          resource_id: string | null
+          resource_type: string | null
+          status: string
+          summary: string
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          agent_name: string
+          channel?: string | null
+          created_at?: string
+          id?: string
+          payload?: Json
+          resource_id?: string | null
+          resource_type?: string | null
+          status?: string
+          summary: string
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          agent_name?: string
+          channel?: string | null
+          created_at?: string
+          id?: string
+          payload?: Json
+          resource_id?: string | null
+          resource_type?: string | null
+          status?: string
+          summary?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       ai_decisions: {
         Row: {
           agent_brain_id: string | null
@@ -1171,6 +1213,134 @@ export type Database = {
           },
         ]
       }
+      influencer_deals: {
+        Row: {
+          affiliate_code: string | null
+          affiliate_url: string | null
+          agreed_at: string | null
+          app_id: string
+          clicks: number
+          commission_owed: number
+          commission_rate: number
+          contacted_at: string | null
+          conversions: number
+          created_at: string
+          id: string
+          influencer_id: string
+          metadata: Json
+          outreach_message: string | null
+          reply_message: string | null
+          revenue_attributed: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          affiliate_code?: string | null
+          affiliate_url?: string | null
+          agreed_at?: string | null
+          app_id: string
+          clicks?: number
+          commission_owed?: number
+          commission_rate?: number
+          contacted_at?: string | null
+          conversions?: number
+          created_at?: string
+          id?: string
+          influencer_id: string
+          metadata?: Json
+          outreach_message?: string | null
+          reply_message?: string | null
+          revenue_attributed?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          affiliate_code?: string | null
+          affiliate_url?: string | null
+          agreed_at?: string | null
+          app_id?: string
+          clicks?: number
+          commission_owed?: number
+          commission_rate?: number
+          contacted_at?: string | null
+          conversions?: number
+          created_at?: string
+          id?: string
+          influencer_id?: string
+          metadata?: Json
+          outreach_message?: string | null
+          reply_message?: string | null
+          revenue_attributed?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "influencer_deals_influencer_id_fkey"
+            columns: ["influencer_id"]
+            isOneToOne: false
+            referencedRelation: "influencers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      influencers: {
+        Row: {
+          contact_url: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          engagement_rate: number | null
+          follower_count: number | null
+          handle: string
+          id: string
+          metadata: Json
+          niche: string | null
+          notes: string | null
+          platform: string
+          region: string | null
+          source: string | null
+          updated_at: string
+        }
+        Insert: {
+          contact_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          engagement_rate?: number | null
+          follower_count?: number | null
+          handle: string
+          id?: string
+          metadata?: Json
+          niche?: string | null
+          notes?: string | null
+          platform: string
+          region?: string | null
+          source?: string | null
+          updated_at?: string
+        }
+        Update: {
+          contact_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          engagement_rate?: number | null
+          follower_count?: number | null
+          handle?: string
+          id?: string
+          metadata?: Json
+          niche?: string | null
+          notes?: string | null
+          platform?: string
+          region?: string | null
+          source?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       integrations: {
         Row: {
           config_summary: Json | null
@@ -1217,6 +1387,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      launch_consents: {
+        Row: {
+          channel: string
+          created_at: string
+          enabled: boolean
+          id: string
+          metadata: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          metadata?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          metadata?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       lead_contacts: {
         Row: {
@@ -2038,6 +2238,54 @@ export type Database = {
           stripe_coupon_id?: string
           valid_from?: string | null
           valid_until?: string | null
+        }
+        Relationships: []
+      }
+      redirect_rules: {
+        Row: {
+          created_at: string
+          destination_path: string
+          fallback_path: string
+          id: string
+          is_active: boolean
+          metadata: Json
+          name: string
+          priority: number
+          required_app_id: string | null
+          required_role: string | null
+          source_path: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          destination_path: string
+          fallback_path?: string
+          id?: string
+          is_active?: boolean
+          metadata?: Json
+          name: string
+          priority?: number
+          required_app_id?: string | null
+          required_role?: string | null
+          source_path: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          destination_path?: string
+          fallback_path?: string
+          id?: string
+          is_active?: boolean
+          metadata?: Json
+          name?: string
+          priority?: number
+          required_app_id?: string | null
+          required_role?: string | null
+          source_path?: string
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
