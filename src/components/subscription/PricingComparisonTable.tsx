@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { Check, Minus, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { SUBSCRIPTION_TIERS } from '@/lib/subscriptionTiers';
@@ -98,8 +99,8 @@ export function PricingComparisonTable() {
               </thead>
               <tbody>
                 {Object.entries(groups).map(([group, rows]) => (
-                  <>
-                    <tr key={`group-${group}`} className="bg-card/20">
+                  <Fragment key={`group-${group}`}>
+                    <tr className="bg-card/20">
                       <td
                         colSpan={SUBSCRIPTION_TIERS.length + 1}
                         className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-primary/80"
@@ -125,7 +126,7 @@ export function PricingComparisonTable() {
                         ))}
                       </tr>
                     ))}
-                  </>
+                  </Fragment>
                 ))}
               </tbody>
             </table>
