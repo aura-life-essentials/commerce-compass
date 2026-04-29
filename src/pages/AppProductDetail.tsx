@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Check, Loader2, Settings, Shield, Sparkles, Zap } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Loader2, Rocket, Settings, Shield, Sparkles, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +22,7 @@ export default function AppProductDetail() {
   const { manageSubscription } = useSubscription();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
+  const [launchLoading, setLaunchLoading] = useState(false);
 
   useSEOHead({
     title: product ? `${product.name} — AuraOmega` : 'App not found — AuraOmega',
@@ -87,6 +88,31 @@ export default function AppProductDetail() {
       toast.error(err instanceof Error ? err.message : 'Failed to open portal', { id: t });
     } finally {
       setPortalLoading(false);
+    }
+  };
+
+  const handleOneClickLaunch = async () => {
+    if (!product) return;
+    if (!user || !session?.access_token) {
+      toast.error('Please sign in to launch');
+      navigate('/auth');
+      return;
+    }
+    setLaunchLoading(true);
+    const t = toast.loading('Spinning up your organic launch across every channel…');
+    try {
+      const { data, error } = await supabase.functions.invoke('organic-launch', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: { app_id: product.id, origin: window.location.origin },
+      });
+      if (error) throw error;
+      if (!data?.launch_id) throw new Error('Launch did not return an id');
+      toast.success(`Launch ready: ${data.posts} posts + ${data.landing_pages} SEO pages`, { id: t });
+      navigate(`/launch/${data.launch_id}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Launch failed', { id: t });
+    } finally {
+      setLaunchLoading(false);
     }
   };
 
@@ -271,6 +297,29 @@ export default function AppProductDetail() {
                     </>
                   )}
                 </Button>
+
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="w-full bg-gradient-to-r from-fuchsia-500/20 to-amber-500/20 border border-amber-500/40 hover:from-fuchsia-500/30 hover:to-amber-500/30"
+                  onClick={handleOneClickLaunch}
+                  disabled={launchLoading}
+                >
+                  {launchLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Launching everywhere…
+                    </>
+                  ) : (
+                    <>
+                      <Rocket className="w-4 h-4 mr-2" />
+                      🚀 One-Click Organic Launch
+                    </>
+                  )}
+                </Button>
+                <p className="text-[11px] text-muted-foreground text-center -mt-2">
+                  Generates posts for Reddit, IG, YouTube, TikTok, X, LinkedIn, Pinterest, Facebook + SEO pages.
+                </p>
 
                 <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t border-border/40">
                   <Shield className="w-3.5 h-3.5" />
