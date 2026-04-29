@@ -18,6 +18,99 @@ const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const admin = createClient(SUPABASE_URL, SERVICE_KEY);
 
 /**
+ * Records a status change to launch_status_history and fans the change out to
+ * any user-registered launch_webhooks. All best-effort — never throws.
+ */
+async function recordStatusChange(
+  launchId: string,
+  userId: string,
+  fromStatus: string | null,
+  toStatus: string,
+  note?: string,
+  payload?: Record<string, unknown>,
+) {
+  try {
+    await admin.from("launch_status_history").insert({
+      launch_id: launchId,
+      user_id: userId,
+      from_status: fromStatus,
+      to_status: toStatus,
+      note: note ?? null,
+    });
+  } catch (e) {
+    log("status history insert failed", { error: (e as Error).message });
+  }
+
+  try {
+    const { data: hooks } = await admin
+      .from("launch_webhooks")
+      .select("id, url, secret, event_types, failure_count")
+      .eq("user_id", userId)
+      .eq("is_active", true);
+
+    const eligible = (hooks ?? []).filter((h: any) =>
+      Array.isArray(h.event_types) && h.event_types.includes("status_changed"),
+    );
+
+    await Promise.all(
+      eligible.map(async (h: any) => {
+        try {
+          const body = JSON.stringify({
+            event: "status_changed",
+            launch_id: launchId,
+            from_status: fromStatus,
+            to_status: toStatus,
+            note: note ?? null,
+            payload: payload ?? {},
+            occurred_at: new Date().toISOString(),
+          });
+          const headers: Record<string, string> = {
+            "Content-Type": "application/json",
+            "User-Agent": "AuraOmega-LaunchHook/1.0",
+          };
+          if (h.secret) headers["X-Webhook-Secret"] = h.secret;
+          const ctrl = new AbortController();
+          const t = setTimeout(() => ctrl.abort(), 8000);
+          const res = await fetch(h.url, {
+            method: "POST",
+            headers,
+            body,
+            signal: ctrl.signal,
+          });
+          clearTimeout(t);
+          await admin
+            .from("launch_webhooks")
+            .update({
+              last_delivered_at: new Date().toISOString(),
+              last_status: res.status,
+              failure_count: res.ok ? 0 : (h.failure_count ?? 0) + 1,
+              is_active: !res.ok && (h.failure_count ?? 0) >= 4 ? false : true,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", h.id);
+        } catch (e) {
+          await admin
+            .from("launch_webhooks")
+            .update({
+              last_status: 0,
+              failure_count: (h.failure_count ?? 0) + 1,
+              is_active: (h.failure_count ?? 0) >= 4 ? false : true,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", h.id);
+          log("webhook delivery failed", {
+            url: h.url,
+            error: (e as Error).message,
+          });
+        }
+      }),
+    );
+  } catch (e) {
+    log("webhook fanout failed", { error: (e as Error).message });
+  }
+}
+
+/**
  * Every product the launcher knows about.
  * Must stay in sync with src/lib/appProducts.ts and src/lib/subscriptionTiers.ts.
  */
