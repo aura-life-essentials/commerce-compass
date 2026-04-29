@@ -9,6 +9,8 @@ import { getTierById, SubscriptionTier } from '@/lib/subscriptionTiers';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { TrialBadge } from '@/components/ui/TrialBadge';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuthContext } from '@/contexts/AuthContext';
 
 export default function SubscriptionSuccess() {
   const [searchParams] = useSearchParams();
@@ -17,6 +19,7 @@ export default function SubscriptionSuccess() {
   const tier = tierId ? getTierById(tierId) : null;
   const { refreshSubscription, trialActive, trialDaysRemaining } = useSubscription();
   const { trackConversion } = useAnalytics();
+  const { session } = useAuthContext();
   const [showConfetti, setShowConfetti] = useState(false);
 
   const fireConfetti = useCallback(async () => {
@@ -47,6 +50,17 @@ export default function SubscriptionSuccess() {
   useEffect(() => {
     // Refresh subscription status
     refreshSubscription();
+
+    // Self-heal: ensure app entitlements are granted even if webhook is delayed
+    if (session?.access_token) {
+      supabase.functions
+        .invoke('grant-app-entitlements', {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          body: { action: 'sync_self' },
+        })
+        .then(() => refreshSubscription())
+        .catch((e) => console.warn('entitlement sync skipped', e));
+    }
     
     // Track conversion
     trackConversion('subscription_completed', { 
@@ -63,7 +77,7 @@ export default function SubscriptionSuccess() {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [refreshSubscription, fireConfetti, trackConversion, tierId, tier, isTrial]);
+  }, [refreshSubscription, fireConfetti, trackConversion, tierId, tier, isTrial, session?.access_token]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4 relative overflow-hidden">
