@@ -317,6 +317,28 @@ serve(async (req) => {
 
     logStep("Event received", { type: event.type, id: event.id });
 
+    // Idempotency: if we've already processed this event id, return 200 without re-running.
+    // Stripe retries failed deliveries up to 3 days; without this we'd double-grant entitlements.
+    try {
+      const { error: idempErr } = await supabase
+        .from("stripe_events")
+        .insert({
+          id: event.id,
+          event_type: event.type,
+          payload: { livemode: event.livemode, created: event.created },
+        });
+      if (idempErr) {
+        // Unique violation = already processed
+        logStep("Duplicate event, skipping", { id: event.id, code: idempErr.code });
+        return new Response(JSON.stringify({ received: true, duplicate: true }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } catch (e) {
+      logStep("Idempotency check failed (continuing)", { error: (e as Error).message });
+    }
+
     switch (event.type) {
       case "payment_intent.succeeded": {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;

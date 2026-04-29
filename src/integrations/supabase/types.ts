@@ -1418,6 +1418,86 @@ export type Database = {
         }
         Relationships: []
       }
+      launch_status_history: {
+        Row: {
+          created_at: string
+          from_status: string | null
+          id: string
+          launch_id: string
+          note: string | null
+          to_status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          launch_id: string
+          note?: string | null
+          to_status: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          launch_id?: string
+          note?: string | null
+          to_status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "launch_status_history_launch_id_fkey"
+            columns: ["launch_id"]
+            isOneToOne: false
+            referencedRelation: "organic_launches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      launch_webhooks: {
+        Row: {
+          created_at: string
+          event_types: string[]
+          failure_count: number
+          id: string
+          is_active: boolean
+          last_delivered_at: string | null
+          last_status: number | null
+          secret: string | null
+          updated_at: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_types?: string[]
+          failure_count?: number
+          id?: string
+          is_active?: boolean
+          last_delivered_at?: string | null
+          last_status?: number | null
+          secret?: string | null
+          updated_at?: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_types?: string[]
+          failure_count?: number
+          id?: string
+          is_active?: boolean
+          last_delivered_at?: string | null
+          last_status?: number | null
+          secret?: string | null
+          updated_at?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       lead_contacts: {
         Row: {
           assigned_owner_user_id: string | null
@@ -2006,6 +2086,7 @@ export type Database = {
           app_name: string
           created_at: string
           id: string
+          idempotency_key: string | null
           landing_pages_generated: number
           metadata: Json
           notes: string | null
@@ -2022,6 +2103,7 @@ export type Database = {
           app_name: string
           created_at?: string
           id?: string
+          idempotency_key?: string | null
           landing_pages_generated?: number
           metadata?: Json
           notes?: string | null
@@ -2038,6 +2120,7 @@ export type Database = {
           app_name?: string
           created_at?: string
           id?: string
+          idempotency_key?: string | null
           landing_pages_generated?: number
           metadata?: Json
           notes?: string | null
@@ -2826,6 +2909,27 @@ export type Database = {
           shopify_store_id?: string | null
           status?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      stripe_events: {
+        Row: {
+          event_type: string
+          id: string
+          payload: Json
+          processed_at: string
+        }
+        Insert: {
+          event_type: string
+          id: string
+          payload?: Json
+          processed_at?: string
+        }
+        Update: {
+          event_type?: string
+          id?: string
+          payload?: Json
+          processed_at?: string
         }
         Relationships: []
       }
