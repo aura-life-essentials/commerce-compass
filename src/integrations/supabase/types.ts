@@ -399,6 +399,51 @@ export type Database = {
         }
         Relationships: []
       }
+      app_entitlements: {
+        Row: {
+          app_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          metadata: Json
+          source: string
+          status: string
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          app_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json
+          source?: string
+          status?: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          app_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json
+          source?: string
+          status?: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       audit_events: {
         Row: {
           created_at: string
@@ -1755,6 +1800,57 @@ export type Database = {
         }
         Relationships: []
       }
+      organic_launches: {
+        Row: {
+          app_id: string
+          app_name: string
+          created_at: string
+          id: string
+          landing_pages_generated: number
+          metadata: Json
+          notes: string | null
+          platforms: string[]
+          posts_generated: number
+          status: string
+          stripe_checkout_url: string | null
+          stripe_price_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          app_id: string
+          app_name: string
+          created_at?: string
+          id?: string
+          landing_pages_generated?: number
+          metadata?: Json
+          notes?: string | null
+          platforms?: string[]
+          posts_generated?: number
+          status?: string
+          stripe_checkout_url?: string | null
+          stripe_price_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          app_id?: string
+          app_name?: string
+          created_at?: string
+          id?: string
+          landing_pages_generated?: number
+          metadata?: Json
+          notes?: string | null
+          platforms?: string[]
+          posts_generated?: number
+          status?: string
+          stripe_checkout_url?: string | null
+          stripe_price_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category: string | null
@@ -2218,6 +2314,74 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_landing_pages: {
+        Row: {
+          app_id: string
+          body_md: string
+          created_at: string
+          cta_text: string
+          headline: string
+          id: string
+          keywords: string[]
+          launch_id: string | null
+          meta_description: string
+          published: boolean
+          slug: string
+          subheadline: string | null
+          target_url: string
+          title: string
+          updated_at: string
+          user_id: string
+          views: number
+        }
+        Insert: {
+          app_id: string
+          body_md: string
+          created_at?: string
+          cta_text?: string
+          headline: string
+          id?: string
+          keywords?: string[]
+          launch_id?: string | null
+          meta_description: string
+          published?: boolean
+          slug: string
+          subheadline?: string | null
+          target_url: string
+          title: string
+          updated_at?: string
+          user_id: string
+          views?: number
+        }
+        Update: {
+          app_id?: string
+          body_md?: string
+          created_at?: string
+          cta_text?: string
+          headline?: string
+          id?: string
+          keywords?: string[]
+          launch_id?: string | null
+          meta_description?: string
+          published?: boolean
+          slug?: string
+          subheadline?: string | null
+          target_url?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          views?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_landing_pages_launch_id_fkey"
+            columns: ["launch_id"]
+            isOneToOne: false
+            referencedRelation: "organic_launches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_requests: {
         Row: {
           ai_response: Json | null
@@ -2267,6 +2431,71 @@ export type Database = {
             columns: ["subscription_id"]
             isOneToOne: false
             referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_posts: {
+        Row: {
+          body: string
+          created_at: string
+          cta: string | null
+          external_post_id: string | null
+          hashtags: string[]
+          id: string
+          launch_id: string
+          media_prompt: string | null
+          metadata: Json
+          platform: string
+          posted_at: string | null
+          status: string
+          target_url: string
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          cta?: string | null
+          external_post_id?: string | null
+          hashtags?: string[]
+          id?: string
+          launch_id: string
+          media_prompt?: string | null
+          metadata?: Json
+          platform: string
+          posted_at?: string | null
+          status?: string
+          target_url: string
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          cta?: string | null
+          external_post_id?: string | null
+          hashtags?: string[]
+          id?: string
+          launch_id?: string
+          media_prompt?: string | null
+          metadata?: Json
+          platform?: string
+          posted_at?: string | null
+          status?: string
+          target_url?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_posts_launch_id_fkey"
+            columns: ["launch_id"]
+            isOneToOne: false
+            referencedRelation: "organic_launches"
             referencedColumns: ["id"]
           },
         ]
@@ -3096,6 +3325,10 @@ export type Database = {
       }
     }
     Functions: {
+      has_app_access: {
+        Args: { _app_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

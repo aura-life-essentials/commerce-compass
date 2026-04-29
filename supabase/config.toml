@@ -65,3 +65,9 @@ verify_jwt = false
 
 [functions.shopify-admin]
 verify_jwt = false
+
+[functions.grant-app-entitlements]
+verify_jwt = false
+
+[functions.organic-launch]
+verify_jwt = false
