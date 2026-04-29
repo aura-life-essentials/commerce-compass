@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AuraOmegaLogo } from "@/components/branding/AuraOmegaLogo";
 import { PricingSection } from "@/components/subscription/PricingSection";
+import { AppMarketplace } from "@/components/storefront/AppMarketplace";
 
 const agents = [
   {
@@ -154,6 +155,9 @@ export default function MainHub() {
 
           {/* Pricing Section — real Stripe-connected component */}
           <PricingSection />
+
+          {/* Standalone app products — real Stripe checkout */}
+          <AppMarketplace />
 
           {/* CTA */}
           <section className="container mx-auto px-4 py-12 md:px-6 md:py-20">
