@@ -69,6 +69,12 @@ export default function MainHub() {
               <Link to="/my-apps">
                 <Button variant="ghost" className="text-muted-foreground hover:text-foreground">My Apps</Button>
               </Link>
+              <Link to="/influencers" className="hidden md:inline-flex">
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground">Partners</Button>
+              </Link>
+              <Link to="/launch-settings" className="hidden md:inline-flex">
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground">Launch Settings</Button>
+              </Link>
               <Link to="/auth">
                 <Button className="bg-gradient-to-r from-[hsl(220,100%,60%)] to-primary hover:opacity-90">Get Started</Button>
               </Link>
