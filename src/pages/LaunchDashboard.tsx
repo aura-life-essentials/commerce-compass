@@ -8,6 +8,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useSEOHead } from '@/hooks/useSEOHead';
+import { LaunchStatusTracker, type LaunchStatus } from '@/components/launch/LaunchStatusTracker';
+import { AiActionAuditLog } from '@/components/launch/AiActionAuditLog';
 
 interface SocialPost {
   id: string;
@@ -114,17 +116,6 @@ export default function LaunchDashboard() {
             <Rocket className="w-3 h-3 mr-1" /> Organic Launch
           </Badge>
           <h1 className="text-3xl md:text-4xl font-bold">{launch.app_name}</h1>
-          <p className="text-muted-foreground">
-            {isGenerating ? (
-              <span className="inline-flex items-center gap-2">
-                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Generating content across every channel…
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-2 text-green-500">
-                <CheckCircle className="w-3.5 h-3.5" /> Ready: {launch.posts_generated} posts · {launch.landing_pages_generated} SEO pages
-              </span>
-            )}
-          </p>
           {launch.stripe_checkout_url && (
             <div className="flex items-center gap-2">
               <Button
@@ -140,6 +131,20 @@ export default function LaunchDashboard() {
               </a>
             </div>
           )}
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 mb-8">
+          <Card className="oro-card border-border/40">
+            <CardHeader className="pb-2"><CardTitle className="text-base">Launch status</CardTitle></CardHeader>
+            <CardContent>
+              <LaunchStatusTracker
+                status={launch.status as LaunchStatus}
+                postsGenerated={launch.posts_generated}
+                pagesGenerated={launch.landing_pages_generated}
+              />
+            </CardContent>
+          </Card>
+          <AiActionAuditLog limit={20} />
         </div>
 
         <h2 className="text-xl font-semibold mb-3">Social posts ({posts.length})</h2>

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useSEOHead } from '@/hooks/useSEOHead';
 import { AuraOmegaLogo } from '@/components/branding/AuraOmegaLogo';
+import { renderSafeMarkdown } from '@/lib/sanitizeMarkdown';
 
 interface SeoPage {
   id: string;
@@ -19,43 +20,6 @@ interface SeoPage {
   cta_text: string;
   target_url: string;
   keywords: string[];
-}
-
-// Tiny, safe markdown → HTML for AI-generated H2/H3/lists/paragraphs.
-function renderMarkdown(md: string): string {
-  const escape = (s: string) =>
-    s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const lines = md.split(/\r?\n/);
-  const out: string[] = [];
-  let inList = false;
-  const flushList = () => { if (inList) { out.push('</ul>'); inList = false; } };
-
-  for (const raw of lines) {
-    const line = raw.trimEnd();
-    if (!line.trim()) { flushList(); continue; }
-    const h = line.match(/^(#{1,6})\s+(.*)$/);
-    if (h) {
-      flushList();
-      const lvl = Math.min(h[1].length + 1, 6); // shift down so page H1 stays unique
-      out.push(`<h${lvl} class="mt-6 mb-2 font-bold tracking-tight text-foreground">${escape(h[2])}</h${lvl}>`);
-      continue;
-    }
-    const li = line.match(/^[-*]\s+(.*)$/);
-    if (li) {
-      if (!inList) { out.push('<ul class="list-disc pl-6 space-y-1 my-3">'); inList = true; }
-      out.push(`<li>${escape(li[1])}</li>`);
-      continue;
-    }
-    flushList();
-    let html = escape(line);
-    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_m, t, u) =>
-      `<a href="${u}" class="text-primary underline underline-offset-4 hover:text-primary/80">${t}</a>`);
-    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-    html = html.replace(/`([^`]+)`/g, '<code class="px-1 py-0.5 rounded bg-muted text-foreground/90 text-sm">$1</code>');
-    out.push(`<p class="my-3 leading-relaxed text-muted-foreground">${html}</p>`);
-  }
-  flushList();
-  return out.join('\n');
 }
 
 export default function SeoLandingPage() {
@@ -143,7 +107,7 @@ export default function SeoLandingPage() {
 
         <article
           className="mt-10 prose-like"
-          dangerouslySetInnerHTML={{ __html: renderMarkdown(page.body_md) }}
+          dangerouslySetInnerHTML={{ __html: renderSafeMarkdown(page.body_md) }}
         />
 
         <div className="mt-12 rounded-xl border border-primary/20 bg-primary/5 p-6 text-center">

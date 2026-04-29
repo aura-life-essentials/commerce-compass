@@ -320,6 +320,15 @@ export default function AppProductDetail() {
                 <p className="text-[11px] text-muted-foreground text-center -mt-2">
                   Generates posts for Reddit, IG, YouTube, TikTok, X, LinkedIn, Pinterest, Facebook + SEO pages.
                 </p>
+                <p className="text-[11px] text-center -mt-1">
+                  <Link to="/launch-settings" className="text-primary underline underline-offset-2">
+                    Approve channels first
+                  </Link>
+                  {" · "}
+                  <Link to="/influencers" className="text-primary underline underline-offset-2">
+                    Influencer program
+                  </Link>
+                </p>
 
                 <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t border-border/40">
                   <Shield className="w-3.5 h-3.5" />

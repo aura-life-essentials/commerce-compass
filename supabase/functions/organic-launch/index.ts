@@ -268,6 +268,33 @@ serve(async (req) => {
     const app = KNOWN_APPS[appId];
     if (!app) throw new Error(`Unknown app_id: ${appId}`);
 
+    // ---- Per-channel consent gating ----
+    // Only run on platforms the user has explicitly enabled via launch_consents.
+    const { data: consentRows } = await admin
+      .from("launch_consents")
+      .select("channel, enabled")
+      .eq("user_id", userId);
+    const enabledChannels = new Set(
+      (consentRows ?? []).filter((r: any) => r.enabled).map((r: any) => r.channel as string),
+    );
+    const allowedPlatforms = platforms.filter((p) =>
+      enabledChannels.has(`social_${p}`),
+    );
+    const skippedPlatforms = platforms.filter((p) => !allowedPlatforms.has(p));
+    if (allowedPlatforms.length === 0) {
+      return new Response(
+        JSON.stringify({
+          error:
+            "No channels approved. Enable at least one social channel in your launch consents.",
+          skipped: skippedPlatforms,
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+
     // Stripe checkout target → use the product detail page on the live storefront.
     // Detail page contains the real Stripe-backed Start Trial button.
     const targetUrl = `${origin}/apps/${encodeURIComponent(appId)}`;
@@ -280,19 +307,31 @@ serve(async (req) => {
         app_id: appId,
         app_name: app.name,
         status: "generating",
-        platforms,
+        platforms: allowedPlatforms,
         stripe_price_id: app.priceId ?? null,
         stripe_checkout_url: targetUrl,
+        metadata: { skipped_platforms: skippedPlatforms },
       })
       .select()
       .single();
 
     if (launchErr) throw launchErr;
 
+    // Audit: launch initiated
+    await admin.from("ai_action_audit").insert({
+      user_id: userId,
+      agent_name: "Organic Launch Engine",
+      action_type: "launch_initiated",
+      resource_type: "organic_launch",
+      resource_id: launch.id,
+      summary: `Initiated launch for ${app.name} on ${allowedPlatforms.length} approved channels`,
+      payload: { allowed: allowedPlatforms, skipped: skippedPlatforms, app_id: appId },
+    });
+
     // Generate everything in parallel (fast)
     const [postResults, seoResults] = await Promise.all([
       Promise.all(
-        platforms.map(async (p) => {
+        allowedPlatforms.map(async (p) => {
           try {
             const post = await generatePlatformPost(app, p, targetUrl);
             return { platform: p, ok: true as const, post };
@@ -378,6 +417,22 @@ serve(async (req) => {
       details: { app_id: appId, posts: postRows.length, pages: seoRows.length },
     });
 
+    // Audit: launch completed
+    await admin.from("ai_action_audit").insert({
+      user_id: userId,
+      agent_name: "Organic Launch Engine",
+      action_type: "launch_completed",
+      resource_type: "organic_launch",
+      resource_id: launch.id,
+      summary: `Generated ${postRows.length} posts + ${seoRows.length} SEO pages for ${app.name}`,
+      status: "completed",
+      payload: {
+        posts: postRows.length,
+        pages: seoRows.length,
+        post_errors: postResults.filter((r) => !r.ok).length,
+      },
+    });
+
     return new Response(
       JSON.stringify({
         ok: true,
@@ -385,6 +440,7 @@ serve(async (req) => {
         posts: postRows.length,
         landing_pages: seoRows.length,
         target_url: targetUrl,
+        skipped_platforms: skippedPlatforms,
         post_errors: postResults.filter((r) => !r.ok),
         page_errors: seoResults.filter((r) => !r.ok),
       }),
