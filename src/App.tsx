@@ -29,6 +29,7 @@ import LeadVault from "./pages/LeadVault";
 import NotFound from "./pages/NotFound";
 import MyApps from "./pages/MyApps";
 import ResetPassword from "./pages/ResetPassword";
+import AppProductDetail from "./pages/AppProductDetail";
 
 const queryClient = new QueryClient();
 
@@ -83,6 +84,9 @@ const AppContent = () => {
       {/* Public pricing page */}
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/subscription-success" element={<SubscriptionSuccess />} />
+
+      {/* App marketplace product detail */}
+      <Route path="/apps/:id" element={<AppProductDetail />} />
       
       {/* Subscription Management */}
       <Route path="/subscription" element={<SubscriptionManagement />} />
