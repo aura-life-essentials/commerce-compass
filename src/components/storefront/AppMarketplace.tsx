@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, ExternalLink, Sparkles, Loader2 } from 'lucide-react';
+import { Check, ExternalLink, Sparkles, Loader2, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +8,8 @@ import { APP_PRODUCTS, AppProduct } from '@/lib/appProducts';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { formatPricePerMonth } from '@/lib/formatCurrency';
 
 export function AppMarketplace() {
   const { user, session } = useAuthContext();
@@ -23,6 +24,7 @@ export function AppMarketplace() {
     }
 
     setLoadingId(product.id);
+    const t = toast.loading(`Preparing checkout for ${product.name}…`);
     try {
       const { data, error } = await supabase.functions.invoke('create-subscription-checkout', {
         headers: { Authorization: `Bearer ${session.access_token}` },
@@ -31,12 +33,12 @@ export function AppMarketplace() {
       if (error) throw error;
       if (data?.url) {
         window.open(data.url, '_blank');
-        toast.success(`Opening checkout for ${product.name}…`);
+        toast.success(`Opening checkout in a new tab`, { id: t });
       } else {
         throw new Error('Checkout URL missing');
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to start checkout');
+      toast.error(err instanceof Error ? err.message : 'Failed to start checkout', { id: t });
     } finally {
       setLoadingId(null);
     }
@@ -89,8 +91,7 @@ export function AppMarketplace() {
               <CardContent className="flex flex-1 flex-col">
                 <p className="text-sm text-muted-foreground mb-4">{product.description}</p>
                 <div className="mb-5">
-                  <span className="text-3xl font-bold">${product.price}</span>
-                  <span className="text-muted-foreground">/mo</span>
+                  <span className="text-3xl font-bold">{formatPricePerMonth(product.price)}</span>
                 </div>
                 <ul className="space-y-2 mb-6 flex-1">
                   {product.features.map((f) => (
@@ -100,24 +101,31 @@ export function AppMarketplace() {
                     </li>
                   ))}
                 </ul>
-                <Button
-                  onClick={() => handleBuy(product)}
-                  disabled={loadingId === product.id}
-                  className={`w-full ${
-                    product.badge ? 'bg-gradient-to-r from-primary to-cyan-500 hover:opacity-90' : ''
-                  }`}
-                  variant={product.badge ? 'default' : 'outline'}
-                >
-                  {loadingId === product.id ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing
-                    </>
-                  ) : (
-                    <>
-                      Start free trial <ExternalLink className="w-4 h-4 ml-2" />
-                    </>
-                  )}
-                </Button>
+                <div className="space-y-2 mt-auto">
+                  <Button
+                    onClick={() => handleBuy(product)}
+                    disabled={loadingId === product.id}
+                    className={`w-full ${
+                      product.badge ? 'bg-gradient-to-r from-primary to-cyan-500 hover:opacity-90' : ''
+                    }`}
+                    variant={product.badge ? 'default' : 'outline'}
+                  >
+                    {loadingId === product.id ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Preparing checkout…
+                      </>
+                    ) : (
+                      <>
+                        Start free trial <ExternalLink className="w-4 h-4 ml-2" />
+                      </>
+                    )}
+                  </Button>
+                  <Link to={`/apps/${product.id}`} className="block">
+                    <Button variant="ghost" className="w-full text-muted-foreground hover:text-foreground">
+                      View details <ArrowRight className="w-4 h-4 ml-1.5" />
+                    </Button>
+                  </Link>
+                </div>
               </CardContent>
             </Card>
           </motion.div>

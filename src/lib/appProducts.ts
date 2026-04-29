@@ -12,6 +12,11 @@ export interface AppProduct {
   badge?: string;
   accent: string;
   features: string[];
+  // Detail page
+  longDescription?: string;
+  outcomes?: { metric: string; description: string }[];
+  bestFor?: string[];
+  faqs?: { q: string; a: string }[];
 }
 
 export const APP_PRODUCTS: AppProduct[] = [
@@ -90,3 +95,34 @@ export const APP_PRODUCTS: AppProduct[] = [
 
 export const getAppProductByPriceId = (priceId: string): AppProduct | undefined =>
   APP_PRODUCTS.find((p) => p.priceId === priceId);
+
+export const getAppProductById = (id: string): AppProduct | undefined =>
+  APP_PRODUCTS.find((p) => p.id === id);
+
+// Shared detail-page enrichment so every product has a usable detail view.
+export const productDetailDefaults = {
+  bestFor: [
+    'Founders done with manual follow-up',
+    'Agencies scaling delivery without headcount',
+    'Sales teams that lose deals to slow response times',
+  ],
+  outcomes: [
+    { metric: '24/7', description: 'Autonomous operation — never sleeps, never forgets' },
+    { metric: '<60s', description: 'Speed-to-lead on every inbound signal' },
+    { metric: '10x', description: 'More follow-ups without hiring a single person' },
+  ],
+  faqs: [
+    {
+      q: 'How does the 3-day free trial work?',
+      a: 'You get full access immediately. Cancel anytime in the first 3 days from your customer portal and you will not be charged.',
+    },
+    {
+      q: 'Can I cancel anytime?',
+      a: 'Yes. One click from the secure Stripe customer portal — no calls, no emails, no friction.',
+    },
+    {
+      q: 'Is my data safe?',
+      a: 'All data is encrypted in transit and at rest. We use bank-grade infrastructure and never share your data.',
+    },
+  ],
+};
