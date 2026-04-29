@@ -102,7 +102,7 @@ export default function MyApps() {
   }
 
   // Not subscribed
-  if (!isSubscribed) {
+  if (!isSubscribed && entitledApps.size === 0) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
