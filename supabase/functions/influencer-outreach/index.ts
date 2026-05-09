@@ -28,26 +28,18 @@ async function getAuthedUserId(req: Request): Promise<string | null> {
 }
 
 async function callAI(prompt: string, system: string) {
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: prompt },
-      ],
-      response_format: { type: "json_object" },
-    }),
+  const { callGrok } = await import("../_shared/grok.ts");
+  const result = await callGrok({
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: prompt },
+    ],
+    grokModel: "grok-4-1-fast-non-reasoning",
+    fallbackModel: "google/gemini-2.5-flash",
+    temperature: 0.6,
+    responseFormat: "json_object",
   });
-  if (res.status === 429) throw new Error("AI rate limit");
-  if (res.status === 402) throw new Error("AI credits exhausted");
-  if (!res.ok) throw new Error(`AI ${res.status}`);
-  const data = await res.json();
-  const text = data.choices?.[0]?.message?.content ?? "{}";
+  const text = result.content || "{}";
   try {
     return JSON.parse(text);
   } catch {

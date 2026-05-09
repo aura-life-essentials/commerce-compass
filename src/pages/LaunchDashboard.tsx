@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { useSEOHead } from '@/hooks/useSEOHead';
 import { LaunchStatusTracker, type LaunchStatus } from '@/components/launch/LaunchStatusTracker';
 import { AiActionAuditLog } from '@/components/launch/AiActionAuditLog';
+import { GrokCeoOverride } from '@/components/launch/GrokCeoOverride';
 
 interface SocialPost {
   id: string;
@@ -145,6 +146,10 @@ export default function LaunchDashboard() {
             </CardContent>
           </Card>
           <AiActionAuditLog limit={20} />
+        </div>
+
+        <div className="mb-10">
+          <GrokCeoOverride />
         </div>
 
         <h2 className="text-xl font-semibold mb-3">Social posts ({posts.length})</h2>

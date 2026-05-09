@@ -237,14 +237,26 @@ Synthesize the final consensus. Prioritize revenue-generating actions.`
     }
   ];
 
-  const isOpenAIKey = key.startsWith("sk-");
-  const arbiterUrl = isOpenAIKey ? OPENAI_URL : LOVABLE_AI_URL;
-  const arbiterModel = isOpenAIKey ? "gpt-4o" : "google/gemini-2.5-flash";
+  // Grok-first arbiter. If XAI key present, Grok arbitrates. Otherwise fall back.
+  const xaiKey = Deno.env.get("XAI_API_KEY");
+  const useGrok = !!xaiKey;
+  const isOpenAIKey = !useGrok && key.startsWith("sk-");
+  const arbiterUrl = useGrok
+    ? "https://api.x.ai/v1/chat/completions"
+    : isOpenAIKey
+      ? OPENAI_URL
+      : LOVABLE_AI_URL;
+  const arbiterModel = useGrok
+    ? "grok-4-1-fast-reasoning"
+    : isOpenAIKey
+      ? "gpt-4o"
+      : "google/gemini-2.5-flash";
+  const arbiterAuth = useGrok ? `Bearer ${xaiKey}` : `Bearer ${key}`;
 
   try {
     const res = await fetch(arbiterUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+      headers: { "Content-Type": "application/json", Authorization: arbiterAuth },
       body: JSON.stringify({ model: arbiterModel, messages: arbiterMessages, temperature: 0.3, max_tokens: 3000, stream: false }),
     });
 
@@ -257,7 +269,7 @@ Synthesize the final consensus. Prioritize revenue-generating actions.`
         agreement_score: parsed.agreement_score || 0.8,
         votes,
         master_verdict: parsed.verdict || parsed.top_insight || "Consensus reached",
-        engine: `consensus_${isOpenAIKey ? "openai_master" : "lovable_arbiter"}`,
+        engine: `consensus_${useGrok ? "grok_arbiter" : isOpenAIKey ? "openai_master" : "lovable_arbiter"}`,
       };
     }
   } catch (e) {

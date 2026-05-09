@@ -198,31 +198,24 @@ const PLATFORM_BRIEFS: Record<Platform, string> = {
 };
 
 async function callAI(prompt: string, system: string) {
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: prompt },
-      ],
-      response_format: { type: "json_object" },
-    }),
+  // Grok-first via shared helper. Falls back to Lovable AI Gateway automatically.
+  const { callGrok } = await import("../_shared/grok.ts");
+  const result = await callGrok({
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: prompt },
+    ],
+    grokModel: "grok-4-1-fast-non-reasoning",
+    fallbackModel: "google/gemini-2.5-flash",
+    temperature: 0.7,
+    responseFormat: "json_object",
   });
-
-  if (res.status === 429)
-    throw new Error("AI rate limit reached, please retry shortly");
-  if (res.status === 402)
-    throw new Error(
-      "AI credits exhausted. Add credits in Lovable AI to keep launching.",
-    );
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`AI gateway ${res.status}: ${text.slice(0, 200)}`);
+  const text = result.content || "{}";
+  try {
+    return JSON.parse(text);
+  } catch {
+    const m = text.match(/\{[\s\S]*\}/);
+    return m ? JSON.parse(m[0]) : {};
   }
 
   const data = await res.json();

@@ -77,3 +77,6 @@ verify_jwt = false
 
 [functions.marketing-blitz]
 verify_jwt = false
+
+[functions.grok-ceo-override]
+verify_jwt = false

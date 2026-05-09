@@ -139,44 +139,44 @@ Based on this information, what is your next decision? Think step by step, then 
 
   let content = "";
 
-  // Try Lovable AI first
-  if (LOVABLE_API_KEY) {
+  // GROK FIRST — unleashed as the autonomous CEO brain.
+  if (XAI_API_KEY) {
     try {
-      logStep("Trying Lovable AI", { model: "google/gemini-2.5-flash-lite" });
+      logStep("Trying Grok primary", { model: "grok-4-1-fast-reasoning" });
+      const response = await fetch(XAI_CHAT_URL, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${XAI_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "grok-4-1-fast-reasoning", messages: aiMessages, temperature: 0.7 }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        content = data.choices?.[0]?.message?.content || "";
+        logStep("Grok primary success", { chars: content.length });
+      } else {
+        logStep("Grok primary failed", { status: response.status });
+      }
+    } catch (e) {
+      logStep("Grok primary error", { error: String(e) });
+    }
+  }
+
+  // Fallback to Lovable AI Gateway (Gemini)
+  if (!content && LOVABLE_API_KEY) {
+    try {
+      logStep("Trying Lovable AI fallback", { model: "google/gemini-2.5-flash-lite" });
       const response = await fetch(LOVABLE_AI_URL, {
         method: "POST",
-        headers: { "Authorization": `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({ model: "google/gemini-2.5-flash-lite", messages: aiMessages, temperature: 0.7, stream: false }),
       });
       if (response.ok) {
         const data = await response.json();
         content = data.choices?.[0]?.message?.content || "";
-        logStep("Lovable AI success", { chars: content.length });
       } else {
         logStep("Lovable AI failed", { status: response.status });
       }
     } catch (e) {
       logStep("Lovable AI error", { error: String(e) });
-    }
-  }
-
-  // Fallback to xAI
-  if (!content && XAI_API_KEY) {
-    try {
-      logStep("Trying xAI fallback");
-      const response = await fetch(XAI_CHAT_URL, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${XAI_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "grok-3-mini-fast", messages: aiMessages, temperature: 0.7 }),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        content = data.choices?.[0]?.message?.content || "";
-      } else {
-        logStep("xAI failed", { status: response.status });
-      }
-    } catch (e) {
-      logStep("xAI error", { error: String(e) });
     }
   }
 
