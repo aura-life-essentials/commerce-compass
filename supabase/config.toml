@@ -1,85 +1,61 @@
 project_id = "rzjkcdtzlhkivnxsrwvc"
 
-[functions.cj-dropshipping]
-verify_jwt = false
-
-[functions.autonomous-brain]
-verify_jwt = false
-
-[functions.viral-scraper]
-verify_jwt = false
-
-[functions.content-generator]
-verify_jwt = false
-
-[functions.stripe-webhook]
-verify_jwt = false
-
-[functions.traffic-webhook]
-verify_jwt = false
-
-[functions.global-expander]
-verify_jwt = false
-
-[functions.ceo-brain]
-verify_jwt = false
-
-[functions.create-checkout]
-verify_jwt = false
-
-[functions.create-subscription-checkout]
-verify_jwt = false
-
-[functions.check-subscription]
-verify_jwt = false
-
-[functions.customer-portal]
-verify_jwt = false
-
-[functions.validate-promo-code]
-verify_jwt = false
-
-[functions.track-analytics]
-verify_jwt = false
-
-[functions.send-welcome-email]
-verify_jwt = false
-
-[functions.send-trial-reminder]
-verify_jwt = false
-
-[functions.send-subscription-email]
-verify_jwt = false
-
-[functions.viral-product-research]
-verify_jwt = false
-
-[functions.xai-video-generate]
-verify_jwt = false
-
-[functions.web3-launch-engine]
-verify_jwt = false
-
-[functions.system-health]
-verify_jwt = false
-
-[functions.shopify-admin]
-verify_jwt = false
-
-[functions.grant-app-entitlements]
-verify_jwt = false
-
-[functions.organic-launch]
-verify_jwt = false
-
-[functions.influencer-outreach]
-verify_jwt = false
-
-[functions.marketing-blitz]
-verify_jwt = false
-
-[functions.grok-ceo-override]
-verify_jwt = false
-
-[functions.process-email-queue]
-verify_jwt = true
+[functions]
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.autonomous-brain]
+    verify_jwt = false
+  [functions.ceo-brain]
+    verify_jwt = false
+  [functions.check-subscription]
+    verify_jwt = false
+  [functions.cj-dropshipping]
+    verify_jwt = false
+  [functions.content-generator]
+    verify_jwt = false
+  [functions.create-checkout]
+    verify_jwt = false
+  [functions.create-subscription-checkout]
+    verify_jwt = false
+  [functions.customer-portal]
+    verify_jwt = false
+  [functions.global-expander]
+    verify_jwt = false
+  [functions.grant-app-entitlements]
+    verify_jwt = false
+  [functions.grok-ceo-override]
+    verify_jwt = false
+  [functions.influencer-outreach]
+    verify_jwt = false
+  [functions.marketing-blitz]
+    verify_jwt = false
+  [functions.organic-launch]
+    verify_jwt = false
+  [functions.process-email-queue]
+    verify_jwt = true
+  [functions.send-subscription-email]
+    verify_jwt = false
+  [functions.send-trial-reminder]
+    verify_jwt = false
+  [functions.send-welcome-email]
+    verify_jwt = false
+  [functions.shopify-admin]
+    verify_jwt = false
+  [functions.stripe-webhook]
+    verify_jwt = false
+  [functions.system-health]
+    verify_jwt = false
+  [functions.track-analytics]
+    verify_jwt = false
+  [functions.traffic-webhook]
+    verify_jwt = false
+  [functions.validate-promo-code]
+    verify_jwt = false
+  [functions.viral-product-research]
+    verify_jwt = false
+  [functions.viral-scraper]
+    verify_jwt = false
+  [functions.web3-launch-engine]
+    verify_jwt = false
+  [functions.xai-video-generate]
+    verify_jwt = false
