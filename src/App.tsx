@@ -34,6 +34,7 @@ import LaunchDashboard from "./pages/LaunchDashboard";
 import SeoLandingPage from "./pages/SeoLandingPage";
 import LaunchSettings from "./pages/LaunchSettings";
 import Influencers from "./pages/Influencers";
+import GrokCeoConsole from "./pages/GrokCeoConsole";
 
 const queryClient = new QueryClient();
 
@@ -103,6 +104,13 @@ const AppContent = () => {
 
       {/* Influencer partner program */}
       <Route path="/influencers" element={<Influencers />} />
+      
+      {/* Grok CEO Console — owner-only */}
+      <Route path="/grok-ceo" element={
+        <ProtectedRoute requireSuperAdmin>
+          <GrokCeoConsole />
+        </ProtectedRoute>
+      } />
       
       {/* Subscription Management */}
       <Route path="/subscription" element={<SubscriptionManagement />} />
