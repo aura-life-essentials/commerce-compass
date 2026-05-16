@@ -17,10 +17,28 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2025-08-27.basil" });
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+const OWNER_EMAILS = (Deno.env.get("STRIPE_OWNER_EMAILS") ?? "ryanauralift@gmail.com")
+  .split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
+const isOwner = (email?: string | null) => !!email && OWNER_EMAILS.includes(email.toLowerCase());
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    // Owner-only gate
+    const authHeader = req.headers.get("Authorization");
+    let callerEmail: string | null = null;
+    if (authHeader) {
+      const anon = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY") ?? "");
+      const { data } = await anon.auth.getUser(authHeader.replace("Bearer ", ""));
+      callerEmail = data.user?.email ?? null;
+    }
+    if (!isOwner(callerEmail)) {
+      return new Response(JSON.stringify({ error: "Forbidden: revenue-router restricted to account owner." }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const body = await req.json();
     const { action, agent_name, agent_role, campaign_id, channel, payment_link, price_id, product_id, summary } = body ?? {};
 
