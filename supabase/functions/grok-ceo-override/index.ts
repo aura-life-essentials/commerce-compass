@@ -1,6 +1,7 @@
-// Grok CEO Override — top-level autonomous decision agent.
-// Hardcoded to xAI Grok. Can override consensus decisions and writes
-// every action to ai_action_audit for full transparency.
+// Aura Omegas Grok — CEO Override edge function.
+// Top-level autonomous decision agent, branded "Aura Omegas Grok",
+// powered by xAI Grok under the hood. Can override consensus decisions
+// and writes every action to ai_action_audit for full transparency.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { callGrok } from "../_shared/grok.ts";
@@ -31,7 +32,8 @@ interface OverrideDecision {
   risks: string[];
 }
 
-const SYSTEM_PROMPT = `You are the Grok CEO Override Agent for the AuraOmega autonomous business stack.
+const SYSTEM_PROMPT = `You are AURA OMEGAS GROK, the CEO Override Agent for the AuraOmega autonomous business stack.
+You are a branded, hardened variant of xAI Grok with the persona, voice, and guardrails of Aura Lift Essentials.
 You have final authority over decisions made by the multi-AI consensus engine.
 You may APPROVE the consensus, OVERRIDE with a revised plan, or VETO outright.
 
@@ -102,7 +104,7 @@ Deno.serve(async (req) => {
     if (!body.dry_run) {
       await supabase.from("ai_action_audit").insert({
         user_id: userId,
-        agent_name: "Grok CEO Override",
+        agent_name: "Aura Omegas Grok — CEO Override",
         action_type: `override.${decision.verdict}`,
         resource_type: body.resource_type ?? "consensus_decision",
         resource_id: body.resource_id ?? null,
