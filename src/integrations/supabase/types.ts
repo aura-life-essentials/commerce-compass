@@ -1130,6 +1130,51 @@ export type Database = {
         }
         Relationships: []
       }
+      grok_ceo_audit: {
+        Row: {
+          command: string
+          created_at: string
+          error: string | null
+          grok_response: Json | null
+          id: string
+          input_mode: string
+          ip_hash: string | null
+          parsed_intent: Json | null
+          routing_decision: Json | null
+          status: string
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          command: string
+          created_at?: string
+          error?: string | null
+          grok_response?: Json | null
+          id?: string
+          input_mode?: string
+          ip_hash?: string | null
+          parsed_intent?: Json | null
+          routing_decision?: Json | null
+          status?: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          command?: string
+          created_at?: string
+          error?: string | null
+          grok_response?: Json | null
+          id?: string
+          input_mode?: string
+          ip_hash?: string | null
+          parsed_intent?: Json | null
+          routing_decision?: Json | null
+          status?: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       health_checks: {
         Row: {
           checked_at: string
@@ -1717,6 +1762,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      multi_store_routing: {
+        Row: {
+          confidence: number | null
+          created_at: string
+          expected_revenue_lift: number | null
+          id: string
+          payload: Json | null
+          product_id: string | null
+          product_title: string | null
+          reasoning: string | null
+          recommended_store_id: string | null
+          recommended_store_name: string | null
+          source_signal: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string
+          expected_revenue_lift?: number | null
+          id?: string
+          payload?: Json | null
+          product_id?: string | null
+          product_title?: string | null
+          reasoning?: string | null
+          recommended_store_id?: string | null
+          recommended_store_name?: string | null
+          source_signal: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string
+          expected_revenue_lift?: number | null
+          id?: string
+          payload?: Json | null
+          product_id?: string | null
+          product_title?: string | null
+          reasoning?: string | null
+          recommended_store_id?: string | null
+          recommended_store_name?: string | null
+          source_signal?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       nft_memberships: {
         Row: {
@@ -3740,6 +3833,10 @@ export type Database = {
       }
     }
     Functions: {
+      exec_owner_command: {
+        Args: { _action: string; _params?: Json }
+        Returns: Json
+      }
       has_app_access: {
         Args: { _app_id: string; _user_id: string }
         Returns: boolean
