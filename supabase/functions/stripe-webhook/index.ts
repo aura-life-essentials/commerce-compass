@@ -401,6 +401,15 @@ serve(async (req) => {
           customerEmail: paymentIntent.receipt_email,
           metadata: paymentIntent.metadata,
         });
+        await writeRevenueAttribution({
+          paymentIntentId: paymentIntent.id,
+          chargeId: typeof paymentIntent.latest_charge === "string" ? paymentIntent.latest_charge : paymentIntent.latest_charge?.id ?? null,
+          customerId: normalizeStripeValue(paymentIntent.customer),
+          amountCents: paymentIntent.amount,
+          currency: paymentIntent.currency,
+          metadata: paymentIntent.metadata,
+          customerEmail: paymentIntent.receipt_email,
+        });
         break;
       }
 
@@ -438,6 +447,16 @@ serve(async (req) => {
         });
 
         await upsertOrderFromCheckoutSession(session);
+        if (session.payment_status === "paid") {
+          await writeRevenueAttribution({
+            paymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null,
+            customerId: normalizeStripeValue(session.customer),
+            amountCents: session.amount_total ?? 0,
+            currency: session.currency ?? "usd",
+            metadata: { ...session.metadata, checkout_session_id: session.id, mode: session.mode },
+            customerEmail: session.customer_details?.email ?? session.customer_email,
+          });
+        }
         break;
       }
 
@@ -466,6 +485,18 @@ serve(async (req) => {
           metadata: {
             invoice_id: invoice.id,
             subscription_id: typeof invoice.subscription === "string" ? invoice.subscription : invoice.subscription?.id ?? null,
+          },
+        });
+        await writeRevenueAttribution({
+          paymentIntentId: typeof invoice.payment_intent === "string" ? invoice.payment_intent : invoice.payment_intent?.id ?? null,
+          customerId: normalizeStripeValue(invoice.customer),
+          amountCents: invoice.amount_paid,
+          currency: invoice.currency,
+          customerEmail: invoice.customer_email,
+          metadata: {
+            invoice_id: invoice.id,
+            subscription_id: typeof invoice.subscription === "string" ? invoice.subscription : invoice.subscription?.id ?? null,
+            source_channel: "subscription",
           },
         });
         break;
