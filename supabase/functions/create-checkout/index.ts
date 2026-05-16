@@ -7,6 +7,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const OWNER_EMAILS = (Deno.env.get("STRIPE_OWNER_EMAILS") ?? "ryanauralift@gmail.com")
+  .split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
+const isOwner = (email?: string | null) => !!email && OWNER_EMAILS.includes(email.toLowerCase());
+
 const PRODUCT_PRICE_MAP: Record<string, string> = {
   "wireless-earbuds-pro": "price_1StjbfFjshJghowTMCSHB90t",
   "portable-neck-fan-360": "price_1Stjc8FjshJghowTRJA47tX1",
@@ -58,6 +62,24 @@ serve(async (req) => {
   }
 
   try {
+    // Owner-only gate: require authenticated owner email
+    const authHeader = req.headers.get("Authorization");
+    const authClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+    );
+    let ownerEmail: string | null = null;
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data } = await authClient.auth.getUser(token);
+      ownerEmail = data.user?.email ?? null;
+    }
+    if (!isOwner(ownerEmail)) {
+      return new Response(JSON.stringify({ error: "Forbidden: Stripe checkout restricted to account owner." }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403,
+      });
+    }
+
     const body: CheckoutRequest = await req.json();
 
     if (body.items && body.items.length > 50) {
