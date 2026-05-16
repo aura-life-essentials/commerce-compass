@@ -83,6 +83,56 @@ const upsertStripeTransaction = async ({
   if (error) throw error;
 };
 
+// 💰 Revenue attribution — single source of truth for "money hit the bank"
+const writeRevenueAttribution = async ({
+  paymentIntentId,
+  chargeId,
+  customerId,
+  amountCents,
+  currency,
+  metadata,
+  customerEmail,
+  productId,
+}: {
+  paymentIntentId: string | null;
+  chargeId?: string | null;
+  customerId?: string | null;
+  amountCents: number;
+  currency: string | null;
+  metadata?: Record<string, unknown> | null;
+  customerEmail?: string | null;
+  productId?: string | null;
+}) => {
+  if (!paymentIntentId || amountCents <= 0) {
+    logStep("Skipping revenue attribution (no PI or zero amount)", { paymentIntentId, amountCents });
+    return;
+  }
+  const md = (metadata ?? {}) as Record<string, any>;
+  const payload = {
+    stripe_payment_intent_id: paymentIntentId,
+    stripe_charge_id: chargeId ?? null,
+    stripe_customer_id: customerId ?? null,
+    amount_cents: amountCents,
+    currency: currency ?? "usd",
+    agent_name: md.agent_name ?? md.agent ?? null,
+    agent_role: md.agent_role ?? null,
+    campaign_id: md.campaign_id ?? null,
+    source_channel: md.source_channel ?? md.channel ?? null,
+    utm_source: md.utm_source ?? null,
+    utm_campaign: md.utm_campaign ?? null,
+    product_id: productId ?? md.product_id ?? null,
+    metadata: { ...md, customer_email: customerEmail ?? null },
+  };
+  const { error } = await supabase
+    .from("revenue_attribution")
+    .upsert(payload, { onConflict: "stripe_payment_intent_id" });
+  if (error) {
+    logStep("Revenue attribution upsert failed", { error: error.message });
+  } else {
+    logStep("💰 Revenue landed", { paymentIntentId, amountCents, agent: payload.agent_name });
+  }
+};
+
 const upsertOrderFromCheckoutSession = async (session: Stripe.Checkout.Session) => {
   if (session.mode !== "payment") return;
 
@@ -351,6 +401,15 @@ serve(async (req) => {
           customerEmail: paymentIntent.receipt_email,
           metadata: paymentIntent.metadata,
         });
+        await writeRevenueAttribution({
+          paymentIntentId: paymentIntent.id,
+          chargeId: typeof paymentIntent.latest_charge === "string" ? paymentIntent.latest_charge : paymentIntent.latest_charge?.id ?? null,
+          customerId: normalizeStripeValue(paymentIntent.customer),
+          amountCents: paymentIntent.amount,
+          currency: paymentIntent.currency,
+          metadata: paymentIntent.metadata,
+          customerEmail: paymentIntent.receipt_email,
+        });
         break;
       }
 
@@ -388,6 +447,16 @@ serve(async (req) => {
         });
 
         await upsertOrderFromCheckoutSession(session);
+        if (session.payment_status === "paid") {
+          await writeRevenueAttribution({
+            paymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null,
+            customerId: normalizeStripeValue(session.customer),
+            amountCents: session.amount_total ?? 0,
+            currency: session.currency ?? "usd",
+            metadata: { ...session.metadata, checkout_session_id: session.id, mode: session.mode },
+            customerEmail: session.customer_details?.email ?? session.customer_email,
+          });
+        }
         break;
       }
 
@@ -416,6 +485,18 @@ serve(async (req) => {
           metadata: {
             invoice_id: invoice.id,
             subscription_id: typeof invoice.subscription === "string" ? invoice.subscription : invoice.subscription?.id ?? null,
+          },
+        });
+        await writeRevenueAttribution({
+          paymentIntentId: typeof invoice.payment_intent === "string" ? invoice.payment_intent : invoice.payment_intent?.id ?? null,
+          customerId: normalizeStripeValue(invoice.customer),
+          amountCents: invoice.amount_paid,
+          currency: invoice.currency,
+          customerEmail: invoice.customer_email,
+          metadata: {
+            invoice_id: invoice.id,
+            subscription_id: typeof invoice.subscription === "string" ? invoice.subscription : invoice.subscription?.id ?? null,
+            source_channel: "subscription",
           },
         });
         break;

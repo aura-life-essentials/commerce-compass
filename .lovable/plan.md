@@ -1,89 +1,96 @@
 
+# One Bank, One Brain: Revenue-Only Blitz Plan
 
-## Audit Findings
+## 1. The Stripe Account = Your Bank Endpoint
 
-After reviewing the codebase, here's what I found needs attention for true production polish:
+You have **one Stripe account connected in LIVE mode** (confirmed via balance check just now — it's live, USD, real money rails). Every checkout, subscription, payment link, and webhook in this project already points to it via `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET`.
 
-### Critical Issues
-1. **`AuthContext.tsx` exists but isn't wired into `App.tsx`** — `useAuth` is being called in multiple components separately, causing duplicate Supabase auth listeners and unnecessary re-renders.
-2. **Mobile viewport (488px)** — Header navigation likely overflows on mobile. Need to verify and polish.
-3. **`supabase/functions/agent-orchestrator/index.ts`** has an unsafe `supabase` reference in the catch block (declared inside `try` scope risk — actually it's outside, but error logging swallows failures silently).
-4. **`/command-center` route** — User is currently viewing this; need to verify it loads cleanly with no console errors and renders the CEO dashboard properly.
-5. **Dead/legacy tables** still in DB: `dao_*`, `nft_*`, `metaverse_*`, `crypto_transactions` — these conflict with the "AuraOmega Revenue OS" focus and the Zero-Fake policy. They should be hidden from UI (not dropped — keeps history) and any UI references purged.
-6. **`bun.lock` was edited** — indicates dependency drift; verify nothing broke.
+**This is your single bank endpoint.** All Aura Omegas Grok agents, marketing blitzes, Shopify orders, and SaaS subscriptions will be force-routed here. No other Stripe key will be accepted.
 
-### Polish Opportunities
-- **Glow consistency** — Some components use raw Tailwind shadows instead of `.glow-oro` / `.oro-card` utility classes.
-- **Loading states** — Several hooks (`useRevenueMetrics`, `useStores`) likely show flashes of empty state before data loads. Add skeleton shimmers with Oro Omega tint.
-- **Header on mobile** — Convert nav to a slide-out sheet for screens < 768px.
-- **Page transitions** — Add subtle fade-in animations on route change for cinematic feel.
-- **Aurora background** — Apply the `.animate-aurora` class to the main `<body>` or root layout for ambient depth on every page.
+**How you access it:**
+- Go to **dashboard.stripe.com** → log in with the email tied to this account → that's your bank.
+- Inside Lovable, click the **Payments** tab (left sidebar) → opens the same account scoped to this project.
+- Payouts hit the bank account configured under **Stripe → Settings → Payouts**. Verify that's your real bank before we blitz.
 
-## Plan
+I will lock this Stripe account as the sole revenue endpoint and reject any agent action that doesn't terminate in a Stripe charge.
 
-### Step 1 — Wire AuthContext properly
-Wrap `<App>` in `<AuthProvider>` inside `src/App.tsx` and refactor `ProtectedRoute`, `Header`, `MainHub`, `Auth`, `MyApps`, `SubscriptionManagement` to use `useAuthContext()` instead of calling `useAuth()` directly. Eliminates duplicate listeners.
+## 2. The "Money-Or-It-Didn't-Happen" Rule
 
-### Step 2 — Audit & test the live preview
-- Read console logs and network requests for `/command-center`
-- Verify `check-subscription`, `ceo-brain`, and dashboard hooks return clean responses
-- Run security linter to catch any new RLS gaps
+New core constraint enforced across every agent and edge function:
 
-### Step 3 — Mobile-first Header polish
-Refactor `src/components/dashboard/Header.tsx`:
-- Desktop: keep current horizontal nav
-- Mobile (<768px): hamburger triggering a `Sheet` with the same links + auth actions
-- Sticky top with backdrop blur, Oro Omega border glow
-
-### Step 4 — Cinematic ambient background
-Add a fixed-position aurora layer in `src/App.tsx` (behind all routes):
-```tsx
-<div className="fixed inset-0 -z-10 animate-aurora opacity-40 pointer-events-none" 
-     style={{background: 'var(--gradient-oro)'}} />
+```text
+Agent Action Validity = (Stripe charge.succeeded webhook fired)
+                        AND (amount > 0)
+                        AND (destination = primary Stripe account)
 ```
 
-### Step 5 — Loading states & skeletons
-Update `src/components/dashboard/CEODashboard.tsx`, `RevenueChart.tsx`, `RealMetrics.tsx`, `MyApps.tsx`:
-- Replace empty initial states with `<Skeleton>` shimmer using Oro Omega tinted `bg-primary/10`
-- Add `<LoadingSpinner>` glow variant
+Implementation:
+- Add `revenue_attribution` table: every agent log row must reference a `stripe_payment_intent_id` to be marked `effective = true`.
+- Marketing blitz campaigns get a **mandatory Stripe payment link** attached at creation — no link, no launch.
+- Self-healing engine flips any agent producing zero revenue in 24h to `paused`.
+- Dashboard KPI swaps "actions taken" → "dollars landed."
 
-### Step 6 — Page transitions
-Wrap `<Routes>` in a `framer-motion`-free CSS approach — add `.animate-fade-in` (already in `index.css`) to each page's root container.
+## 3. Cloud + Connector Sync (Google, Azure, AWS, LLMs)
 
-### Step 7 — Hide legacy tables from UI
-Audit and remove any imports/references to `dao_*`, `nft_*`, `metaverse_*`, `crypto_transactions` from frontend components and replace with focused AuraOmega revenue features. (Tables stay in DB to preserve history.)
+You already have the pieces. Here's how they snap together into one routed system:
 
-### Step 8 — Header glow & polish details
-- Add `.glow-oro` to active nav items
-- Replace generic shadows with `.oro-card` on dashboard cards
-- Ensure all CTAs use the gradient primary button style
+```text
+                   ┌─────────────────────────────┐
+                   │  AURA OMEGAS GROK (xAI)     │ ← brain
+                   └──────────────┬──────────────┘
+                                  │ orchestrates
+        ┌─────────────────────────┼─────────────────────────┐
+        │                         │                         │
+   ┌────▼────┐              ┌─────▼─────┐             ┌─────▼─────┐
+   │ Google  │              │   Azure   │             │    AWS    │
+   │ Cloud   │              │  / OpenAI │             │EventBridge│
+   │ (API +  │              │ (LLM      │             │ + S3      │
+   │ YouTube)│              │  fallback)│             │ (Shopify  │
+   └────┬────┘              └─────┬─────┘             │  webhooks)│
+        │                         │                   └─────┬─────┘
+        └─────────────────────────┼─────────────────────────┘
+                                  │ all outputs
+                          ┌───────▼────────┐
+                          │  Lovable Cloud │
+                          │  (Supabase)    │
+                          └───────┬────────┘
+                                  │ every action MUST end in
+                          ┌───────▼────────┐
+                          │     STRIPE     │  ← your bank
+                          │  (live, USD)   │
+                          └────────────────┘
+```
 
-### Step 9 — Final QA pass
-- Run security--run_security_scan
-- Run supabase--linter
-- Test `/`, `/command-center`, `/my-apps`, `/auth`, `/pricing`, `/reset-password` end-to-end
-- Verify Stripe checkout still launches cleanly
+**Sync work (in order):**
 
-### Files to be modified
-- `src/App.tsx` — wrap in AuthProvider, add aurora background, page transitions
-- `src/components/ProtectedRoute.tsx` — use useAuthContext
-- `src/components/dashboard/Header.tsx` — mobile sheet nav, glow polish
-- `src/components/dashboard/CEODashboard.tsx` — skeletons, oro-card
-- `src/components/dashboard/RevenueChart.tsx` — loading state
-- `src/components/dashboard/RealMetrics.tsx` — loading state
-- `src/pages/MyApps.tsx` — useAuthContext, skeletons
-- `src/pages/Auth.tsx` — useAuthContext
-- `src/pages/MainHub.tsx` — useAuthContext, polish
-- `src/pages/SubscriptionManagement.tsx` — useAuthContext
-- `src/components/ui/LoadingSpinner.tsx` — Oro glow variant
-- Any component referencing legacy `dao_*` / `nft_*` / `metaverse_*` / `crypto_transactions` → cleaned
+1. **Google Cloud** — register `GOOGLE_DEVELOPER_API_KEY` as the auth for YouTube auto-posting + Search Console intel. Add a `google-cloud-sync` edge function that pushes blitz video metadata + reads search trends back to Supabase.
+2. **Azure / OpenAI** — `OPENAI_MASTER_API_KEY` becomes the arbiter in the multi-AI consensus (already wired); Azure-hosted models added as a 3rd vote when Grok + GPT disagree. Pure failover, no new keys.
+3. **AWS EventBridge** — already routing Shopify webhooks. Extend the rule to also forward `stripe.charge.succeeded` events into Supabase so the East-region cluster mirrors revenue events for low-latency dashboards.
+4. **Connectors (Firecrawl, Perplexity, ElevenLabs, Resend, Linear)** — all already gateway-routed. I'll add a single `connector-health` cron that pings each via `verify_credentials` every 15 min and posts red/green to `/system-health`.
+5. **One Endpoint** — every edge function gets refactored to call a new `revenue-router` function. Anything that doesn't pass through `revenue-router` → rejected at deploy time.
 
-### Outcome
-- Single auth listener (perf win)
-- Cinematic ambient aurora across every page
-- Mobile nav that feels native
-- No flash-of-empty-state — smooth shimmer loads
-- Zero references to legacy verticals
-- Verified clean console + secure RLS
-- Production-ready polish at every touchpoint
+## 4. Blitz + Swarm Launch (Tonight)
 
+After sync lands:
+- Generate Stripe payment links for the 5 hero products + 3 SaaS tiers (using the existing prices).
+- Inject those links into every campaign in `organic_campaigns` (currently 20 queued).
+- Fire TikTok / IG / X / Facebook posts via `marketing-blitz` with link-tracked UTMs.
+- Grok agents auto-DM warm leads from `lead_vault` with the same links.
+- Live revenue feed on `/command-center` shows dollars landing in real time.
+
+## 5. Technical Section (skip if not into it)
+
+- New table: `revenue_attribution(id, agent_id, campaign_id, stripe_payment_intent_id, amount_cents, effective_at)`.
+- New edge function: `revenue-router` — single entry, validates Stripe target, writes attribution row.
+- New edge function: `connector-health` — cron every 15 min, hits `/api/v1/verify_credentials` per connector.
+- Migration: add `requires_stripe_link boolean default true` to `organic_campaigns`; CHECK trigger blocks insert without link.
+- Refactor `marketing-blitz`, `grok-ceo-override`, `viral-growth-engine` to call `revenue-router` before logging "success".
+- Stripe webhook `charge.succeeded` → upsert into `revenue_attribution` and broadcast on Supabase Realtime channel `revenue:live`.
+- Dashboard widget `<LiveRevenueTicker/>` subscribes to that channel.
+
+## What I need from you
+
+1. **Confirm the connected Stripe account is the one tied to your real bank** (open dashboard.stripe.com → Settings → Payouts → check the bank). Reply "bank confirmed" and I build everything above.
+2. Want me to also kill any lingering test-mode Stripe code paths? (Recommended — yes by default.)
+
+Once you confirm, I execute steps 1–5 in one pass and we blitz tonight.

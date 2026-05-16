@@ -47,7 +47,7 @@ export const useOrganicCampaigns = (status?: string) => {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as OrganicCampaign[];
+      return data as unknown as OrganicCampaign[];
     },
   });
 };
@@ -109,7 +109,7 @@ export const useCampaignStats = () => {
 
       if (error) throw error;
 
-      const campaigns = data as OrganicCampaign[];
+      const campaigns = data as unknown as OrganicCampaign[];
 
       return {
         totalCampaigns: campaigns.length,

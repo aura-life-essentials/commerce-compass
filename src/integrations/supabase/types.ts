@@ -2028,6 +2028,8 @@ export type Database = {
           revenue_attributed: number | null
           started_at: string | null
           status: string | null
+          stripe_payment_link: string | null
+          stripe_price_id: string | null
           target_markets: string[] | null
           target_platforms: string[] | null
           total_engagement: number | null
@@ -2050,6 +2052,8 @@ export type Database = {
           revenue_attributed?: number | null
           started_at?: string | null
           status?: string | null
+          stripe_payment_link?: string | null
+          stripe_price_id?: string | null
           target_markets?: string[] | null
           target_platforms?: string[] | null
           total_engagement?: number | null
@@ -2072,6 +2076,8 @@ export type Database = {
           revenue_attributed?: number | null
           started_at?: string | null
           status?: string | null
+          stripe_payment_link?: string | null
+          stripe_price_id?: string | null
           target_markets?: string[] | null
           target_platforms?: string[] | null
           total_engagement?: number | null
@@ -2369,6 +2375,63 @@ export type Database = {
           source_path?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      revenue_attribution: {
+        Row: {
+          agent_name: string | null
+          agent_role: string | null
+          amount_cents: number
+          campaign_id: string | null
+          created_at: string
+          currency: string
+          effective_at: string
+          id: string
+          metadata: Json
+          product_id: string | null
+          source_channel: string | null
+          stripe_charge_id: string | null
+          stripe_customer_id: string | null
+          stripe_payment_intent_id: string
+          utm_campaign: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          agent_name?: string | null
+          agent_role?: string | null
+          amount_cents: number
+          campaign_id?: string | null
+          created_at?: string
+          currency?: string
+          effective_at?: string
+          id?: string
+          metadata?: Json
+          product_id?: string | null
+          source_channel?: string | null
+          stripe_charge_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_payment_intent_id: string
+          utm_campaign?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          agent_name?: string | null
+          agent_role?: string | null
+          amount_cents?: number
+          campaign_id?: string | null
+          created_at?: string
+          currency?: string
+          effective_at?: string
+          id?: string
+          metadata?: Json
+          product_id?: string | null
+          source_channel?: string | null
+          stripe_charge_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_payment_intent_id?: string
+          utm_campaign?: string | null
+          utm_source?: string | null
         }
         Relationships: []
       }
