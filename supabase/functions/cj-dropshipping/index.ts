@@ -9,6 +9,7 @@ const corsHeaders = {
 };
 
 const CJ_API_KEY = Deno.env.get("CJ_DROPSHIPPING_API_KEY");
+const CJ_EMAIL = Deno.env.get("CJ_DROPSHIPPING_EMAIL") ?? "api";
 const CJ_BASE = "https://developers.cjdropshipping.com/api2.0/v1";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -25,7 +26,7 @@ async function getAccessToken(): Promise<string> {
   const res = await fetch(`${CJ_BASE}/authentication/getAccessToken`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: "api", password: CJ_API_KEY }),
+    body: JSON.stringify({ email: CJ_EMAIL, password: CJ_API_KEY }),
   });
   const json = await res.json();
   if (!json?.data?.accessToken) {
