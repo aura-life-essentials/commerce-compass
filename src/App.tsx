@@ -35,6 +35,7 @@ import SeoLandingPage from "./pages/SeoLandingPage";
 import LaunchSettings from "./pages/LaunchSettings";
 import Influencers from "./pages/Influencers";
 import GrokCeoConsole from "./pages/GrokCeoConsole";
+import XaiConsole from "./pages/XaiConsole";
 
 const queryClient = new QueryClient();
 
@@ -109,6 +110,13 @@ const AppContent = () => {
       <Route path="/grok-ceo" element={
         <ProtectedRoute requireSuperAdmin>
           <GrokCeoConsole />
+        </ProtectedRoute>
+      } />
+
+      {/* X-AI Control Plane — owner-only */}
+      <Route path="/x-ai" element={
+        <ProtectedRoute requireSuperAdmin>
+          <XaiConsole />
         </ProtectedRoute>
       } />
       

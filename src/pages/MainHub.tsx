@@ -105,7 +105,7 @@ export default function MainHub() {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Zap className="w-4 h-4 text-[hsl(200,100%,72%)]" />
-                  <span>3-Day Free Trial</span>
+                  <span>Secure Stripe Checkout</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Bot className="w-4 h-4 text-primary" />
@@ -186,7 +186,7 @@ export default function MainHub() {
               <div className="relative z-10">
                 <h2 className="text-3xl font-bold mb-4">Ready to automate your revenue?</h2>
                 <p className="text-muted-foreground mb-8">
-                  Start with 2 agents at $97/mo or unlock the full team at $297/mo. 3-day free trial. Cancel anytime.
+                  Start with 2 agents at $97/mo or unlock the full team at $297/mo. Cancel anytime.
                 </p>
                 <div className="flex flex-wrap justify-center gap-3">
                   <Link to="/pricing">
