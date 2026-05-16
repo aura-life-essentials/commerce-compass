@@ -9,6 +9,7 @@ const corsHeaders = {
 };
 
 const CJ_API_KEY = Deno.env.get("CJ_DROPSHIPPING_API_KEY");
+const CJ_EMAIL = Deno.env.get("CJ_DROPSHIPPING_EMAIL") ?? "api";
 const CJ_BASE = "https://developers.cjdropshipping.com/api2.0/v1";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -25,7 +26,7 @@ async function getAccessToken(): Promise<string> {
   const res = await fetch(`${CJ_BASE}/authentication/getAccessToken`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: "api", password: CJ_API_KEY }),
+    body: JSON.stringify({ email: CJ_EMAIL, password: CJ_API_KEY }),
   });
   const json = await res.json();
   if (!json?.data?.accessToken) {
@@ -66,6 +67,7 @@ serve(async (req) => {
           ...(keyword && { productNameEn: keyword }),
         });
         const data = await cjRequest(`/product/list?${qs}`);
+        console.log("[cj-dropshipping] list_products raw:", JSON.stringify(data).slice(0, 600));
         const products = (data?.data?.list || []).map((p: any) => ({
           cj_product_id: p.pid,
           title: p.productNameEn,
@@ -76,7 +78,7 @@ serve(async (req) => {
           shipping_cost: 0,
           total_cost: parseFloat(p.sellPrice || "0"),
         }));
-        return new Response(JSON.stringify({ success: true, products, total: data?.data?.total ?? products.length }), {
+        return new Response(JSON.stringify({ success: true, products, total: data?.data?.total ?? products.length, raw_meta: { code: data?.code, message: data?.message } }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
