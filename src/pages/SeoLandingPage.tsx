@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Loader2, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Loader2, ArrowRight, ShieldCheck, Sparkles, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useSEOHead } from '@/hooks/useSEOHead';
 import { AuraOmegaLogo } from '@/components/branding/AuraOmegaLogo';
 import { renderSafeMarkdown } from '@/lib/sanitizeMarkdown';
+import { useAuthContext } from '@/contexts/AuthContext';
+import { useSubscription } from '@/hooks/useSubscription';
 
 interface SeoPage {
   id: string;
@@ -24,6 +26,9 @@ interface SeoPage {
 
 export default function SeoLandingPage() {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuthContext();
+  const { isSubscribed } = useSubscription();
   const [page, setPage] = useState<SeoPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -72,6 +77,9 @@ export default function SeoLandingPage() {
     );
   }
 
+  const canSeeFullBody = Boolean(user && isSubscribed);
+  const teaser = (page.body_md || '').slice(0, 280);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
@@ -101,14 +109,44 @@ export default function SeoLandingPage() {
             </Button>
           </a>
           <span className="text-xs text-muted-foreground inline-flex items-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5" /> Secured by Stripe · 3-day free trial
+            <ShieldCheck className="w-3.5 h-3.5" /> Secured by Stripe · Cancel anytime
           </span>
         </div>
 
-        <article
-          className="mt-10 prose-like"
-          dangerouslySetInnerHTML={{ __html: renderSafeMarkdown(page.body_md) }}
-        />
+        {canSeeFullBody ? (
+          <article
+            className="mt-10 prose-like"
+            dangerouslySetInnerHTML={{ __html: renderSafeMarkdown(page.body_md) }}
+          />
+        ) : (
+          <div className="mt-10 space-y-6">
+            <article
+              className="prose-like opacity-90"
+              dangerouslySetInnerHTML={{ __html: renderSafeMarkdown(teaser + '…') }}
+            />
+            <div className="relative rounded-xl border border-primary/30 bg-gradient-to-br from-primary/10 via-background to-cyan-500/5 p-8 text-center overflow-hidden">
+              <div className="absolute inset-0 backdrop-blur-sm pointer-events-none" />
+              <div className="relative z-10 space-y-3">
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
+                  <Lock className="w-6 h-6 text-primary" />
+                </div>
+                <h2 className="text-2xl font-bold">Subscribers only</h2>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  The full playbook, setup guide and access instructions are reserved for active AuraOmega subscribers.
+                </p>
+                <div className="flex flex-wrap justify-center gap-3 pt-2">
+                  <Button
+                    size="lg"
+                    onClick={() => navigate(user ? '/pricing' : '/auth')}
+                    className="bg-gradient-to-r from-primary to-cyan-500"
+                  >
+                    {user ? 'View pricing' : 'Sign in to unlock'} <ArrowRight className="w-4 h-4 ml-1.5" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="mt-12 rounded-xl border border-primary/20 bg-primary/5 p-6 text-center">
           <h2 className="text-xl font-bold mb-2">Ready to start?</h2>
