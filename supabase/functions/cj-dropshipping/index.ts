@@ -67,6 +67,7 @@ serve(async (req) => {
           ...(keyword && { productNameEn: keyword }),
         });
         const data = await cjRequest(`/product/list?${qs}`);
+        console.log("[cj-dropshipping] list_products raw:", JSON.stringify(data).slice(0, 600));
         const products = (data?.data?.list || []).map((p: any) => ({
           cj_product_id: p.pid,
           title: p.productNameEn,
@@ -77,7 +78,7 @@ serve(async (req) => {
           shipping_cost: 0,
           total_cost: parseFloat(p.sellPrice || "0"),
         }));
-        return new Response(JSON.stringify({ success: true, products, total: data?.data?.total ?? products.length }), {
+        return new Response(JSON.stringify({ success: true, products, total: data?.data?.total ?? products.length, raw_meta: { code: data?.code, message: data?.message } }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
