@@ -7,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const OWNER_EMAILS = (Deno.env.get("STRIPE_OWNER_EMAILS") ?? "ryanauralift@gmail.com")
+const OWNER_EMAILS = (Deno.env.get("STRIPE_OWNER_EMAILS") ?? "ryanauralift@gmail.com,thegrokfather@outlook.com")
   .split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
 const isOwner = (email?: string | null) => !!email && OWNER_EMAILS.includes(email.toLowerCase());
 

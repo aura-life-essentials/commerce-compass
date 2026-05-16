@@ -12,7 +12,7 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[CUSTOMER-PORTAL] ${step}${detailsStr}`);
 };
 
-const OWNER_EMAILS = (Deno.env.get("STRIPE_OWNER_EMAILS") ?? "ryanauralift@gmail.com")
+const OWNER_EMAILS = (Deno.env.get("STRIPE_OWNER_EMAILS") ?? "ryanauralift@gmail.com,thegrokfather@outlook.com")
   .split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
 const isOwner = (email?: string | null) => !!email && OWNER_EMAILS.includes(email.toLowerCase());
 
