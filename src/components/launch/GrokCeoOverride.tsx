@@ -8,7 +8,7 @@ import { Loader2, ShieldCheck, AlertTriangle, Ban } from "lucide-react";
 import { toast } from "sonner";
 
 /**
- * Grok CEO Override panel — calls the grok-ceo-override edge function with a
+ * Aura Omegas Grok CEO Override panel — calls the grok-ceo-override edge function with a
  * proposal (free-form JSON or text). Shows verdict, rationale, and revised
  * actions. Every call is auto-logged to ai_action_audit.
  */
@@ -36,9 +36,9 @@ export function GrokCeoOverride() {
         body: { proposal: parsedProposal, context: context || undefined },
       });
       if (error) throw error;
-      if (!data?.success) throw new Error(data?.error || "Grok override failed");
+      if (!data?.success) throw new Error(data?.error || "Aura Omegas Grok override failed");
       setDecision(data.decision);
-      toast.success(`Grok verdict: ${data.decision.verdict.toUpperCase()}`);
+      toast.success(`Aura Omegas Grok verdict: ${data.decision.verdict.toUpperCase()}`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Override failed");
     } finally {
@@ -59,16 +59,16 @@ export function GrokCeoOverride() {
     <Card className="oro-card p-6 space-y-4">
       <header className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold">Grok CEO Override</h3>
+          <h3 className="text-lg font-semibold">Aura Omegas Grok — CEO Override</h3>
           <p className="text-sm text-muted-foreground">
-            Top-level autonomous decision authority. Logged to audit trail.
+            Top-level autonomous decision authority, branded as Aura Omegas Grok. Every call logged to audit trail.
           </p>
         </div>
-        <Badge variant="outline" className="border-primary/40 text-primary">grok-4-1-fast-reasoning</Badge>
+        <Badge variant="outline" className="border-primary/40 text-primary">Aura Omegas Grok · grok-4-1-fast-reasoning</Badge>
       </header>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Proposal (JSON or text)</label>
+        <label className="text-sm font-medium">Proposal for Aura Omegas Grok (JSON or text)</label>
         <Textarea
           value={proposal}
           onChange={(e) => setProposal(e.target.value)}
@@ -89,7 +89,7 @@ export function GrokCeoOverride() {
 
       <Button onClick={submit} disabled={loading} className="w-full glow-oro">
         {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-        {loading ? "Grok reviewing…" : "Submit to Grok"}
+        {loading ? "Aura Omegas Grok reviewing…" : "Submit to Aura Omegas Grok"}
       </Button>
 
       {decision ? (
